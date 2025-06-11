@@ -2,7 +2,7 @@
 
 import { useEffect, useState} from "react";
 import styles from "./page.module.css";
-import SlidingButton from "../../_components/slidingButton/page";
+//import SlidingButton from '../../../_components/slidingButton'
 import { supabase } from '@/lib/supabase';
 import sendEvent from "../_supaHandler";
 
@@ -43,22 +43,23 @@ const TicTacToe = () => {
     const formatedPayload = formatPayload(data[0].boardState, data[0].nextToken);
     setGame(formatedPayload);
   };
-  
-  useEffect(() =>{
-    fetchData();
-  }, []);
 
   useEffect(() => {
-    supabase
-      .channel('TicTacToe Updates')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName}, payload => {
-        const formatedPayload = formatPayload(payload.new.boardState, payload.new.nextToken)
-        setGame(formatedPayload);
-        /*if (payload.id === parseInt(user_id)) {
-          setGame(payload.board)
-        }*/
-      })
-      .subscribe();
+    fetchData();
+      const channel = supabase
+        .channel('TicTacToe Updates')
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName}, 
+          (payload) => {
+            const formatedPayload = formatPayload(payload.new.boardState, payload.new.nextToken)
+            setGame(formatedPayload)
+            setErrorMessage("")
+          }
+        )
+        .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, []);
   
   const calculateWinner = (squares) => {
@@ -118,6 +119,7 @@ const TicTacToe = () => {
     //await api response & set login warning based on result
     const req = createReq(newGame);
     sendEvent(req);
+    setMyToken(null)
   };
   
   let winnerArray = new Array(3);
@@ -149,7 +151,7 @@ const TicTacToe = () => {
             'Tie game!'}
             
         </p>
-        <SlidingButton />
+        
         <button className={styles.resetButton} onClick={resetGame}>
           Reset Game
         </button>
