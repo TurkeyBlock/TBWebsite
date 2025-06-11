@@ -7,7 +7,8 @@ import { supabase } from '@/lib/supabase';
 import sendEvent from "../_supaHandler";
 
 const TicTacToe = () => {
-  const channelName = "tic-tac-toe-1"
+  const channelName = 1;
+  const tableName = "TicTacToe";
   const [errorMessage, setErrorMessage] = useState("");
   const [myToken, setMyToken] = useState(null);
 
@@ -26,9 +27,18 @@ const TicTacToe = () => {
     return data;
   };
 
+  function createReq(updatedGame){
+    const req = {
+      table: tableName,
+      id:channelName,
+      body: updatedGame
+    }
+    return req;
+  };
+
   useEffect(() => {
     async function fetchData() {
-      const { data, error } = await supabase.from('TicTacToe-1').select("*"); 
+      const { data, error } = await supabase.from(tableName).select("*"); 
       //There should only ever be one entry in the lobby -> data[0] from the select array.
       const formatedPayload = formatPayload(data[0].boardState, data[0].nextToken);
       setGame(formatedPayload);
@@ -36,7 +46,7 @@ const TicTacToe = () => {
     fetchData();
     supabase
       .channel('TicTacToe Updates')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'TicTacToe-1', filter:'id=eq.${channelName}',}, payload => {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName}, payload => {
         const formatedPayload = formatPayload(payload.new.boardState, payload.new.nextToken)
         setGame(formatedPayload);
         /*if (payload.id === parseInt(user_id)) {
@@ -91,11 +101,8 @@ const TicTacToe = () => {
       currentToken: game.currentToken === "X" ? "O" : "X",
     };
     //await api response & set login warning based on result
-    const req = {
-      method: "UPDATE",
-      body: updatedGame
-    }
-    sendEvent();
+    const req = createReq(updatedGame);
+    sendEvent(req);
   };
 
   const resetGame = async () => {
@@ -104,11 +111,8 @@ const TicTacToe = () => {
       currentToken: "X",
     };
     //await api response & set login warning based on result
-    const req = {
-      method: "UPDATE",
-      body: newGame
-    }
-    sendEvent();
+    const req = createReq(newGame);
+    sendEvent(req);
   };
   
   let winnerArray = new Array(3);

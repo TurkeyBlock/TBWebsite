@@ -1,20 +1,14 @@
 "use server"
-import { createClient } from "@supabase/supabase-js";
-const supabase = createClient(    
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-);
+import { supabase } from '../../lib/supabase';
+
 export default async function sendEvent(req, res) {
-    if(!supabase || req.method !== 'UPDATE'){
+    if(!supabase){
         console.log('failed to send');
         return;
     }
-
-    const { content } = req.body;
+    console.log(req);
     const { data, error } = await supabase
-    .from(content.table)
-    .update([{ 'boardState': content.board, 'nextToken': content.currentToken }]);
-    if (error) return res.status(400).json({ error });
-    return res.status(200).json(data);
-    return res.status(405).json({ message: 'Method not allowed' });
+    .from(req.table)
+    .update({'boardState': req.body.board, 'nextToken': req.body.currentToken})
+    .eq('id', req.id)
 }
