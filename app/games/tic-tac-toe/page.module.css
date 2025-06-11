@@ -1,0 +1,100 @@
+/*index.css*/
+.body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+}
+
+.appContainer {
+  text-align: center;
+}
+
+.h1 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  grid-gap: 10px;
+}
+
+.cell {
+  width: 100px;
+  height: 100px;
+  color:black;
+  border: 2px solid #333;
+  font-size: 2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-color: #fff;
+  transition: background-color 0.3s;
+}
+.cell:hover {
+  background-color: #f0f0f0;
+}
+.cellHighlight{
+  background-color: green;
+}
+.cellFailure{
+  background-color: red;
+}
+
+.currentToken {
+  margin-top: 20px;
+  font-size: 1.5em;
+  color: #333;
+}
+
+.resetButton {
+  margin-top: 10px;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.resetButton:hover {
+  background-color: #45a049;
+}
+
+.errorMessage {
+  color: #ff0000;
+  margin-top: 10px;
+  font-size: 1.2em;
+}
+.winner {
+  background-color: #4caf50;
+  color: #fff;
+}
+.inactiveAlert{
+  display:none
+}
+.authAlert {
+  margin-bottom: 15px;
+  padding: 20px;
+  background-color: #f44336; /* Red */
+  color: white;
+  
+}
+.exitButton {
+  color:white;
+  font-weight:bold;
+  margin-right:15px;
+}
+.exitButton:hover{
+  color:black;
+}
