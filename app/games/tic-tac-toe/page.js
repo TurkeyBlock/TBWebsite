@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState} from "react";
 import styles from "./page.module.css";
 import SlidingButton from "../../_components/slidingButton/page";
 import { supabase } from '@/lib/supabase';
@@ -35,14 +35,16 @@ const TicTacToe = () => {
     }
     return req;
   };
-
+  async function fetchData() {
+    const { data, error } = await supabase.from(tableName).select("*"); 
+    console.log(error);
+    //There should only ever be one entry in the lobby -> data[0] from the select array.
+    const formatedPayload = formatPayload(data[0].boardState, data[0].nextToken);
+    setGame(formatedPayload);
+  };
+  
+  let payload;
   useEffect(() => {
-    async function fetchData() {
-      const { data, error } = await supabase.from(tableName).select("*"); 
-      //There should only ever be one entry in the lobby -> data[0] from the select array.
-      const formatedPayload = formatPayload(data[0].boardState, data[0].nextToken);
-      setGame(formatedPayload);
-    };
     fetchData();
     supabase
       .channel('TicTacToe Updates')
@@ -54,7 +56,7 @@ const TicTacToe = () => {
         }*/
       })
       .subscribe();
-  }, []);
+  }, [payload]);
   
   const calculateWinner = (squares) => {
     const lines = [
