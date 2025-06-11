@@ -35,7 +35,7 @@ const TicTacToe = () => {
     }
     return req;
   };
-  
+
   async function fetchData() {
     const { data, error } = await supabase.from(tableName).select("*"); 
     console.log(error);
@@ -43,9 +43,12 @@ const TicTacToe = () => {
     const formatedPayload = formatPayload(data[0].boardState, data[0].nextToken);
     setGame(formatedPayload);
   };
+  
+  useEffect(() =>{
+    fetchData();
+  }, []);
 
   useEffect(() => {
-    fetchData();
     supabase
       .channel('TicTacToe Updates')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName}, payload => {
@@ -56,7 +59,7 @@ const TicTacToe = () => {
         }*/
       })
       .subscribe();
-  }, [supabase.channel.on, fetchData]);
+  }, []);
   
   const calculateWinner = (squares) => {
     const lines = [
@@ -87,7 +90,7 @@ const TicTacToe = () => {
       setMyToken(game.currentToken);
     }
     else if(myToken!=game.currentToken){
-      setErrorMessage("It's not your turn!");
+      setErrorMessage("It's not your turn! ("+myToken+")");
       return;
     }
     if (calculateWinner(squares) || squares[index]) {
