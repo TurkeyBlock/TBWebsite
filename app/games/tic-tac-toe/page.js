@@ -4,27 +4,40 @@ import { useEffect, useState, useRef } from "react";
 import styles from "./page.module.css";
 import SlidingButton from "../../_components/slidingButton/page";
 import { supabase } from '@/lib/supabase';
+import sendEvent from "../_supaHandler";
 
 const TicTacToe = () => {
-  const channelName = "tic-tac-toe"
+  const channelName = "tic-tac-toe-1"
   const [errorMessage, setErrorMessage] = useState("");
   const [myToken, setMyToken] = useState(null);
 
+  //Handle - if id =  null, you're doing singleplayer
   const [game, setGame] = useState({
+    id: null,
     board: Array(9).fill(null),
     currentToken: "X",
   });
 
+  function formatPayload(newBoard,nextToken){
+    const data = {
+      board: newBoard,
+      currentToken: nextToken,
+    };
+    return data;
+  };
+
   useEffect(() => {
+    async function fetchData() {
+      const { data, error } = await supabase.from('TicTacToe-1').select("*"); 
+      //There should only ever be one entry in the lobby -> data[0] from the select array.
+      const formatedPayload = formatPayload(data[0].boardState, data[0].nextToken);
+      setGame(formatedPayload);
+    };
+    fetchData();
     supabase
       .channel('TicTacToe Updates')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'TicTacToe' }, payload => {
-        const formatedPayload = {
-          board: payload.new.boardState,
-          currentToken: payload.new.nextToken,
-        };
-        //console.log(payload.new);
-        //console.log(formatedPayload);
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'TicTacToe-1', filter:'id=eq.${channelName}',}, payload => {
+        const formatedPayload = formatPayload(payload.new.boardState, payload.new.nextToken)
         setGame(formatedPayload);
         /*if (payload.id === parseInt(user_id)) {
           setGame(payload.board)
@@ -78,6 +91,11 @@ const TicTacToe = () => {
       currentToken: game.currentToken === "X" ? "O" : "X",
     };
     //await api response & set login warning based on result
+    const req = {
+      method: "UPDATE",
+      body: updatedGame
+    }
+    sendEvent();
   };
 
   const resetGame = async () => {
@@ -86,6 +104,11 @@ const TicTacToe = () => {
       currentToken: "X",
     };
     //await api response & set login warning based on result
+    const req = {
+      method: "UPDATE",
+      body: newGame
+    }
+    sendEvent();
   };
   
   let winnerArray = new Array(3);
