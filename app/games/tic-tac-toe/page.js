@@ -35,6 +35,7 @@ const TicTacToe = () => {
     }
     return req;
   };
+  
   async function fetchData() {
     const { data, error } = await supabase.from(tableName).select("*"); 
     console.log(error);
@@ -42,8 +43,7 @@ const TicTacToe = () => {
     const formatedPayload = formatPayload(data[0].boardState, data[0].nextToken);
     setGame(formatedPayload);
   };
-  
-  let payload;
+
   useEffect(() => {
     fetchData();
     supabase
@@ -56,7 +56,7 @@ const TicTacToe = () => {
         }*/
       })
       .subscribe();
-  }, [payload]);
+  }, [supabase.channel.on, fetchData]);
   
   const calculateWinner = (squares) => {
     const lines = [
@@ -73,7 +73,7 @@ const TicTacToe = () => {
     for (let i = 0; i < lines.length; i++) {
       const [a, b, c] = lines[i];
       if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-        winnerArray = new Array(a,b,c);
+        winnerArray = [a,b,c];
         return squares[a];
       }
     }
