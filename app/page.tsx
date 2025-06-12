@@ -1,6 +1,8 @@
+import TextInput from "./_components/textInput"
 export default function Page() {
   return (
     <div>
+      <TextInput/>
       <h1>Hello D&D Nerds</h1>
       <h2>@Turkeyblock.org</h2>
       <a>aa</a>

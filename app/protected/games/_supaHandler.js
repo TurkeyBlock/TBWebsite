@@ -1,6 +1,12 @@
 "use server"
 import { supabase } from '../../../lib/supabase';
-
+/*
+req = {
+    table:String,
+    id:Number,
+    body:{},
+}
+*/
 export default async function sendEvent(req, res) {
     if(!supabase){
         console.log('failed to send');

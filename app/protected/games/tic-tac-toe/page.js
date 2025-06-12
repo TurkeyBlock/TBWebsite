@@ -5,6 +5,7 @@ import styles from "./page.module.css";
 //import SlidingButton from '../../../_components/slidingButton'
 import { supabase } from '@/lib/supabase';
 import sendEvent from "../_supaHandler";
+//import {TextInput} from "../../../_components/textInput";
 
 const TicTacToe = () => {
   const channelName = 1;
@@ -37,7 +38,7 @@ const TicTacToe = () => {
   };
 
   async function fetchData() {
-    const { data, error } = await supabase.from(tableName).select("*"); 
+    const { data, error } = await supabase.from(tableName).select("*").eq('id', 1); 
     console.log(error);
     //There should only ever be one entry in the lobby -> data[0] from the select array.
     const formatedPayload = formatPayload(data[0].boardState, data[0].nextToken);
@@ -91,7 +92,7 @@ const TicTacToe = () => {
       setMyToken(game.currentToken);
     }
     else if(myToken!=game.currentToken){
-      setErrorMessage("It's not your turn! ("+myToken+")");
+      setErrorMessage("It's not your turn! (Your Token = "+myToken+")");
       return;
     }
     if (calculateWinner(squares) || squares[index]) {
@@ -158,6 +159,7 @@ const TicTacToe = () => {
         {errorMessage && (
           <p className={styles.errorMessage}>{errorMessage}</p>
         )}
+        
       </div>
     </main>
   );
