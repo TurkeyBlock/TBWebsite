@@ -1,16 +1,19 @@
+"use client"
 import { useState } from 'react';
 
-export default function TextInput() {
+const TextInput = ({inputText="", setInputText, buttonLabel = "Submit", handleSubmit}) => {
+  /*
   const [text, setText] = useState('');
-
+  */
   const handleChange = (event) => {
-    setText(event.target.value);
+    setInputText(event.target.value);
   };
-
+  /*
   const handleSubmit = (event) => {
     event.preventDefault();
     alert(`You entered: ${text}`);
   };
+  */
 
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
@@ -21,7 +24,7 @@ export default function TextInput() {
         <input
           type="text"
           id="textInput"
-          value={text}
+          value={inputText}
           onChange={handleChange}
           style={{
             padding: '5px',
@@ -41,9 +44,11 @@ export default function TextInput() {
             cursor: 'pointer',
           }}
         >
-          Submit
+          {buttonLabel}
         </button>
       </form>
     </div>
   );
 }
+
+export default TextInput;

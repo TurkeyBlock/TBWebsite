@@ -4,14 +4,24 @@ import { useEffect, useState} from "react";
 import styles from "./page.module.css";
 //import SlidingButton from '../../../_components/slidingButton'
 import { supabase } from '@/lib/supabase';
-import sendEvent from "../_supaHandler";
-//import {TextInput} from "../../../_components/textInput";
+import {sendEvent, fetchData} from "../_supaHandler";
+import TextInput from "../../../_components/textInput/page";
 
 const TicTacToe = () => {
-  const channelName = 1;
   const tableName = "TicTacToe";
+
+  const [gameId, setGameId] = useState(1);
+  const [inputText, setInputText] = useState("");
+  function handleSubmit(event){
+    event.preventDefault();
+    console.log(event);
+    setGameId(inputText);
+  }
+
   const [errorMessage, setErrorMessage] = useState("");
   const [myToken, setMyToken] = useState(null);
+
+
 
   //Handle - if id =  null, you're doing singleplayer
   const [game, setGame] = useState({
@@ -31,25 +41,23 @@ const TicTacToe = () => {
   function createReq(updatedGame){
     const req = {
       table: tableName,
-      id:channelName,
+      id: gameId,
       body: updatedGame
     }
     return req;
   };
 
-  async function fetchData() {
-    const { data, error } = await supabase.from(tableName).select("*").eq('id', 1); 
-    console.log(error);
-    //There should only ever be one entry in the lobby -> data[0] from the select array.
-    const formatedPayload = formatPayload(data[0].boardState, data[0].nextToken);
-    setGame(formatedPayload);
+  async function initGameState() {
+    const payload = await fetchData(tableName, gameId);
+    console.log(payload);
+    setGame(formatPayload(payload.boardState, payload.nextToken))
   };
 
   useEffect(() => {
-    fetchData();
+    initGameState();
       const channel = supabase
         .channel('TicTacToe Updates')
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName}, 
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
           (payload) => {
             const formatedPayload = formatPayload(payload.new.boardState, payload.new.nextToken)
             setGame(formatedPayload)
@@ -61,7 +69,7 @@ const TicTacToe = () => {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, []);
+  }, [gameId]);
   
   const calculateWinner = (squares) => {
     const lines = [
@@ -108,8 +116,15 @@ const TicTacToe = () => {
       currentToken: game.currentToken === "X" ? "O" : "X",
     };
     //await api response & set login warning based on result
-    const req = createReq(updatedGame);
-    sendEvent(req);
+    try{
+      const req = createReq(updatedGame);
+      //console.log(await 
+        sendEvent(req)
+      //);
+    }
+    catch{
+      console.log("Client unable to send event. Try refreshing your page.")
+    }
   };
 
   const resetGame = async () => {
@@ -118,9 +133,14 @@ const TicTacToe = () => {
       currentToken: "X",
     };
     //await api response & set login warning based on result
-    const req = createReq(newGame);
-    sendEvent(req);
-    setMyToken(null)
+    try{
+      const req = createReq(newGame);
+      sendEvent(req);
+      setMyToken(null)
+    }
+    catch{
+      console.log("Client unable to send event. Try refreshing your page.")
+    }
   };
   
   let winnerArray = new Array(3);
@@ -130,6 +150,7 @@ const TicTacToe = () => {
     <main
       className={styles.body}
     >
+      <TextInput inputText={inputText} setInputText={setInputText} buttonLabel="Submit" handleSubmit={ handleSubmit }/>
       <div className={styles.appContainer}>
         <h1 className = {styles.h1}>
           Tic Tac Toe

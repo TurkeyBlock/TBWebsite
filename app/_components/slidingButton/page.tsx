@@ -1,7 +1,7 @@
 // components/SlidingButton.js
 import { useState } from "react";
 
-export default function SlidingButton({h = 36, w = 128, onText = "On", offText = "Off"}) {
+function SlidingButton({h = 36, w = 128, onText = "On", offText = "Off"}) {
   const [isSliding, setIsSliding] = useState(false);
 
   const handleSlide = () => {
@@ -24,3 +24,5 @@ export default function SlidingButton({h = 36, w = 128, onText = "On", offText =
     </div>
   );
 }
+
+export default SlidingButton;
