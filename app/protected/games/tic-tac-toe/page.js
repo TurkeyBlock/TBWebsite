@@ -10,11 +10,13 @@ import TextInput from "../../../_components/textInput/page";
 const TicTacToe = () => {
   const tableName = "TicTacToe";
 
-  const [gameId, setGameId] = useState(1);
+  const [gameId, setGameId] = useState(null);
   const [inputText, setInputText] = useState("");
   function handleSubmit(event){
     event.preventDefault();
     console.log(event);
+    if(inputText=="")
+      return;
     setGameId(inputText);
   }
 
@@ -51,23 +53,28 @@ const TicTacToe = () => {
     const payload = await fetchData(tableName, gameId);
     console.log(payload);
     setGame(formatPayload(payload.boardState, payload.nextToken))
+    setMyToken(null);
   };
 
   useEffect(() => {
-    initGameState();
-      const channel = supabase
-        .channel('TicTacToe Updates')
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
-          (payload) => {
-            const formatedPayload = formatPayload(payload.new.boardState, payload.new.nextToken)
-            setGame(formatedPayload)
-            setErrorMessage("")
-          }
-        )
-        .subscribe();
+    //Induce singleplayer
+    if(gameId!=null){
 
-    return () => {
-      supabase.removeChannel(channel)
+      initGameState();
+        const channel = supabase
+          .channel('TicTacToe Updates')
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
+            (payload) => {
+              const formatedPayload = formatPayload(payload.new.boardState, payload.new.nextToken)
+              setGame(formatedPayload)
+              setErrorMessage("")
+            }
+          )
+          .subscribe();
+      return () => {
+        supabase.removeChannel(channel)
+      }
+
     }
   }, [gameId]);
   
@@ -115,15 +122,21 @@ const TicTacToe = () => {
       board: squares,
       currentToken: game.currentToken === "X" ? "O" : "X",
     };
-    //await api response & set login warning based on result
-    try{
-      const req = createReq(updatedGame);
-      //console.log(await 
-        sendEvent(req)
-      //);
+    if(gameId!=null){
+      //await api response & set login warning based on result
+      try{
+        const req = createReq(updatedGame);
+        //console.log(await 
+          sendEvent(req)
+        //);
+      }
+      catch{
+        console.log("Client unable to send event. Try refreshing your page.")
+      }
     }
-    catch{
-      console.log("Client unable to send event. Try refreshing your page.")
+    else{
+      setGame(updatedGame);
+      setMyToken(updatedGame.currentToken);
     }
   };
 
@@ -132,14 +145,19 @@ const TicTacToe = () => {
       board: Array(9).fill(null),
       currentToken: "X",
     };
-    //await api response & set login warning based on result
-    try{
-      const req = createReq(newGame);
-      sendEvent(req);
-      setMyToken(null)
+    if(gameId!=null){
+      //await api response & set login warning based on result
+      try{
+        const req = createReq(newGame);
+        sendEvent(req);
+        setMyToken(null)
+      }
+      catch{
+        console.log("Client unable to send event. Try refreshing your page.")
+      }
     }
-    catch{
-      console.log("Client unable to send event. Try refreshing your page.")
+    else{
+      setGame(newGame);
     }
   };
   
@@ -150,7 +168,7 @@ const TicTacToe = () => {
     <main
       className={styles.body}
     >
-      <TextInput inputText={inputText} setInputText={setInputText} buttonLabel="Submit" handleSubmit={ handleSubmit }/>
+      <TextInput inputText={inputText} setInputText={setInputText} buttonLabel="Submit" boxLabel="Lobby Code:" handleSubmit={ handleSubmit }/>
       <div className={styles.appContainer}>
         <h1 className = {styles.h1}>
           Tic Tac Toe
