@@ -1,6 +1,6 @@
 "use client"
 
-import { ChangeEventHandler, FormEventHandler } from "react";
+import { ChangeEvent, ChangeEventHandler, FormEventHandler } from "react";
 
 interface Props {
   boxLabel?:string;
@@ -11,9 +11,6 @@ interface Props {
   hide?:boolean;
 }
 const TextInput = ({boxLabel = "Input Text:", inputText="", buttonLabel = "Submit", setInputText, handleSubmit, hide=false}: Props) => {
-  const handleChange = (event) => {
-    setInputText(event.target.value);
-  };
 
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', display:hide === true ? 'none': ''}}>
@@ -25,7 +22,7 @@ const TextInput = ({boxLabel = "Input Text:", inputText="", buttonLabel = "Submi
           type="text"
           id="textInput"
           value={inputText}
-          onChange={handleChange}
+          onChange={setInputText}
           style={{
             padding: '5px',
             border: '1px solid #ccc',
