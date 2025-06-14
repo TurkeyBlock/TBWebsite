@@ -1,7 +1,13 @@
 "use client"
 
-const TextInput = ({inputText="", setInputText, buttonLabel = "Submit", handleSubmit}) => {
-  const handleChange = (event) => {
+interface Props {
+  inputText?: string;
+  setInputText: any;
+  buttonLabel?: string;
+  handleSubmit: any;
+}
+const TextInput = ({inputText="", setInputText, buttonLabel = "Submit", handleSubmit}: Props) => {
+  const handleChange = (event:any) => {
     setInputText(event.target.value);
   };
 
