@@ -41,7 +41,8 @@ export async function sendEvent(req:request, res:string) {
     if(req.table === "TicTacToe"){
         const singleData:TicTacToe_Response = data[0]
         if(req.body.board.length !== 9){
-            return res = "Client did not provide a complete gameState";
+            res = "Client did not provide a complete gameState";
+            return res;
         }
 
         let commitingReset:boolean = true;
@@ -58,10 +59,12 @@ export async function sendEvent(req:request, res:string) {
             }
             if (!commitingReset){
                 if(differences > 1){
-                    return res = "Differences in database vs client = "+differences;
+                    res = "Differences in database vs client = "+differences;
+                    return res;
                 }
                 if(overwriting){
-                    return res = "Attempted to overwrite existing piece";
+                    res = "Attempted to overwrite existing piece";
+                    return res;
                 }
             }
         }

@@ -67,7 +67,7 @@ const TicTacToe = () => {
 
       initGameState();
         const channel = supabase
-          .channel('TicTacToe Updates')
+          .channel(`${gameId}`)
           .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
             (payload) => {
               const formatedPayload = formatPayload(payload.new.boardState, payload.new.nextToken)
@@ -82,6 +82,7 @@ const TicTacToe = () => {
             console.log('leave', key, leftPresences)
           })
           .subscribe();
+          console.log(channel);
       return () => {
         supabase.removeChannel(channel)
       }
