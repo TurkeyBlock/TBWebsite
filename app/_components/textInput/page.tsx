@@ -1,6 +1,6 @@
 "use client"
 
-import { ChangeEvent, ChangeEventHandler, FormEventHandler } from "react";
+import {FormEventHandler } from "react";
 
 interface Props {
   boxLabel?:string;
