@@ -21,6 +21,8 @@ const TicTacToe = () => {
     else{
       event.preventDefault(); //Do not refresh the page UNLESS client was previously subscribed to a channel
     }
+
+    //This portion needs to check if the game can be fetched from the given id &/or key
     if(inputText=="")
       return;
     setGameId(inputText);
