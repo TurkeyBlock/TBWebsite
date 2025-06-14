@@ -16,8 +16,8 @@ type request = {
 
 type TicTacToe_Response = {
     id: number,
-    boardState: Array<String>,
-    nextToken: String,
+    boardState: Array<string>,
+    nextToken: string,
 }
 
 
@@ -34,13 +34,14 @@ export async function sendEvent(req:request, res:string) {
     .limit(1)
 
     if(data == null){
-        return;
+        //change @ later date for actual handling
+        return error;
     }
     //For cheating-checks, we can redo game validation here.
     if(req.table === "TicTacToe"){
         const singleData:TicTacToe_Response = data[0]
         if(req.body.board.length !== 9){
-            return "Client did not provide a complete gameState";
+            return res = "Client did not provide a complete gameState";
         }
 
         let commitingReset:boolean = true;
@@ -57,10 +58,10 @@ export async function sendEvent(req:request, res:string) {
             }
             if (!commitingReset){
                 if(differences > 1){
-                    return "Differences in database vs client = "+differences;
+                    return res = "Differences in database vs client = "+differences;
                 }
                 if(overwriting){
-                    return "Attempted to overwrite existing piece";
+                    return res = "Attempted to overwrite existing piece";
                 }
             }
         }

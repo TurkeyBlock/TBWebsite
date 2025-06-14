@@ -12,8 +12,10 @@ const TicTacToe = () => {
 
   const [gameId, setGameId] = useState(null);
   const [inputText, setInputText] = useState("");
+
+  //Handles submission to lobby-input form.
   function handleSubmit(event){
-    event.preventDefault();
+    event.preventDefault(); //Do not refresh the page.
     console.log(event);
     if(inputText=="")
       return;
@@ -25,13 +27,14 @@ const TicTacToe = () => {
 
 
 
-  //Handle - if id =  null, you're doing singleplayer
+  //Handle: if id =  null, you're doing singleplayer
   const [game, setGame] = useState({
     id: null,
     board: Array(9).fill(null),
     currentToken: "X",
   });
 
+  //Format the recieved-from-subscription payload to client-readable state 
   function formatPayload(newBoard,nextToken){
     const data = {
       board: newBoard,
@@ -40,6 +43,7 @@ const TicTacToe = () => {
     return data;
   };
 
+  //Format a request for the server function to read, authorize, and broadcast
   function createReq(updatedGame){
     const req = {
       table: tableName,
@@ -56,6 +60,7 @@ const TicTacToe = () => {
     setMyToken(null);
   };
 
+  //Game channel subscription
   useEffect(() => {
     //Induce singleplayer
     if(gameId!=null){
@@ -70,6 +75,12 @@ const TicTacToe = () => {
               setErrorMessage("")
             }
           )
+          .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+            console.log('join', key, newPresences)
+          })
+          .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+            console.log('leave', key, leftPresences)
+          })
           .subscribe();
       return () => {
         supabase.removeChannel(channel)

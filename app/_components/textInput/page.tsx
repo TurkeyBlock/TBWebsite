@@ -1,19 +1,9 @@
 "use client"
-import { useState } from 'react';
 
 const TextInput = ({inputText="", setInputText, buttonLabel = "Submit", handleSubmit}) => {
-  /*
-  const [text, setText] = useState('');
-  */
   const handleChange = (event) => {
     setInputText(event.target.value);
   };
-  /*
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    alert(`You entered: ${text}`);
-  };
-  */
 
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
