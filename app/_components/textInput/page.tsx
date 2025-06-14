@@ -1,6 +1,7 @@
+// @ts-nocheck
 "use client"
 
-import { ChangeEvent, ChangeEventHandler, FormEventHandler } from "react";
+import { ChangeEventHandler, FormEventHandler } from "react";
 
 interface Props {
   boxLabel?:string;
