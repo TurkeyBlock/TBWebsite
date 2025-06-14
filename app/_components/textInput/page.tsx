@@ -1,21 +1,21 @@
 "use client"
 
-import {FormEventHandler } from "react";
+import { ChangeEvent,ChangeEventHandler, FormEventHandler } from "react";
+
 
 interface Props {
   boxLabel?:string;
   inputText?: string;
   buttonLabel?: string;
-  setInputText:(arg0:string)=>null;
+  setInputText:ChangeEventHandler;
   handleSubmit: FormEventHandler;
   hide?:boolean;
 }
-
 const TextInput = ({boxLabel = "Input Text:", inputText="", buttonLabel = "Submit", setInputText, handleSubmit, hide=false}: Props) => {
-  const onChange = (e: React.ChangeEvent<HTMLInputElement >) => {
-    const newValue = e. currentTarget.value;
-    setInputText(newValue);
-  }
+  const handleChange = (event:any) => {
+    setInputText(event.target.value);
+    console.log(event.target.value);
+  };
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', display:hide === true ? 'none': ''}}>
       <form onSubmit={handleSubmit}>
@@ -26,7 +26,7 @@ const TextInput = ({boxLabel = "Input Text:", inputText="", buttonLabel = "Submi
           type="text"
           id="textInput"
           value={inputText}
-          onChange={onChange}
+          onChange={handleChange}
           style={{
             padding: '5px',
             border: '1px solid #ccc',

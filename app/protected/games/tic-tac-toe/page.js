@@ -15,9 +15,11 @@ const TicTacToe = () => {
 
   //Handles submission to lobby-input form.
   function handleSubmit(event){
-    if(gameId==null){
-      event.preventDefault(); //Do not refresh the page UNLESS client was previously subscribed to a channel
+    if(gameId!=null){
       console.log("Attempted to join lobby while already subscribed to a channel - reloading page.")
+    }
+    else{
+      event.preventDefault(); //Do not refresh the page UNLESS client was previously subscribed to a channel
     }
     if(inputText=="")
       return;
