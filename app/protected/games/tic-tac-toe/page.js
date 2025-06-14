@@ -15,8 +15,10 @@ const TicTacToe = () => {
 
   //Handles submission to lobby-input form.
   function handleSubmit(event){
-    event.preventDefault(); //Do not refresh the page.
-    console.log(event);
+    if(gameId==null){
+      event.preventDefault(); //Do not refresh the page UNLESS client was previously subscribed to a channel
+      console.log("Attempted to join lobby while already subscribed to a channel - reloading page.")
+    }
     if(inputText=="")
       return;
     setGameId(inputText);
@@ -53,36 +55,38 @@ const TicTacToe = () => {
     return req;
   };
 
-  async function initGameState() {
-    const payload = await fetchData(tableName, gameId);
-    console.log(payload);
-    setGame(formatPayload(payload.boardState, payload.nextToken))
-    setMyToken(null);
-  };
-
   //Game channel subscription
   useEffect(() => {
     //Induce singleplayer
     if(gameId!=null){
 
+      //Boot the client-side-render of the game, fetched from database
+      async function initGameState() {
+        const payload = await fetchData(tableName, gameId);
+        console.log(payload);
+        setGame(formatPayload(payload.boardState, payload.nextToken))
+        setMyToken(null);
+      };
       initGameState();
-        const channel = supabase
-          .channel(`${gameId}`)
-          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
-            (payload) => {
-              const formatedPayload = formatPayload(payload.new.boardState, payload.new.nextToken)
-              setGame(formatedPayload)
-              setErrorMessage("")
-            }
-          )
-          .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-            console.log('join', key, newPresences)
-          })
-          .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-            console.log('leave', key, leftPresences)
-          })
-          .subscribe();
-          console.log(channel);
+      
+      //Subscribe the game's channel, inform client of table updates (and joins/leaves)
+      const channel = supabase
+        .channel(`${gameId}`)
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
+          (payload) => {
+            const formatedPayload = formatPayload(payload.new.boardState, payload.new.nextToken)
+            setGame(formatedPayload)
+            setErrorMessage("")
+          }
+        )
+        .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+          console.log('join', key, newPresences)
+        })
+        .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+          console.log('leave', key, leftPresences)
+        })
+        .subscribe();
+        console.log(channel);
       return () => {
         supabase.removeChannel(channel)
       }
@@ -180,7 +184,7 @@ const TicTacToe = () => {
     <main
       className={styles.body}
     >
-      <TextInput inputText={inputText} setInputText={setInputText} buttonLabel="Submit" boxLabel="Lobby Code:" handleSubmit={ handleSubmit }/>
+      <TextInput boxLabel="Lobby Code:" inputText={inputText} buttonLabel="Submit" setInputText={setInputText} handleSubmit={ handleSubmit } hide={gameId!=null}/>
       <div className={styles.appContainer}>
         <h1 className = {styles.h1}>
           Tic Tac Toe
