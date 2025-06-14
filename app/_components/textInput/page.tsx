@@ -1,14 +1,11 @@
 "use client"
 
-import { ChangeEventHandler, FormEventHandler } from "react";
-
-
 interface Props {
   boxLabel?:string;
   inputText?: string;
   buttonLabel?: string;
-  setInputText:ChangeEventHandler;
-  handleSubmit: FormEventHandler;
+  setInputText:any;
+  handleSubmit: any;
   hide?:boolean;
 }
 const TextInput = ({boxLabel = "Input Text:", inputText="", buttonLabel = "Submit", setInputText, handleSubmit, hide=false}: Props) => {
