@@ -37,6 +37,7 @@ export default function RootLayout({
         >
           <Navigation/>
           {children}
+          <Analytics mode="production" />;
         </ThemeProvider>
       </body>
     </html>
