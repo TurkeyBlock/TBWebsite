@@ -11,7 +11,7 @@ interface Props {
   hide?:boolean;
 }
 const TextInput = ({boxLabel = "Input Text:", inputText="", buttonLabel = "Submit", setInputText, handleSubmit, hide=false}: Props) => {
-  const handleChange = (event:ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: any) => {
     setInputText(event.target.value);
   };
 
