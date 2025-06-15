@@ -10,7 +10,6 @@ const Navbar = () => {
         <Logo />
         <Link href="/" className={styles.link}>Homepage</Link>
         <Link href="/protected/games/tic-tac-toe" className={styles.link}>Games</Link>
-        <Link href="/login" className={styles.link}>Login</Link>
         <Button />
       </div>
   );

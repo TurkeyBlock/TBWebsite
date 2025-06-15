@@ -5,9 +5,7 @@ import { supabase } from '../../../lib/supabase';
 type request = {
     table: string,
     id: number,
-
-    //Update, Reset
-    type: string
+    name?:string,
     body:{
         board: Array<string>
         currentToken: string
@@ -20,6 +18,23 @@ type TicTacToe_Response = {
     nextToken: string,
 }
 
+export async function createGame(req:request, res:string){
+    if(!supabase){
+        console.log('failed to send');
+        return;
+    }
+    console.log("!");
+    const user = supabase.auth.getUser();
+    const { data, error } = await supabase
+    .from(req.table)
+    .insert({'boardState': req.body.board, 'nextToken': req.body.currentToken, 'name':req.name, 'user_id':user})
+
+    if(data == null){
+        //change @ later date for actual handling
+        return error;
+    }
+    return data;
+}
 
 export async function sendEvent(req:request, res:string) {
     if(!supabase){

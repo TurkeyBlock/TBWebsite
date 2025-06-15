@@ -4,7 +4,7 @@ import { useEffect, useState} from "react";
 import styles from "./page.module.css";
 //import SlidingButton from '../../../_components/slidingButton'
 import { supabase } from '@/lib/supabase';
-import {sendEvent, fetchData} from "../_supaHandler";
+import {createGame, sendEvent, fetchData} from "../_supaHandler";
 import TextInput from "../../../_components/textInput/page";
 
 const TicTacToe = () => {
@@ -34,13 +34,17 @@ const TicTacToe = () => {
   }
 
 
-
-  //Handle: if id =  null, you're doing singleplayer
-  const [game, setGame] = useState({
-    id: null,
+  const newGame = {
     board: Array(9).fill(null),
     currentToken: "X",
+  };
+  //Handle: if id =  null, you're doing singleplayer
+  const [game, setGame] = useState({
+    id:null,
+    board:newGame.board,
+    currentToken:newGame.currentToken
   });
+ 
 
   //Format the recieved-from-subscription payload to client-readable state 
   function formatPayload(newBoard,nextToken){
@@ -52,15 +56,20 @@ const TicTacToe = () => {
   };
 
   //Format a request for the server function to read, authorize, and broadcast
-  function createReq(updatedGame){
+  function createReq(updatedGame, declareName){
     const req = {
       table: tableName,
       id: gameId,
+      name:declareName,
       body: updatedGame
     }
     return req;
   };
 
+  async function submitGameCreate(){
+    const data = await createGame(createReq(game,"tempName"))
+    console.log(data);
+  }
   //Game channel subscription
   useEffect(() => {
     //Induce singleplayer
@@ -87,6 +96,9 @@ const TicTacToe = () => {
           (payload) => {
             const formatedPayload = formatPayload(payload.new.boardState, payload.new.nextToken)
             setGame(formatedPayload)
+            if(formatedPayload.board.toString()==newGame.board.toString()){
+              setMyToken(null);
+            }
             setErrorMessage("")
           }
         )
@@ -97,7 +109,6 @@ const TicTacToe = () => {
           console.log('leave', key, leftPresences)
         })
         .subscribe();
-        console.log(channel);
       return () => {
         supabase.removeChannel(channel)
       }
@@ -153,10 +164,8 @@ const TicTacToe = () => {
     if(inLobby===true){
       //await api response & set login warning based on result
       try{
-        const req = createReq(updatedGame);
-        //console.log(await 
-          sendEvent(req)
-        //);
+        const req = createReq(updatedGame,"");
+        sendEvent(req);
       }
       catch{
         console.log("Client unable to send event. Try refreshing your page.")
@@ -170,14 +179,10 @@ const TicTacToe = () => {
 
   const resetGame = async () => {
     setErrorMessage("");
-    const newGame = {
-      board: Array(9).fill(null),
-      currentToken: "X",
-    };
     if(inLobby===true){
       //await api response & set login warning based on result
       try{
-        const req = createReq(newGame);
+        const req = createReq(newGame,"");
         sendEvent(req);
         setMyToken(null)
       }
@@ -202,6 +207,7 @@ const TicTacToe = () => {
           <TextInput boxLabel="Lobby Code:" inputText={inputText} buttonLabel="Submit" setInputText={setInputText} handleSubmit={ handleSubmit }/>
           <span style={{height:"2px",width:"100%", backgroundColor:"lightGrey"}}></span>
           <div className="secondBox" style={{padding:"5%"}}>
+            <button className={styles.resetButton} onClick={submitGameCreate}></button>
             <li>Open lobbies placeholder</li>
             <li>Use [0-9]</li>
           </div>
