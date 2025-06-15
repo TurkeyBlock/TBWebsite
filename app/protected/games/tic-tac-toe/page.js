@@ -6,7 +6,6 @@ import styles from "./page.module.css";
 import { supabase } from '@/lib/supabase';
 import {sendEvent, fetchData} from "../_supaHandler";
 import TextInput from "../../../_components/textInput/page";
-import { exit } from "process";
 
 const TicTacToe = () => {
   const tableName = "TicTacToe";
@@ -17,8 +16,8 @@ const TicTacToe = () => {
 
   //Handles submission to lobby-input form.
   function handleSubmit(event){
-    if(gameId!=null){
-      console.log("Attempted to join lobby while already subscribed to a channel - reloading page.")
+    if(inLobby===false){
+      console.log("Attempted to join a lobby while already in one - reloading page.")
     }
     else{
       event.preventDefault(); //Do not refresh the page UNLESS client was previously subscribed to a channel
@@ -151,7 +150,7 @@ const TicTacToe = () => {
       board: squares,
       currentToken: game.currentToken === "X" ? "O" : "X",
     };
-    if(gameId!=null){
+    if(inLobby===true){
       //await api response & set login warning based on result
       try{
         const req = createReq(updatedGame);
@@ -175,7 +174,7 @@ const TicTacToe = () => {
       board: Array(9).fill(null),
       currentToken: "X",
     };
-    if(gameId!=null){
+    if(inLobby===true){
       //await api response & set login warning based on result
       try{
         const req = createReq(newGame);
