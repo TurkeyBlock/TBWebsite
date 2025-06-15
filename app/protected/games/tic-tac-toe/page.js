@@ -16,7 +16,7 @@ const TicTacToe = () => {
 
   //Handles submission to lobby-input form.
   function handleSubmit(event){
-    if(inLobby===false){
+    if(inLobby===true){
       console.log("Attempted to join a lobby while already in one - reloading page.")
     }
     else{
