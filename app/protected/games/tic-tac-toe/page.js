@@ -6,12 +6,14 @@ import styles from "./page.module.css";
 import { supabase } from '@/lib/supabase';
 import {sendEvent, fetchData} from "../_supaHandler";
 import TextInput from "../../../_components/textInput/page";
+import { exit } from "process";
 
 const TicTacToe = () => {
   const tableName = "TicTacToe";
 
   const [gameId, setGameId] = useState(null);
-  const [inputText, setInputText] = useState("");
+  const [inLobby, setInLobby] = useState(false);  //Boolean to check for success in joining a lobby
+  const [inputText, setInputText] = useState("");  //Form input for lobby id.
 
   //Handles submission to lobby-input form.
   function handleSubmit(event){
@@ -22,14 +24,15 @@ const TicTacToe = () => {
       event.preventDefault(); //Do not refresh the page UNLESS client was previously subscribed to a channel
     }
 
-    //This portion needs to check if the game can be fetched from the given id &/or key
-    if(inputText=="")
-      return;
     setGameId(inputText);
   }
 
   const [errorMessage, setErrorMessage] = useState("");
   const [myToken, setMyToken] = useState(null);
+  const [sidebar, setSidebar] = useState(true);
+  function toggleSidebar(){
+    setSidebar(sidebar?false:true);
+  }
 
 
 
@@ -63,16 +66,21 @@ const TicTacToe = () => {
   useEffect(() => {
     //Induce singleplayer
     if(gameId!=null){
-
+      setSidebar(false);
       //Boot the client-side-render of the game, fetched from database
       async function initGameState() {
         const payload = await fetchData(tableName, gameId);
         console.log(payload);
+        if(payload==undefined){
+          setErrorMessage("Lobby not found")
+          return;
+        }
         setGame(formatPayload(payload.boardState, payload.nextToken))
         setMyToken(null);
       };
       initGameState();
-      
+      setInLobby(true);
+
       //Subscribe the game's channel, inform client of table updates (and joins/leaves)
       const channel = supabase
         .channel(`${gameId}`)
@@ -122,6 +130,7 @@ const TicTacToe = () => {
 
 
   const makeMove = async (index) => {
+    setErrorMessage("");
     const squares = [...game.board];
     if(myToken===null){
       setMyToken(game.currentToken);
@@ -161,6 +170,7 @@ const TicTacToe = () => {
   };
 
   const resetGame = async () => {
+    setErrorMessage("");
     const newGame = {
       board: Array(9).fill(null),
       currentToken: "X",
@@ -178,6 +188,7 @@ const TicTacToe = () => {
     }
     else{
       setGame(newGame);
+      setMyToken(null);
     }
   };
   
@@ -185,40 +196,58 @@ const TicTacToe = () => {
   const isTied = game.board.includes(null)
   const winner = calculateWinner(game.board);
   return (
-    <main
-      className={styles.body}
-    >
-      <TextInput boxLabel="Lobby Code:" inputText={inputText} buttonLabel="Submit" setInputText={setInputText} handleSubmit={ handleSubmit } hide={gameId!=null}/>
-      <div className={styles.appContainer}>
-        <h1 className = {styles.h1}>
-          Tic Tac Toe
-        </h1>
-        <div className = {styles.board}>
-          {game.board.map((cell, index) => (
-            <div
-              key={index}
-              className={(winnerArray).includes(index)!==false ? [styles.cell, styles.cellHighlight].join(" ") : !isTied ? [styles.cell, styles.cellFailure].join(" ") : styles.cell}
-              onClick={() => makeMove(index)}
-            >
-              {cell}
-            </div>
-          ))}
+    <main style={{display:"flex", flexDirection:"row",backgroundColor:"black"}}>
+
+      <div className="sidebar" style={{display:"flex", flexDirection:"row", backgroundColor:"darkgrey"}}>
+        <div className="sidebarContents" style={{flex:"1", display:sidebar==true?"flex":"none", flexDirection:"column", alignItems:"start"}}>
+          <TextInput boxLabel="Lobby Code:" inputText={inputText} buttonLabel="Submit" setInputText={setInputText} handleSubmit={ handleSubmit }/>
+          <span style={{height:"2px",width:"100%", backgroundColor:"lightGrey"}}></span>
+          <div className="secondBox" style={{padding:"5%"}}>
+            <li>Open lobbies placeholder</li>
+            <li>Use [0-9]</li>
+          </div>
         </div>
-        <p className={styles.currentToken}>
-          {winner
-            ? `Player ${winner} wins!`:
-            isTied ? `Current Player: ${game.currentToken}`:
-            'Tie game!'}
+        <span className="sidebarEdge" style={{backgroundColor:"grey"}}>
+          <button style={{padding:"3px"}} onClick={toggleSidebar}>{sidebar==true?"<<":">>"}</button>
+        </span>
+      </div>
+      
+      <div style={{padding: "0px", flex:"1"}}>
+        <div
+          className={styles.body}
+        >
+          <div className={styles.appContainer}>
+            <h1 className = {styles.h1}>
+              Tic Tac Toe
+            </h1>
+            <div className = {styles.board}>
+              {game.board.map((cell, index) => (
+                <div
+                  key={index}
+                  className={(winnerArray).includes(index)!==false ? [styles.cell, styles.cellHighlight].join(" ") : !isTied ? [styles.cell, styles.cellFailure].join(" ") : styles.cell}
+                  onClick={() => makeMove(index)}
+                >
+                  {cell}
+                </div>
+              ))}
+            </div>
+            <p className={styles.currentToken}>
+              {winner
+                ? `Player ${winner} wins!`:
+                isTied ? `Current Player: ${game.currentToken}`:
+                'Tie game!'}
+                
+            </p>
             
-        </p>
-        
-        <button className={styles.resetButton} onClick={resetGame}>
-          Reset Game
-        </button>
-        {errorMessage && (
-          <p className={styles.errorMessage}>{errorMessage}</p>
-        )}
-        
+            <button className={styles.resetButton} onClick={resetGame}>
+              Reset Game
+            </button>
+            {errorMessage && (
+              <p className={styles.errorMessage}>{errorMessage}</p>
+            )}
+            
+          </div>
+        </div>
       </div>
     </main>
   );
