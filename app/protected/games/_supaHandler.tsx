@@ -18,7 +18,7 @@ type TicTacToe_Response = {
     nextToken: string,
 }
 
-export async function createGame(req:request, res:string){
+export async function createGame(req:request){
     if(!supabase){
         console.log('failed to send');
         return;

@@ -70,6 +70,7 @@ const TicTacToe = () => {
     const data = await createGame(createReq(game,"tempName"))
     console.log(data);
   }
+  
   //Game channel subscription
   useEffect(() => {
     //Induce singleplayer
