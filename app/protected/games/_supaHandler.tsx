@@ -18,17 +18,15 @@ type TicTacToe_Response = {
     nextToken: string,
 }
 
-export async function createGame(req:request, res:string){
-    if(!supabase){
+export async function createGame(req:request){
+    const user = supabase.auth.getUser();
+    if(!user){
         console.log('failed to send');
         return;
     }
-    console.log("!");
-    const user = supabase.auth.getUser();
     const { data, error } = await supabase
     .from(req.table)
     .insert({'boardState': req.body.board, 'nextToken': req.body.currentToken, 'name':req.name, 'user_id':user})
-
     if(data == null){
         //change @ later date for actual handling
         return error;

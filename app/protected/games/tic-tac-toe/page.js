@@ -67,9 +67,16 @@ const TicTacToe = () => {
   };
 
   async function submitGameCreate(){
-    const data = await createGame(createReq(game,"tempName"))
-    console.log(data);
+    if(!inLobby){
+      const data = await createGame(createReq(game,"tempName"))
+
+      //This isn't working to retrieve game ID.
+      //console.log(data);
+      setGameId(data.id);
+      
+    }
   }
+  
   //Game channel subscription
   useEffect(() => {
     //Induce singleplayer
@@ -209,7 +216,6 @@ const TicTacToe = () => {
           <div className="secondBox" style={{padding:"5%"}}>
             <button className={styles.resetButton} onClick={submitGameCreate}></button>
             <li>Open lobbies placeholder</li>
-            <li>Use [0-9]</li>
           </div>
         </div>
         <span className="sidebarEdge" style={{backgroundColor:"grey"}}>
