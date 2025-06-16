@@ -4,7 +4,15 @@ import { useState} from "react";
 import { supabase } from '@/lib/supabase'
 
 async function getTable(){
+  //Pull user's current JWT.
+  const { data: { session } } = await supabase.auth.getSession();
+  const jwt = session?.access_token;
+  
+  //Invoke edge function with JWT permisions.
   const { data, error } = await supabase.functions.invoke('postgres-edge', {
+    headers: {
+      'Authorization': `Bearer ${jwt}`,
+    },
     body: { name: 'Functions' },
   })
   console.log(data);
