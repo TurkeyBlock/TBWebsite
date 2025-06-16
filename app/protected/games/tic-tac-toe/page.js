@@ -69,8 +69,11 @@ const TicTacToe = () => {
   async function submitGameCreate(){
     if(!inLobby){
       const data = await createGame(createReq(game,"tempName"))
+
+      //This isn't working to retrieve game ID.
+      //console.log(data);
       setGameId(data.id);
-      console.log(data);
+      
     }
   }
   
