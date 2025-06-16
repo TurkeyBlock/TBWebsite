@@ -67,8 +67,11 @@ const TicTacToe = () => {
   };
 
   async function submitGameCreate(){
-    const data = await createGame(createReq(game,"tempName"))
-    console.log(data);
+    if(!inLobby){
+      const data = await createGame(createReq(game,"tempName"))
+      setGameId(data.id);
+      console.log(data);
+    }
   }
   
   //Game channel subscription
@@ -210,7 +213,6 @@ const TicTacToe = () => {
           <div className="secondBox" style={{padding:"5%"}}>
             <button className={styles.resetButton} onClick={submitGameCreate}></button>
             <li>Open lobbies placeholder</li>
-            <li>Use [0-9]</li>
           </div>
         </div>
         <span className="sidebarEdge" style={{backgroundColor:"grey"}}>

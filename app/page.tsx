@@ -1,12 +1,18 @@
 "use client"
-import TextInput from "./_components/textInput/page"
 import { useState} from "react";
+import { supabase } from '@/lib/supabase';
 
 export default function Page() {
-  const [inputText, setInputText] = useState("");
+  async function anonyLogin(){
+    const { data, error } = await supabase.auth.signInAnonymously()
+    if(error){
+      console.log(error);
+    }
+    console.log(data);
+  }
   return (
     <div>
-      <TextInput inputText={inputText} setInputText={setInputText} buttonLabel="Submit" handleSubmit={ console.log({inputText})}/>
+      <button style={{backgroundColor:"red" }}onClick={anonyLogin}>Temporary Log-in Button</button>
       <h1>Hello D&D Nerds</h1>
       <h2>@Turkeyblock.org</h2>
       <a>aa</a>
