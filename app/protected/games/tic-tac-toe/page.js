@@ -73,7 +73,7 @@ const TicTacToe = () => {
       setSidebar(false);
       //Boot the client-side-render of the game, fetched from database
       async function initGameState() {
-        const payload = callSupabase("GET", tableName, gameId, null, null);
+        const payload = await callSupabase("GET", tableName, gameId, null, null);
         console.log(payload);
         if(payload==undefined){
           setErrorMessage("Lobby not found")
