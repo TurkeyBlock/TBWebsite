@@ -1,5 +1,5 @@
 
-/*
+
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 interface RequestBody {
@@ -14,7 +14,8 @@ Deno.serve(async (req)=>{
     return new Response('ok', {
       headers: {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': '*'
+        'Access-Control-Allow-Headers': '*',
+        'Access-Control-Allow-Methods': '*'
       },
       status: 200
     });
@@ -23,6 +24,8 @@ Deno.serve(async (req)=>{
     const supabaseClient = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_ANON_KEY') ?? '', {
       global: {
         headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': '*',
           Authorization: req.headers.get('Authorization')
         }
       }
@@ -35,6 +38,8 @@ Deno.serve(async (req)=>{
         error: 'Unauthorized'
       }), {
         headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': '*',
           'Content-Type': 'application/json'
         },
         status: 401
@@ -43,40 +48,47 @@ Deno.serve(async (req)=>{
     //-----------------------------------------------------------------------------------------------------------------
     //Begin undertaking requests
     let returnBody:unknown = null;
+    const supabaseServicer = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+    //There is no GET method atm. All GETs are processed as an actionless PATCH
     const reqBody:RequestBody = await req.json();
-    if(req.method === 'GET' || req.method === 'PATCH'){
-      const { data: {row}, error: {gameError} } = await supabaseClient.from(reqBody.table).select('*').eq('id', reqBody.id).limit(1);
-      if(req.method === 'GET'){
-        returnBody = row;
+    if(req.method == 'GET' || req.method == 'PATCH'){
+      const { data, error} = await supabaseServicer.from(reqBody.table).select('*').eq('id', reqBody.id).limit(1);
+      if(error){
+        throw new Error("Issue retrieving row using GET/PATCH");
+      }
+      const game = data[0];
+      if(req.method == 'GET' || reqBody.action == null){
+        returnBody = game;
       }
       else{
         //use the servicer to get the table's editKey
-        const supabaseServicer = createClient(
-          Deno.env.get('SUPABASE_URL')!,
-          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-        );
-
-
         //check if this user has the editing key (table = TABLE_keys), or if none was necessary
-        const editKey = await supabaseServicer.from((reqBody.table).concat('_keys')).select('editKey').eq('id', reqBody.id).limit(1);
-        if(editKey===null || editKey===reqBody.key){
-          //Commit game-specific actions
-          if(reqBody.table === "TicTacToe"){
+        const {data, error} = await supabaseServicer.from((reqBody.table).concat('_Keys')).select('editKey').eq('id', reqBody.id).limit(1);
+        if (error) {
+          throw new Error("Issue confirming edit key");
+        }
+        const editKey = data[0].editKey;
+        if(editKey==null || editKey == "" || editKey==reqBody.key){
+          //Commit game-specific actions <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+          if(reqBody.table == "TicTacToe"){
             let newBoard:Array<string>;
             let newToken:string;
 
             //confirm that some action was actually requested.
             if(reqBody.action!=null){
               const instructions = reqBody.action.split(" ");
-              if(instructions[0] === "RESET"){              
+              if(instructions[0] == "RESET"){              
                 newBoard = Array(9).fill(null);
                 newToken = 'X';
               }
-              else if(instructions[0] === "MOVE"){
+              else if(instructions[0] == "MOVE"){
                 let token = instructions[1];
                 let position = instructions[2];
-                if(row.nextToken==token && row.board[position]==null){
-                  newBoard = row.board;
+                if(game.nextToken==token && game.board[position]==null){
+                  newBoard = game.board;
                   newBoard[position] = token;
                   newToken = (token == "X" ? "O" : "X");
                 }
@@ -88,10 +100,13 @@ Deno.serve(async (req)=>{
             else{
               throw new Error("No action provided");
             }
-            //client provided the table updating key, so the services makes their move.
-            supabaseServicer.from(reqBody.table).update({'boardState': newBoard!, 'nextToken': newToken!}).eq('id', reqBody.id);
+            //client provided the table updating key, so the services makes their move. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            const { data, error } = await supabaseServicer.from(reqBody.table).update({'board': newBoard!, 'nextToken': newToken!}).eq('id', reqBody.id);
+            if (error) {
+              throw new Error("Move validated, Update failed.");
+            }
           }
-          else if(reqBody.table === "ConnectFour"){
+          else if(reqBody.table == "ConnectFour"){
             //Non TicTacToe handling
           }
           else{
@@ -111,6 +126,8 @@ Deno.serve(async (req)=>{
       returnBody
     }), {
       headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': '*',
         'Content-Type': 'application/json'
       },
       status: 200
@@ -120,10 +137,13 @@ Deno.serve(async (req)=>{
       error: error.message
     }), {
       headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': '*',
         'Content-Type': 'application/json'
       },
       status: 500
     });
   }
 });
-*/
+
+

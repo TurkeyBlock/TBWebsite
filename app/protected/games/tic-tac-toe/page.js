@@ -40,7 +40,6 @@ const TicTacToe = () => {
   };
   //Handle: if id =  null, you're doing singleplayer
   const [game, setGame] = useState({
-    id:null,
     board:newGame.board,
     currentToken:newGame.currentToken
   });
@@ -74,12 +73,11 @@ const TicTacToe = () => {
       //Boot the client-side-render of the game, fetched from database
       async function initGameState() {
         const payload = await callSupabase("GET", tableName, gameId, null, null);
-        console.log(payload);
         if(payload==undefined){
           setErrorMessage("Lobby not found")
           return;
         }
-        setGame(formatPayload(payload.boardState, payload.nextToken))
+        setGame(formatPayload(payload.board,payload.nextToken));
         setMyToken(null);
       };
       initGameState();
@@ -90,7 +88,7 @@ const TicTacToe = () => {
         .channel(`${gameId}`)
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
           (payload) => {
-            const formatedPayload = formatPayload(payload.new.boardState, payload.new.nextToken)
+            const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken)
             setGame(formatedPayload)
             if(formatedPayload.board.toString()==newGame.board.toString()){
               setMyToken(null);
@@ -138,11 +136,16 @@ const TicTacToe = () => {
   const makeMove = async (index) => {
     setErrorMessage("");
     const squares = [...game.board];
-    if(myToken===null){
+
+    //Setting a constant isn't guaranteed to sync, so editing it could fail to be reflected in the function.
+    let funcToken = myToken;
+    if(funcToken==null){
       setMyToken(game.currentToken);
+      funcToken = game.currentToken;
+      console.log(funcToken);
     }
-    else if(myToken!=game.currentToken){
-      setErrorMessage("It's not your turn! (Your Token = "+myToken+")");
+    else if(funcToken!=game.currentToken){
+      setErrorMessage("It's not your turn! (Your Token = "+funcToken+")");
       return;
     }
     if (calculateWinner(squares) || squares[index]) {
@@ -160,7 +163,7 @@ const TicTacToe = () => {
     if(inLobby===true){
       //await api response & set login warning based on result
       try{
-        callSupabase("PATCH", tableName, gameId, ("MOVE "+myToken+" "+index), null);
+        callSupabase("PATCH", tableName, gameId, ("MOVE "+funcToken+" "+index), null);
       }
       catch{
         console.log("Client unable to send event. Try refreshing your page.")
