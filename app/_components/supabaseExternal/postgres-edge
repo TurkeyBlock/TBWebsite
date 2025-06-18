@@ -112,6 +112,7 @@ Deno.serve(async (req)=>{
           else{
             throw new Error("Invalid table requested");
           }
+          returnBody = "OK";
         }
         else{
           throw new Error("Invalid edit key provided");
