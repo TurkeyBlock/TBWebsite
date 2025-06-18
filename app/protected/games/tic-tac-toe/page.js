@@ -4,7 +4,7 @@ import { useEffect, useState} from "react";
 import styles from "./page.module.css";
 //import SlidingButton from '../../../_components/slidingButton'
 import { supabase } from '@/lib/supabase';
-import {callSupabase} from '../supabaseEdgeCaller'
+import {callSupabase} from '../_supabaseEdgeCaller'
 import TextInput from "../../../_components/textInput/page";
 
 const TicTacToe = () => {
