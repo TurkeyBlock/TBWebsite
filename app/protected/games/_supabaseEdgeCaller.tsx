@@ -21,19 +21,34 @@ export async function callSupabase(functionMethod:"GET"|"PATCH"|"POST", tableNam
     key:playKey,
   }
 
-  //Invoke edge function with user's JWT.
-  const { data, error } = await supabase.functions.invoke('postgres-edge', {
-    method: functionMethod,
-    headers: {
-      'Authorization': `Bearer ${jwt}`,
-    },
-    body,
-  })
+  let returnData:string = "", returnError:string = "";
+  if(functionMethod == "GET"){
+    const { data, error} = await supabase.functions.invoke('postgres-edge', {
+      method: functionMethod,
+      headers: {
+        'Authorization': `Bearer ${jwt}`,
+      },
+    })
+    returnData = data;
+    returnError = error;
+  }
+  else{
+    //Invoke edge function with user's JWT.
+    const { data, error } = await supabase.functions.invoke('postgres-edge', {
+      method: functionMethod,
+      headers: {
+        'Authorization': `Bearer ${jwt}`,
+      },
+      body,
+    })
+    returnData = data;
+    returnError = error;
+  }
   
-  if(data==null){
-    return error;
+  if(returnData==null){
+    return returnError;
   }
   //GET returns the game, PATCH & POST return success or fail.
-  console.log(data);
-  return data;
+  console.log(returnData);
+  return returnData;
 }
