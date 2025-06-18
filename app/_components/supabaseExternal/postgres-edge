@@ -1,0 +1,129 @@
+
+/*
+import { createClient } from 'npm:@supabase/supabase-js@2';
+
+interface RequestBody {
+  table: string,
+  id?: number,
+  action?: "RESET" | string,
+  key?:string
+}
+
+Deno.serve(async (req)=>{
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': '*'
+      },
+      status: 200
+    });
+  }
+  try {
+    const supabaseClient = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_ANON_KEY') ?? '', {
+      global: {
+        headers: {
+          Authorization: req.headers.get('Authorization')
+        }
+      }
+    });
+    // Get the session or user object
+    const token = req.headers.get('Authorization')?.replace('Bearer ', '');
+    const { data: { user }, error } = await supabaseClient.auth.getUser(token);
+    if (error || !user) {
+      return new Response(JSON.stringify({
+        error: 'Unauthorized'
+      }), {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        status: 401
+      });
+    }
+    //-----------------------------------------------------------------------------------------------------------------
+    //Begin undertaking requests
+    let returnBody:unknown = null;
+    const reqBody:RequestBody = await req.json();
+    if(req.method === 'GET' || req.method === 'PATCH'){
+      const { data: {row}, error: {gameError} } = await supabaseClient.from(reqBody.table).select('*').eq('id', reqBody.id).limit(1);
+      if(req.method === 'GET'){
+        returnBody = row;
+      }
+      else{
+        //use the servicer to get the table's editKey
+        const supabaseServicer = createClient(
+          Deno.env.get('SUPABASE_URL')!,
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+        );
+
+
+        //check if this user has the editing key (table = TABLE_keys), or if none was necessary
+        const editKey = await supabaseServicer.from((reqBody.table).concat('_keys')).select('editKey').eq('id', reqBody.id).limit(1);
+        if(editKey===null || editKey===reqBody.key){
+          //Commit game-specific actions
+          if(reqBody.table === "TicTacToe"){
+            let newBoard:Array<string>;
+            let newToken:string;
+
+            //confirm that some action was actually requested.
+            if(reqBody.action!=null){
+              const instructions = reqBody.action.split(" ");
+              if(instructions[0] === "RESET"){              
+                newBoard = Array(9).fill(null);
+                newToken = 'X';
+              }
+              else if(instructions[0] === "MOVE"){
+                let token = instructions[1];
+                let position = instructions[2];
+                if(row.nextToken==token && row.board[position]==null){
+                  newBoard = row.board;
+                  newBoard[position] = token;
+                  newToken = (token == "X" ? "O" : "X");
+                }
+                else{
+                  throw new Error("Invalid move requested");
+                }
+              }
+            }
+            else{
+              throw new Error("No action provided");
+            }
+            //client provided the table updating key, so the services makes their move.
+            supabaseServicer.from(reqBody.table).update({'boardState': newBoard!, 'nextToken': newToken!}).eq('id', reqBody.id);
+          }
+          else if(reqBody.table === "ConnectFour"){
+            //Non TicTacToe handling
+          }
+          else{
+            throw new Error("Invalid table requested");
+          }
+        }
+        else{
+          throw new Error("Invalid edit key provided");
+        }
+      }
+    }
+    else{
+      throw new Error("Invalid method; POST is not yet available");
+    }
+    //return the new/current gameState
+    return new Response(JSON.stringify({
+      returnBody
+    }), {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      status: 200
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({
+      error: error.message
+    }), {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      status: 500
+    });
+  }
+});
+*/

@@ -4,7 +4,7 @@ import { useEffect, useState} from "react";
 import styles from "./page.module.css";
 //import SlidingButton from '../../../_components/slidingButton'
 import { supabase } from '@/lib/supabase';
-import {createGame, sendEvent, fetchData} from "../_supaHandler";
+import {callSupabase} from '../supabaseEdgeCaller'
 import TextInput from "../../../_components/textInput/page";
 
 const TicTacToe = () => {
@@ -55,20 +55,9 @@ const TicTacToe = () => {
     return data;
   };
 
-  //Format a request for the server function to read, authorize, and broadcast
-  function createReq(updatedGame, declareName){
-    const req = {
-      table: tableName,
-      id: gameId,
-      name:declareName,
-      body: updatedGame
-    }
-    return req;
-  };
-
   async function submitGameCreate(){
     if(!inLobby){
-      const data = await createGame(createReq(game,"tempName"))
+      const data = await callSupabase("POST", tableName, gameId, null, null);
 
       //This isn't working to retrieve game ID.
       //console.log(data);
@@ -84,7 +73,7 @@ const TicTacToe = () => {
       setSidebar(false);
       //Boot the client-side-render of the game, fetched from database
       async function initGameState() {
-        const payload = await fetchData(tableName, gameId);
+        const payload = callSupabase("GET", tableName, gameId, null, null);
         console.log(payload);
         if(payload==undefined){
           setErrorMessage("Lobby not found")
@@ -171,8 +160,7 @@ const TicTacToe = () => {
     if(inLobby===true){
       //await api response & set login warning based on result
       try{
-        const req = createReq(updatedGame,"");
-        sendEvent(req);
+        callSupabase("PATCH", tableName, gameId, ("MOVE "+myToken+" "+index), null);
       }
       catch{
         console.log("Client unable to send event. Try refreshing your page.")
@@ -189,8 +177,7 @@ const TicTacToe = () => {
     if(inLobby===true){
       //await api response & set login warning based on result
       try{
-        const req = createReq(newGame,"");
-        sendEvent(req);
+        callSupabase("PATCH", tableName, gameId, "RESET", null);
         setMyToken(null)
       }
       catch{

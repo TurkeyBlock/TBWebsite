@@ -1,4 +1,4 @@
-"use server"
+/*"use server"
 //The following modules are, effectively, public-facing API endpoints.
 import { supabase } from '../../../lib/supabase';
 
@@ -103,3 +103,4 @@ export async function fetchData(table:string, id:number){
         return;
     return res.data[0];
 };
+*/
