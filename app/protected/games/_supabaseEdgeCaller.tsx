@@ -29,8 +29,11 @@ export async function callSupabase(functionMethod:"GET"|"PATCH"|"POST", tableNam
     },
     body,
   })
-  console.log(data);
-
+  
+  if(data==null){
+    return error;
+  }
   //GET returns the game, PATCH & POST return success or fail.
+  console.log(data);
   return data;
 }
