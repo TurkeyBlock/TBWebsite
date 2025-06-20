@@ -6,7 +6,7 @@ interface RequestBody {
   table: string,
   id?: number,
   action?: "RESET" | string,
-  key?:string
+  key?: string
 }
 
 Deno.serve(async (req)=>{
@@ -45,6 +45,7 @@ Deno.serve(async (req)=>{
         status: 401
       });
     }
+    console.log("Is Authenticated Anonymous = "+user.is_anonymous);
     //-----------------------------------------------------------------------------------------------------------------
     //Begin undertaking requests
     let returnBody:unknown = null;
@@ -120,7 +121,41 @@ Deno.serve(async (req)=>{
       }
     }
     else{
-      throw new Error("Invalid method; POST is not yet available");
+      //POST Method -----------------------------------------------------------------------------------
+      if(user.is_anonymous){
+        throw new Error("Invalid method; POST is not yet available");
+      }
+      else{
+        const { data:gameIds, error:searchingError} = await supabaseServicer.from((reqBody.table).concat('_Keys')).select('id').eq('creatorId', user.id);
+        if (searchingError) {
+          throw new Error("Failed during search for pre-existing games");
+        }
+        console.log("Found games under user ID:")
+        console.log(gameIds);
+        if(gameIds.length>0){
+          console.log('bap existing games!');
+          const gameIdValues = gameIds.map(obj => obj.id);
+          console.log(gameIdValues);
+          console.log(await supabaseServicer.from(reqBody.table).delete().in('id',gameIdValues));
+          console.log(await supabaseServicer.from((reqBody.table).concat('_Keys')).delete().in('id',gameIdValues));
+        }
+        //Create a new game table and grab its generated ID
+        const { data:newId, error:creationError} = await supabaseServicer.from(reqBody.table).insert({'name':'userTable'}).select('id');
+        if (creationError) {
+          throw new Error("Failed to create Game");
+        }
+        let newIdVal = newId[0].id;
+        //Use generated ID to create corresponding KEY table
+        if(!reqBody.key){
+          reqBody.key = "";
+        }
+        const { data, error } = await supabaseServicer.from((reqBody.table).concat('_Keys')).insert({'id':newIdVal,'editKey':reqBody.key,'creatorId':user.id});
+        if (error) {
+          throw new Error("Failed to create Game keys");
+        }
+        //Upon successful creation of the rows, send user their game ID.
+        returnBody = newIdVal;
+      }
     }
     //return the new/current gameState
     return new Response(JSON.stringify({

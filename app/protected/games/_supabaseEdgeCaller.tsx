@@ -49,7 +49,7 @@ export async function callSupabase(functionMethod:"GET"|"PATCH"|"POST", tableNam
     returnData = data;
     returnError = error;
   }
-  
+  console.log(returnData);
   if(returnData==null){
     console.log("Error in supabaseEdgeCaller: "+returnError);
     return returnError;
