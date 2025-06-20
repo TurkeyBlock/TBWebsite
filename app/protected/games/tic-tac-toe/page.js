@@ -3,9 +3,9 @@
 import { useEffect, useState} from "react";
 import styles from "./page.module.css";
 //import SlidingButton from '../../../_components/slidingButton'
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client'
 import {callSupabase} from '../_supabaseEdgeCaller'
-import TextInput from "../../../_components/textInput/page";
+import TextInput from "@/app/_components/textInput/page";
 
 const TicTacToe = () => {
   const tableName = "TicTacToe";
@@ -84,7 +84,7 @@ const TicTacToe = () => {
       setInLobby(true);
 
       //Subscribe the game's channel, inform client of table updates (and joins/leaves)
-      const channel = supabase
+      const channel = createClient()
         .channel(`${gameId}`)
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
           (payload) => {
@@ -104,7 +104,7 @@ const TicTacToe = () => {
         })
         .subscribe();
       return () => {
-        supabase.removeChannel(channel)
+        createClient().removeChannel(channel)
       }
 
     }

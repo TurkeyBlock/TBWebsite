@@ -1,6 +1,6 @@
 "use client"
 
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 /*
 interface RequestBody {
   table: string,
@@ -34,7 +34,7 @@ async function getTable(){
   <button style={{padding:"3px"}} onClick={getTable}>"Click for Table"</button>
 */
   async function anonyLogin(){
-    const { data, error } = await supabase.auth.signInAnonymously()
+    const { data, error } = await createClient().auth.signInAnonymously()
     if(error){
       console.log(error);
     }
