@@ -66,6 +66,9 @@ const TicTacToe = () => {
 
   async function submitGameCreate(){
     if(!inLobby){
+      //temp to get vercel off my back
+      setIsLocked(false);
+
       const data = await callSupabase("POST", tableName, gameId, null, null);
       setGameId(data.returnBody);
       console.log("Set game ID to: "+ data.returnBody)
