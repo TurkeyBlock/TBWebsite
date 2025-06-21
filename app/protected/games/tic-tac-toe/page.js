@@ -11,8 +11,21 @@ const TicTacToe = () => {
   const tableName = "TicTacToe";
 
   const [gameId, setGameId] = useState(null);
+  const [gameKey, setGameKey] = useState(null);
+
   const [inLobby, setInLobby] = useState(false);  //Boolean to check for success in joining a lobby
-  const [inputText, setInputText] = useState("");  //Form input for lobby id.
+  const [isLocked, setIsLocked] = useState(false); //Display boolean for if the lobby is locked
+
+  const [inputGameId, setInputGameId] = useState("");  //Form input for lobby id.
+  const [inputGameKey, setInputGameKey] = useState("");  //Form input for lobby key.
+
+  const [errorMessage, setErrorMessage] = useState("");
+  const [myToken, setMyToken] = useState(null);
+  const [sidebar, setSidebar] = useState(true);
+
+  function toggleSidebar(){
+    setSidebar(sidebar?false:true);
+  }
 
   //Handles submission to lobby-input form.
   function handleSubmit(event){
@@ -23,15 +36,12 @@ const TicTacToe = () => {
       event.preventDefault(); //Do not refresh the page UNLESS client was previously subscribed to a channel
     }
 
-    setGameId(inputText);
+    setGameId(inputGameId);
+    setGameKey(inputGameKey);
   }
 
-  const [errorMessage, setErrorMessage] = useState("");
-  const [myToken, setMyToken] = useState(null);
-  const [sidebar, setSidebar] = useState(true);
-  function toggleSidebar(){
-    setSidebar(sidebar?false:true);
-  }
+
+ 
 
 
   const newGame = {
@@ -57,10 +67,8 @@ const TicTacToe = () => {
   async function submitGameCreate(){
     if(!inLobby){
       const data = await callSupabase("POST", tableName, gameId, null, null);
-
-      //This isn't working to retrieve game ID.
-      //console.log(data);
-      setGameId(data.id);
+      setGameId(data.returnBody);
+      console.log("Set game ID to: "+ data.returnBody)
       
     }
   }
@@ -93,15 +101,15 @@ const TicTacToe = () => {
             if(formatedPayload.board.toString()==newGame.board.toString()){
               setMyToken(null);
             }
-            setErrorMessage("")
+            setErrorMessage("");
           }
-        )
+        )/*
         .on('presence', { event: 'join' }, ({ key, newPresences }) => {
           console.log('join', key, newPresences)
         })
         .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
           console.log('leave', key, leftPresences)
-        })
+        })*/
         .subscribe();
       return () => {
         createClient().removeChannel(channel)
@@ -163,7 +171,7 @@ const TicTacToe = () => {
     if(inLobby===true){
       //await api response & set login warning based on result
       try{
-        callSupabase("PATCH", tableName, gameId, ("MOVE "+funcToken+" "+index), null);
+        callSupabase("PATCH", tableName, gameId, ("MOVE "+funcToken+" "+index), gameKey);
       }
       catch{
         console.log("Client unable to send event. Try refreshing your page.")
@@ -194,14 +202,76 @@ const TicTacToe = () => {
   };
   
   let winnerArray = new Array(3);
-  const isTied = game.board.includes(null)
+  const isOngoing = game.board.includes(null)
   const winner = calculateWinner(game.board);
   return (
-    <main style={{display:"flex", flexDirection:"row",backgroundColor:"black"}}>
+    <main style={{display:"flex", flexDirection:"row"}}>
+      {/*main holds the sidebar and main-page flex boxes*/}
 
       <div className="sidebar" style={{display:"flex", flexDirection:"row", backgroundColor:"darkgrey"}}>
-        <div className="sidebarContents" style={{flex:"1", display:sidebar==true?"flex":"none", flexDirection:"column", alignItems:"start"}}>
-          <TextInput boxLabel="Lobby Code:" inputText={inputText} buttonLabel="Submit" setInputText={setInputText} handleSubmit={ handleSubmit }/>
+        {/* sidebar flexbox*/}
+        <div className="sidebarContents" style={{flex:"1", display:sidebar==true?"flex":"none", flexDirection:"column", alignItems:"start", maxWidth:'25vw'}}>
+          {/*<TextInput boxLabel="Lobby Code:" inputText={inputText} buttonLabel="Submit" setInputText={setInputText} handleSubmit={ handleSubmit }/>*/}
+
+
+
+          {/*Game ID / Key submission form*/}
+          <div style={{display:'flex', padding: '20px', fontFamily: 'Arial, sans-serif'}}>
+            <form onSubmit={handleSubmit} style={{display:'flex', flexDirection:'column'}}>
+              <div className="displayGrouping" style={{display:'flex', flexDirection:"row"}}>
+                <label htmlFor="textInput" style={{ marginRight: '10px', alignContent:'center', fontWeight:'bold'}}>
+                  Game ID
+                </label>
+                <input
+                  type="text"
+                  id="textInput"
+                  value={inputGameId}
+                  onChange={(event) => { setInputGameId(event.target.value) }}
+                  style={{
+                    marginLeft:'auto',
+                    padding: '5px',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                  }}
+                />
+              </div>
+              <div className="displayGrouping" style={{display:'flex', flexDirection:"row"}}>
+                <label htmlFor="textInput" style={{ marginRight: '10px', alignContent:'center', fontWeight:'bold'}}>
+                  Game Key
+                </label>
+                <input
+                  type="text"
+                  id="textInput"
+                  value={inputGameKey}
+                  onChange={(event) => { setInputGameKey(event.target.value) }}
+                  style={{
+                    marginLeft:'auto',
+                    padding: '5px',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                  }}
+                />
+              </div>
+              <button
+                type="submit"
+                style={{
+                  alignSelf:'stretch',
+                  marginTop: '5px',
+                  backgroundColor: '#0070f3',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                }}
+              >
+                Submit
+              </button>
+            </form>
+          </div>
+
+
+          
+
           <span style={{height:"2px",width:"100%", backgroundColor:"lightGrey"}}></span>
           <div className="secondBox" style={{padding:"5%"}}>
             <button className={styles.resetButton} onClick={submitGameCreate}></button>
@@ -213,41 +283,46 @@ const TicTacToe = () => {
         </span>
       </div>
       
-      <div style={{padding: "0px", flex:"1"}}>
-        <div
-          className={styles.body}
-        >
-          <div className={styles.appContainer}>
-            <h1 className = {styles.h1}>
-              Tic Tac Toe
-            </h1>
-            <div className = {styles.board}>
-              {game.board.map((cell, index) => (
-                <div
-                  key={index}
-                  className={(winnerArray).includes(index)!==false ? [styles.cell, styles.cellHighlight].join(" ") : !isTied ? [styles.cell, styles.cellFailure].join(" ") : styles.cell}
-                  onClick={() => makeMove(index)}
-                >
-                  {cell}
-                </div>
-              ))}
-            </div>
-            <p className={styles.currentToken}>
-              {winner
-                ? `Player ${winner} wins!`:
-                isTied ? `Current Player: ${game.currentToken}`:
-                'Tie game!'}
-                
-            </p>
-            
-            <button className={styles.resetButton} onClick={resetGame}>
-              Reset Game
-            </button>
-            {errorMessage && (
-              <p className={styles.errorMessage}>{errorMessage}</p>
-            )}
-            
+
+      {/*-------------------------------------------------------------------*/}
+
+
+      <div className={styles.body} style={{padding: "0px", flex:"1"}}>
+        {/*main page flex box*/}
+        <div className={styles.appContainer}>
+          <h1 style={{fontSize:"3em", marginBottom:'2vw'}}>{
+            !inLobby
+            ? 'Singleplayer':
+            isLocked
+            ? `[X] Game ID: ${gameId}`
+            : `[*] Game ID: ${gameId}`
+          }</h1>
+          <div className = {styles.board}>
+            {game.board.map((cell, index) => (
+              <div
+                key={index}
+                className={(winnerArray).includes(index)!==false ? [styles.cell, styles.cellHighlight].join(" ") : (!isOngoing && winnerArray[0]==null) ? [styles.cell, styles.cellFailure].join(" ") : styles.cell}
+                onClick={() => makeMove(index)}
+              >
+                {cell}
+              </div>
+            ))}
           </div>
+          <p className={styles.currentToken}>
+            {winner
+              ? `Player ${winner} wins!`:
+              isOngoing ? `Current Player: ${game.currentToken}`:
+              'Tie game!'}
+              
+          </p>
+          
+          <button className={styles.resetButton} onClick={resetGame}>
+            Reset Game
+          </button>
+          {errorMessage && (
+            <p className={styles.errorMessage}>{errorMessage}</p>
+          )}
+          
         </div>
       </div>
     </main>

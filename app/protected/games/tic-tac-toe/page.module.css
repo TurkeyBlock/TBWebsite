@@ -13,6 +13,9 @@
 
 .appContainer {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .h1 {
@@ -21,6 +24,7 @@
 }
 
 .board {
+  justify-content:center;
   display: grid;
   grid-template-columns: repeat(3, 100px);
   grid-gap: 10px;
