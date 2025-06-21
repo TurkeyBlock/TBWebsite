@@ -5,7 +5,7 @@ import styles from "./page.module.css";
 //import SlidingButton from '../../../_components/slidingButton'
 import { createClient } from '@/lib/supabase/client'
 import {callSupabase} from '../_supabaseEdgeCaller'
-import TextInput from "@/app/_components/textInput/page";
+//import TextInput from "@/app/_components/textInput/page";
 
 const TicTacToe = () => {
   const tableName = "TicTacToe";
