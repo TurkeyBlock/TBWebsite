@@ -70,8 +70,10 @@ const TicTacToe = () => {
       setIsLocked(false);
 
       const data = await callSupabase("POST", tableName, gameId, null, null);
-      setGameId(data.returnBody);
-      console.log("Set game ID to: "+ data.returnBody)
+      setGameId(data.id);
+      setGameKey(data.key);
+      console.log("Set game ID to: "+ data.id)
+      console.log("Set game Key to: "+ data.key)
       
     }
   }

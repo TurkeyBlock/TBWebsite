@@ -46,7 +46,7 @@ export async function callSupabase(functionMethod:"GET"|"PATCH"|"POST", tableNam
       console.log("NON-GET returned null: "+returnError);
       return returnError;
     }
-    returnData = data;
+    returnData = data.returnBody;
     returnError = error;
   }
   console.log(returnData);
