@@ -226,7 +226,7 @@ const TicTacToe = () => {
 
       <div className="sidebar" style={{display:"flex", flexDirection:"row", backgroundColor:"darkgrey"}}>
         {/* sidebar flexbox*/}
-        <div className="sidebarContents" style={{flex:"1", display:sidebar==true?"flex":"none", flexDirection:"column", alignItems:"start"}}>
+        <div className="sidebarContents" style={{flex:"1", display:sidebar==true?"flex":"none", flexDirection:"column", alignItems:"stretch"}}>
           {/*<TextInput boxLabel="Lobby Code:" inputText={inputText} buttonLabel="Submit" setInputText={setInputText} handleSubmit={ handleSubmit }/>*/}
 
           {/*Game ID / Key submission form*/}
@@ -238,6 +238,7 @@ const TicTacToe = () => {
               <input
                 type="text"
                 id="textInput"
+                placeholder="Required"
                 value={inputGameId}
                 onChange={(event) => { setInputGameId(event.target.value) }}
                 style={{
@@ -255,6 +256,7 @@ const TicTacToe = () => {
               <input
                 type="text"
                 id="textInput"
+                placeholder="Optional"
                 value={inputGameKey}
                 onChange={(event) => { setInputGameKey(event.target.value) }}
                 style={{
@@ -290,6 +292,7 @@ const TicTacToe = () => {
               </label>
               <input
                 type="text"
+                placeholder="Optional"
                 id="textInput"
                 value={chosenGameKey}
                 onChange={(event) => { setChosenGameKey(event.target.value) }}
@@ -319,11 +322,15 @@ const TicTacToe = () => {
 
           <span style={{height:"2px",width:"100%", backgroundColor:"lightGrey"}}></span>
           
-          <div className="secondBox" style={{padding:"5%"}}>
-            <button className={styles.resetButton} onClick={submitGameCreate}></button>
-            <li>Open lobbies placeholder</li>
+          {/* Width = 0, minWidth = 100%  (or contain:"size") ensures that this box does not contribute to the size of the sidebar, and instead matches what is forced by the other children. */}
+          <div className="secondBox" style={{padding:"5%", contain:"size" }}>
+              <div style={{fontWeight:'bold'}}>Joining a game:</div>
+              <span>Enter the Game ID, and the Game Key if it requires one, then click [Join Game]. If you do not have a required Game Key, you will join in spectate-only. </span>
+              <div  style={{marginTop:'15px', fontWeight:'bold'}}>Creating a game:</div>
+              <span>Enter a Game Key of your choosing, which you will share with others, then click [Create Game]. If no Game Key is entered, the game will be open to all.</span>
+              <div style={{marginTop:'20px', padding:'5px',backgroundColor:'#0070f3', border: '1px solid #ccc', borderRadius: '4px',}}>You will need to be logged into a non-anonymous account to create a game. </div>
+              
           </div>
-
 
         </div>
         <span className="sidebarEdge" style={{backgroundColor:"grey"}}>
