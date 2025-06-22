@@ -236,7 +236,7 @@ const TicTacToe = () => {
                 id="textInput"
                 placeholder="Required"
                 value={inputGameId}
-                onChange={(event) => {!inLobby && setInputGameId(event.target.value) }}
+                onChange={!inLobby?((event) => {setInputGameId(event.target.value)}):()=>{}}
                 style={{
                   marginLeft:'auto',
                   padding: '5px',
@@ -254,7 +254,7 @@ const TicTacToe = () => {
                 id="textInput"
                 placeholder="Optional"
                 value={inputGameKey}
-                onChange={(event) => {!inLobby && setInputGameKey(event.target.value) }}
+                onChange={!inLobby?((event) => {setInputGameKey(event.target.value)}):()=>{}}
                 style={{
                   marginLeft:'auto',
                   padding: '5px',
