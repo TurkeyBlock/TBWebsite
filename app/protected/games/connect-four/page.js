@@ -114,7 +114,7 @@ const TicTacToe = () => {
                 })
                 .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
                 console.log('leave', key, leftPresences)
-                })*/
+                })*\\/
                 .subscribe();
                 return () => {
                     createClient().removeChannel(channel)
@@ -124,7 +124,7 @@ const TicTacToe = () => {
             resetGame();
         }
     }, [gameId]);
-*/
+
 
 
 
@@ -136,3 +136,7 @@ const TicTacToe = () => {
 
 
 }
+
+
+
+*/
