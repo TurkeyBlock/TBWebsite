@@ -1,3 +1,4 @@
+/*
 "use client"
 
 import { useEffect, useState} from "react";
@@ -123,7 +124,7 @@ const TicTacToe = () => {
             resetGame();
         }
     }, [gameId]);
-
+*/
 
 
 
