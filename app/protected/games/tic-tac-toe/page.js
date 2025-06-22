@@ -19,6 +19,8 @@ const TicTacToe = () => {
   const [inputGameId, setInputGameId] = useState("");  //Form input for lobby id.
   const [inputGameKey, setInputGameKey] = useState("");  //Form input for lobby key.
 
+  const [chosenGameKey, setChosenGameKey] = useState(""); //Key creation for a new game
+
   const [errorMessage, setErrorMessage] = useState("");
   const [myToken, setMyToken] = useState(null);
   const [sidebar, setSidebar] = useState(true);
@@ -28,7 +30,7 @@ const TicTacToe = () => {
   }
 
   //Handles submission to lobby-input form.
-  function handleSubmit(event){
+  function handleJoin(event){
     if(inLobby===true){
       console.log("Attempted to join a lobby while already in one - reloading page.")
     }
@@ -38,6 +40,15 @@ const TicTacToe = () => {
 
     setGameId(inputGameId);
     setGameKey(inputGameKey);
+  }
+  function handleCreate(event){
+    if(inLobby===true){
+      console.log("Attempted to join a lobby while already in one - reloading page.")
+    }
+    else{
+      event.preventDefault(); //Do not refresh the page UNLESS client was previously subscribed to a channel
+    }
+    submitGameCreate();
   }
 
 
@@ -69,7 +80,7 @@ const TicTacToe = () => {
       //temp to get vercel off my back
       setIsLocked(false);
 
-      const data = await callSupabase("POST", tableName, gameId, null, null);
+      const data = await callSupabase("POST", tableName, gameId, null, chosenGameKey);
       setGameId(data.id);
       setGameKey(data.key);
       console.log("Set game ID to: "+ data.id)
@@ -218,70 +229,102 @@ const TicTacToe = () => {
         <div className="sidebarContents" style={{flex:"1", display:sidebar==true?"flex":"none", flexDirection:"column", alignItems:"start"}}>
           {/*<TextInput boxLabel="Lobby Code:" inputText={inputText} buttonLabel="Submit" setInputText={setInputText} handleSubmit={ handleSubmit }/>*/}
 
-
-
           {/*Game ID / Key submission form*/}
-          <div style={{display:'flex', padding: '20px', fontFamily: 'Arial, sans-serif'}}>
-            <form onSubmit={handleSubmit} style={{display:'flex', flexDirection:'column'}}>
-              <div className="displayGrouping" style={{display:'flex', flexDirection:"row"}}>
-                <label htmlFor="textInput" style={{ marginRight: '10px', alignContent:'center', fontWeight:'bold'}}>
-                  Game ID
-                </label>
-                <input
-                  type="text"
-                  id="textInput"
-                  value={inputGameId}
-                  onChange={(event) => { setInputGameId(event.target.value) }}
-                  style={{
-                    marginLeft:'auto',
-                    padding: '5px',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
-                  }}
-                />
-              </div>
-              <div className="displayGrouping" style={{display:'flex', flexDirection:"row"}}>
-                <label htmlFor="textInput" style={{ marginRight: '10px', alignContent:'center', fontWeight:'bold'}}>
-                  Game Key
-                </label>
-                <input
-                  type="text"
-                  id="textInput"
-                  value={inputGameKey}
-                  onChange={(event) => { setInputGameKey(event.target.value) }}
-                  style={{
-                    marginLeft:'auto',
-                    padding: '5px',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
-                  }}
-                />
-              </div>
-              <button
-                type="submit"
+          <form onSubmit={handleJoin} style={{display:'flex', flexDirection:'column', padding: '20px', fontFamily: 'Arial, sans-serif'}}>
+            <div className="displayGrouping" style={{display:'flex', flexDirection:"row"}}>
+              <label htmlFor="textInput" style={{ marginRight: '10px', alignContent:'center', fontWeight:'bold'}}>
+                Game ID
+              </label>
+              <input
+                type="text"
+                id="textInput"
+                value={inputGameId}
+                onChange={(event) => { setInputGameId(event.target.value) }}
                 style={{
-                  alignSelf:'stretch',
-                  marginTop: '5px',
-                  backgroundColor: '#0070f3',
-                  color: '#fff',
-                  border: 'none',
+                  marginLeft:'auto',
+                  padding: '5px',
+                  border: '1px solid #ccc',
                   borderRadius: '4px',
-                  cursor: 'pointer',
                 }}
-              >
-                Submit
-              </button>
-            </form>
-          </div>
-
-
-          
+              />
+            </div>
+            <div className="displayGrouping" style={{display:'flex', flexDirection:"row", marginTop:'3px'}}>
+              <label htmlFor="textInput" style={{ marginRight: '10px', alignContent:'center', fontWeight:'bold'}}>
+                Game Key
+              </label>
+              <input
+                type="text"
+                id="textInput"
+                value={inputGameKey}
+                onChange={(event) => { setInputGameKey(event.target.value) }}
+                style={{
+                  marginLeft:'auto',
+                  padding: '5px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                }}
+              />
+            </div>
+            <button
+              type="submit"
+              style={{
+                alignSelf:'stretch',
+                marginTop: '5px',
+                backgroundColor: '#0070f3',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              Join Game
+            </button>
+          </form>
 
           <span style={{height:"2px",width:"100%", backgroundColor:"lightGrey"}}></span>
+
+          <form onSubmit={handleCreate} style={{display:'flex', flexDirection:'column', padding: '20px', fontFamily: 'Arial, sans-serif'}}>
+            <div className="displayGrouping" style={{display:'flex', flexDirection:"row"}}>
+              <label htmlFor="textInput" style={{ marginRight: '10px', alignContent:'center', fontWeight:'bold'}}>
+                Game Key
+              </label>
+              <input
+                type="text"
+                id="textInput"
+                value={chosenGameKey}
+                onChange={(event) => { setChosenGameKey(event.target.value) }}
+                style={{
+                  marginLeft:'auto',
+                  padding: '5px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                }}
+              />
+            </div>
+            <button
+              type="submit"
+              style={{
+                alignSelf:'stretch',
+                marginTop: '5px',
+                backgroundColor: '#0070f3',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              Create Game
+            </button>
+          </form>
+
+          <span style={{height:"2px",width:"100%", backgroundColor:"lightGrey"}}></span>
+          
           <div className="secondBox" style={{padding:"5%"}}>
             <button className={styles.resetButton} onClick={submitGameCreate}></button>
             <li>Open lobbies placeholder</li>
           </div>
+
+
         </div>
         <span className="sidebarEdge" style={{backgroundColor:"grey"}}>
           <button style={{padding:"3px"}} onClick={toggleSidebar}>{sidebar==true?"<<":">>"}</button>

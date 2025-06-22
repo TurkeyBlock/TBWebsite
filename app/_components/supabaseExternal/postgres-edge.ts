@@ -149,10 +149,11 @@ Deno.serve(async (req)=>{
         if(!reqBody.key){
           reqBody.key = "";
         }
-        const { data:{newKeyVal}, error } = await supabaseServicer.from((reqBody.table).concat('_Keys')).insert({'id':newIdVal,'editKey':reqBody.key,'creatorId':user.id}).select('editKey');
+        const { data:newKey, error } = await supabaseServicer.from((reqBody.table).concat('_Keys')).insert({'id':newIdVal,'editKey':reqBody.key,'creatorId':user.id}).select('editKey');
         if (error) {
           throw new Error("Failed to create Game keys");
         }
+        let newKeyVal = newKey[0].editKey;
         //Upon successful creation of the rows, send user their game ID.
         returnBody = {id:newIdVal, key:newKeyVal}
       }
