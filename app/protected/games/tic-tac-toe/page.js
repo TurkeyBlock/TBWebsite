@@ -328,7 +328,9 @@ const TicTacToe = () => {
               <span>Enter the Game ID, and the Game Key if it requires one, then click [Join Game]. If you do not have a required Game Key, you will join in spectate-only. </span>
               <div  style={{marginTop:'15px', fontWeight:'bold'}}>Creating a game:</div>
               <span>Enter a Game Key of your choosing, which you will share with others, then click [Create Game]. If no Game Key is entered, the game will be open to all.</span>
-              <div style={{marginTop:'20px', padding:'5px',backgroundColor:'#0070f3', border: '1px solid #ccc', borderRadius: '4px',}}>You will need to be logged into a non-anonymous account to create a game. </div>
+              <div  style={{marginTop:'15px', fontWeight:'bold'}}>Additionally:</div>
+              <span style={{marginTop:'20px'}}>Game IDs {'[1 -> 5]'} are public lobbies. </span>
+              <div style={{marginTop:'20px'}}>You will need to be logged into a non-anonymous account to create a game. </div>
               
           </div>
 
