@@ -31,23 +31,17 @@ const TicTacToe = () => {
 
   //Handles submission to lobby-input form.
   function handleJoin(event){
-    if(inLobby===true){
-      console.log("Attempted to join a lobby while already in one - reloading page.")
+    event.preventDefault(); //Do not refresh the page
+    if(inLobby){
+      setGameId(null);
+      setInLobby(false);
+      return;
     }
-    else{
-      event.preventDefault(); //Do not refresh the page UNLESS client was previously subscribed to a channel
-    }
-
     setGameId(inputGameId);
     setGameKey(inputGameKey);
   }
   function handleCreate(event){
-    if(inLobby===true){
-      console.log("Attempted to join a lobby while already in one - reloading page.")
-    }
-    else{
-      event.preventDefault(); //Do not refresh the page UNLESS client was previously subscribed to a channel
-    }
+    event.preventDefault(); //Do not refresh the page
     submitGameCreate();
   }
 
@@ -130,8 +124,11 @@ const TicTacToe = () => {
         .subscribe();
       return () => {
         createClient().removeChannel(channel)
+        console.log("left");
       }
-
+    }
+    else{
+      resetGame();
     }
   }, [gameId]);
   
