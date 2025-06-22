@@ -2,10 +2,8 @@
 
 import { useEffect, useState} from "react";
 import styles from "./page.module.css";
-//import SlidingButton from '../../../_components/slidingButton'
 import { createClient } from '@/lib/supabase/client'
 import {callSupabase} from '../_supabaseEdgeCaller'
-//import TextInput from "@/app/_components/textInput/page";
 
 const TicTacToe = () => {
   const tableName = "TicTacToe";
@@ -44,10 +42,6 @@ const TicTacToe = () => {
     event.preventDefault(); //Do not refresh the page
     submitGameCreate();
   }
-
-
- 
-
 
   const newGame = {
     board: Array(9).fill(null),
@@ -124,7 +118,6 @@ const TicTacToe = () => {
         .subscribe();
       return () => {
         createClient().removeChannel(channel)
-        console.log("left");
       }
     }
     else{
