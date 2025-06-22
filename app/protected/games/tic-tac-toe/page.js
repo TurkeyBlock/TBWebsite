@@ -83,9 +83,10 @@ const TicTacToe = () => {
       const data = await callSupabase("POST", tableName, gameId, null, chosenGameKey);
       setGameId(data.id);
       setGameKey(data.key);
-      console.log("Set game ID to: "+ data.id)
-      console.log("Set game Key to: "+ data.key)
-      
+
+      //For visual sidebar purposes
+      setInputGameId(data.id);
+      setInputGameKey(data.key);
     }
   }
   
@@ -249,7 +250,7 @@ const TicTacToe = () => {
                 }}
               />
             </div>
-            <div className="displayGrouping" style={{display:inLobby?'none':'flex', flexDirection:"row", marginTop:'3px'}}>
+            <div className="displayGrouping" style={{display:'flex', flexDirection:"row", marginTop:'3px'}}>
               <label htmlFor="textInput" style={{ marginRight: '10px', alignContent:'center', fontWeight:'bold'}}>
                 Game Key
               </label>
@@ -258,7 +259,7 @@ const TicTacToe = () => {
                 id="textInput"
                 placeholder="Optional"
                 value={inputGameKey}
-                onChange={(event) => { setInputGameKey(event.target.value) }}
+                onChange={(event) => {!inLobby && setInputGameKey(event.target.value) }}
                 style={{
                   marginLeft:'auto',
                   padding: '5px',
