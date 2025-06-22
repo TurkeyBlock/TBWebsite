@@ -32,6 +32,11 @@ const TicTacToe = () => {
     event.preventDefault(); //Do not refresh the page
     if(inLobby){
       setGameId(null);
+      setGameKey("");
+      setChosenGameKey('');
+      setInputGameId('');
+      setInputGameKey('');
+
       setInLobby(false);
       return;
     }
