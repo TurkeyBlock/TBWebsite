@@ -240,7 +240,7 @@ const TicTacToe = () => {
                 id="textInput"
                 placeholder="Required"
                 value={inputGameId}
-                onChange={(event) => { setInputGameId(event.target.value) }}
+                onChange={(event) => {!inLobby && setInputGameId(event.target.value) }}
                 style={{
                   marginLeft:'auto',
                   padding: '5px',
@@ -249,7 +249,7 @@ const TicTacToe = () => {
                 }}
               />
             </div>
-            <div className="displayGrouping" style={{display:'flex', flexDirection:"row", marginTop:'3px'}}>
+            <div className="displayGrouping" style={{display:inLobby?'none':'flex', flexDirection:"row", marginTop:'3px'}}>
               <label htmlFor="textInput" style={{ marginRight: '10px', alignContent:'center', fontWeight:'bold'}}>
                 Game Key
               </label>
@@ -279,13 +279,13 @@ const TicTacToe = () => {
                 cursor: 'pointer',
               }}
             >
-              Join Game
+              {inLobby ? 'Leave Game' : 'Join Game' }
             </button>
           </form>
 
-          <span style={{height:"2px",width:"100%", backgroundColor:"lightGrey"}}></span>
+          <span style={{height:"2px",width:"100%", backgroundColor:"lightGrey", display:inLobby?'none':''}}></span>
 
-          <form onSubmit={handleCreate} style={{display:'flex', flexDirection:'column', padding: '20px', fontFamily: 'Arial, sans-serif'}}>
+          <form onSubmit={handleCreate} style={{display: inLobby?'none':'flex', flexDirection:'column', padding: '20px', fontFamily: 'Arial, sans-serif'}}>
             <div className="displayGrouping" style={{display:'flex', flexDirection:"row"}}>
               <label htmlFor="textInput" style={{ marginRight: '10px', alignContent:'center', fontWeight:'bold'}}>
                 Game Key
