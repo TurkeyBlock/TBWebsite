@@ -8,7 +8,19 @@ interface RequestBody {
   key?:string
 }
 
-export async function callSupabase(functionMethod:"GET"|"PATCH"|"POST", tableName:string, gameId?:number, gameAction?:string, playKey?:string){
+interface PostReturn {
+  id:number
+  key:string
+}
+interface GetReturn{
+  gameRow:any
+}
+interface combinedReturn{
+  data?: PostReturn | GetReturn
+  error?:string
+}
+
+export async function callSupabase(functionMethod:"GET"|"PATCH"|"POST", tableName:string, gameId?:number, gameAction?:string, playKey?:string):Promise<combinedReturn>{
   //Pull user's current JWT.
   const { data: { session } } = await createClient().auth.getSession();
   const jwt = session?.access_token;
@@ -20,40 +32,36 @@ export async function callSupabase(functionMethod:"GET"|"PATCH"|"POST", tableNam
     key:playKey,
   }
 
-  let returnData:string = "", returnError:string = "";
+  let funcReturn:combinedReturn = {};
+
   //GET methods can't have bodies, and that's a pain in the butt atm.
   if(functionMethod == "GET"){
-    const { data, error} = await createClient().functions.invoke('postgres-edge', {
+    const { data: { returnBody }, error} = await createClient().functions.invoke('postgres-edge', {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${jwt}`,
       },
       body,
     })
-    returnData = data.returnBody;
-    returnError = error;
+    funcReturn.data = returnBody;
+    funcReturn.error = error;
   }
   else{
     //Invoke edge function with user's JWT.
-    const { data, error } = await createClient().functions.invoke('postgres-edge', {
+    const { data: { returnBody }, error } = await createClient().functions.invoke('postgres-edge', {
       method: `${functionMethod}`,
       headers: {
         'Authorization': `Bearer ${jwt}`,
       },
       body,
     })
-    if(data == null){
-      console.log("NON-GET returned null: "+returnError);
-      return returnError;
-    }
-    returnData = data.returnBody;
-    returnError = error;
+    funcReturn.data = returnBody;
+    funcReturn.error = error;
   }
-  console.log(returnData);
-  if(returnData==null){
-    console.log("Error in supabaseEdgeCaller: "+returnError);
-    return returnError;
+  console.log(funcReturn.data);
+  if(funcReturn.data==null){
+    console.log("Error in supabaseEdgeCaller: "+funcReturn.error);
   }
   //GET returns the game, PATCH & POST return success or fail.
-  return returnData;
+  return funcReturn
 }
