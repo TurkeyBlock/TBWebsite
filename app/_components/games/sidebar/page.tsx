@@ -18,7 +18,7 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
 
     const [inputGameId, setInputGameId] = useState("");  //Form input for lobby id.
     const [inputGameKey, setInputGameKey] = useState("");  //Form input for lobby key.
-    const [chosenGameKey, setChosenGameKey] = useState(""); //Key creation for a new game
+    const [chosenGameKey, setChosenGameKey] = useState(""); //Form input for key creation for a new game
 
     const [sidebar, setSidebar] = useState(true);
     function toggleSidebar(){
@@ -43,8 +43,6 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
 
     async function submitGameCreate(){
         if(!inLobby){
-            //temp to get vercel off my back
-            //setIsLocked(false);
 
             const payload = await callSupabase("POST", tableName, undefined, undefined, chosenGameKey);
             //console.log(payload);

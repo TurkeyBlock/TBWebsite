@@ -193,6 +193,8 @@ const TicTacToe = () => {
             : `[*] Game ID: ${gameId}`
           }</h1>
           <div className = {styles.board}>
+
+          {/*--------------------*/}
             {game.board.map((cell, index) => (
               <div
                 key={index}

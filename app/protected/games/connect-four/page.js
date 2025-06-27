@@ -1,0 +1,228 @@
+
+"use client"
+
+import { useEffect, useState} from "react";
+import styles from "./page.module.css";
+
+import { createClient } from '@/lib/supabase/client'
+import {callSupabase} from '@/app/_components/games/_supabaseEdgeCaller';
+import {Sidebar} from '@/app/_components/games/sidebar/page';
+
+const ConnectFour = () => {
+    const tableName = "ConnectFour";
+
+  const [gameId, setGameId] = useState(null);
+  const [gameKey, setGameKey] = useState(null);
+
+  const [inLobby, setInLobby] = useState(false);  //Boolean to check for success in joining a lobby
+  //const [isLocked, setIsLocked] = useState(false); //Display boolean for if the lobby is locked
+
+  const [errorMessage, setErrorMessage] = useState("");
+  const [myToken, setMyToken] = useState(null);
+    const newGame = { //7 collumns by 6 rows
+        board: Array(7).fill().map(() => Array(6).fill(null)),
+        currentToken: "X",
+    };
+    //Handle: if id =  null, you're doing singleplayer
+    const [game, setGame] = useState({
+        board:newGame.board,
+        currentToken:newGame.currentToken
+    });
+    
+    //Format the recieved-from-subscription payload to client-readable state 
+    function formatPayload(newBoard,nextToken){
+        const data = {
+            board: newBoard,
+            currentToken: nextToken,
+        };
+        return data;
+    };
+
+    //Game channel subscription
+    useEffect(() => {
+    //Induce singleplayer
+        if(gameId!=null){
+            //Boot the client-side-render of the game, fetched from database
+            async function initGameState() {
+                const payload = await callSupabase("GET", tableName, gameId, null, null);
+                if(payload==undefined){
+                setErrorMessage("Lobby not found")
+                return;
+                }
+                setGame(formatPayload(payload.board,payload.nextToken));
+                setMyToken(null);
+            };
+            initGameState();
+            setInLobby(true);
+
+            //Subscribe the game's channel, inform client of table updates (and joins/leaves)
+            const channel = createClient()
+                .channel(`${gameId}`)
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
+                (payload) => {
+                        const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken)
+                        setGame(formatedPayload)
+                        if(formatedPayload.board.toString()==newGame.board.toString()){
+                        setMyToken(null);
+                    }
+                    setErrorMessage("");
+                }
+                )
+                .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+                    console.log('join', key, newPresences)
+                })
+                .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+                    console.log('leave', key, leftPresences)
+                })
+                .subscribe();
+                return () => {
+                    createClient().removeChannel(channel)
+                }
+        }
+        else{
+            resetGame();
+        }
+    }, [gameId]);
+
+    const resetGame = async () => {
+        setErrorMessage("");
+        if(inLobby===true){
+        //await api response & set login warning based on result
+            try{
+                callSupabase("PATCH", tableName, gameId, "RESET", null);
+                setMyToken(null)
+            }
+            catch{
+                console.log("Client unable to send event. Try refreshing your page.")
+            }
+        }
+        else{
+            setGame(newGame);
+            setMyToken(null);
+        }
+    }
+    const calculateWinner  = (board) =>{
+        return false;
+    }
+
+    const makeMove = async (index) => {
+        setErrorMessage("");
+        //Setting a constant isn't guaranteed to sync, so editing it could fail to be reflected in the function.
+        let funcToken = myToken;
+        if(funcToken==null){
+            setMyToken(game.currentToken);
+            funcToken = game.currentToken;
+            //console.log(funcToken);
+        }
+        else if(funcToken!=game.currentToken){
+            setErrorMessage("It's not your turn! (Your Token = "+funcToken+")");
+            return;
+        }
+
+        let filledCol = true;
+        const newBoard = [...game.board];
+
+        for(let i=newBoard[index].length-1; i>=0; --i){
+            if(!newBoard[index][i]){
+                newBoard[index][i] = funcToken;
+                filledCol=false;
+                break;
+            }
+        }
+        const updatedGame = {
+            ...game,
+            board: newBoard,
+            currentToken: game.currentToken === "X" ? "O" : "X",
+        };
+        //console.log(updatedGame);
+        console.log(filledCol || calculateWinner(newBoard));
+        if (calculateWinner(newBoard) || filledCol) {
+            setErrorMessage("Invalid move. Please try again.");
+            return;
+        }
+        if(inLobby===true){
+            //await api response & set login warning based on result
+            try{
+                callSupabase("PATCH", tableName, gameId, ("MOVE "+funcToken+" "+index), gameKey);
+            }
+            catch{
+                console.log("Client unable to send event. Try refreshing your page.")
+            }
+        }
+        else{
+            setGame(updatedGame);
+            setMyToken(updatedGame.currentToken);
+        }
+    };
+
+
+    return (
+        <main style={{display:"flex", flexDirection:"row"}}>
+            {/*main holds the sidebar and main-page flex boxes*/}
+
+
+            {/*Game-create and game-join caller. Does not hold the subscriber TO the game, only the create and join logic.*/}
+            <Sidebar tableName={tableName} setGameId={setGameId} setGameKey={setGameKey} setInLobby={setInLobby} inLobby={inLobby}/>
+
+            {/*-------------------------------------------------------------------*/}
+
+
+            <div className={styles.body} style={{padding: "0px", flex:"1"}}>
+                {/*main page flex box*/}
+                <div className={styles.appContainer}>
+                    <h1 style={{fontSize:"3em", marginBottom:'2vw'}}>{
+                        !inLobby
+                        ? 'Singleplayer':
+                        false
+                        ? `[X] Game ID: ${gameId}`
+                        : `[*] Game ID: ${gameId}`
+                    }</h1>
+                    <div className = {styles.board}>
+                        {/*--------------------*/}
+                        {game.board.map((col, colIndex) => (
+                            <div
+                                key={colIndex}
+                                className = {styles.column}
+                                //className={(winnerArray).includes(index)!==false ? [styles.cell, styles.cellHighlight].join(" ") : (!isOngoing && winnerArray[0]==null) ? [styles.cell, styles.cellFailure].join(" ") : styles.cell}
+                                //onClick={() => makeMove(index)}
+                            >
+                            {col.map((cell, cellIndex) => (
+                                <div
+                                    key={cellIndex}
+                                    className = {styles.cell}
+                                    //className={(winnerArray).includes(index)!==false ? [styles.cell, styles.cellHighlight].join(" ") : (!isOngoing && winnerArray[0]==null) ? [styles.cell, styles.cellFailure].join(" ") : styles.cell}
+                                    onClick={() => makeMove(colIndex)}
+                                >
+                                {cell}
+                                </div>
+                            ))}
+                            </div>
+                        ))}
+                    </div>
+                    <p className={styles.currentToken}>
+                        {/*{winner
+                        ? `Player ${winner} wins!`:
+                        isOngoing ? `Current Player: ${game.currentToken}`:
+                        'Tie game!'}*/}
+                    </p>
+                    <button className={styles.resetButton} onClick={resetGame}>
+                        Reset Game
+                    </button>
+                    {errorMessage && (
+                        <p className={styles.errorMessage}>{errorMessage}</p>
+                    )}
+                </div>
+            </div>
+        </main>
+    );
+
+
+
+
+
+
+
+
+
+}
+export default ConnectFour
