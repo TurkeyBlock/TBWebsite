@@ -47,8 +47,9 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
             //setIsLocked(false);
 
             const payload = await callSupabase("POST", tableName, undefined, undefined, chosenGameKey);
+            //console.log(payload);
             if(payload.data){
-                const data:PostReturn = payload.data as PostReturn;
+                const data = payload.data as PostReturn;
                 setGameId(data.id.toString());
                 setGameKey(data.key);
 

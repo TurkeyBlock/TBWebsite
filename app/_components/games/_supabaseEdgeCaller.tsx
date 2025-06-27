@@ -48,14 +48,16 @@ export async function callSupabase(functionMethod:"GET"|"PATCH"|"POST", tableNam
   }
   else{
     //Invoke edge function with user's JWT.
-    const { data: { returnBody }, error } = await createClient().functions.invoke('postgres-edge', {
+    const { data, error } = await createClient().functions.invoke('postgres-edge', {
       method: `${functionMethod}`,
       headers: {
         'Authorization': `Bearer ${jwt}`,
       },
       body,
     })
-    funcReturn.data = returnBody;
+    if(data){
+      funcReturn.data = data.returnBody;
+    }
     funcReturn.error = error;
   }
   console.log(funcReturn.data);
