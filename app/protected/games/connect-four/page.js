@@ -101,9 +101,42 @@ const ConnectFour = () => {
             setMyToken(null);
         }
     }
-    const calculateWinner  = (board) =>{
-        return false;
+
+
+    //winning array contains ALL positions with connections of 4 or greater, positions may be unordered or repeated.
+    let winnerArray = [];
+
+    const calculateWinner  = (board, col, row) =>{
+        const flood = (col, row, incCol, incRow) =>{
+            //Skip the starting token
+            col+=incCol;
+            row+=incRow;
+
+            let connectedPositions = [];
+            while(board[col] && board[col][row]==game.currentToken){
+                connectedPositions.push([col,row]);
+                col+=incCol;
+                row+=incRow;
+            }
+            return connectedPositions;
+        }
+        
+        let start = [col,row];
+        let lines = new Array(4);
+        lines[0] = [start].concat(flood(col,row, 1, 0)).concat(flood(col,row,-1,0));
+        lines[1] = [start].concat(flood(col,row, 0, 1)).concat(flood(col,row,0,-1));
+        lines[2] = [start].concat(flood(col,row, 1, 1)).concat(flood(col,row, -1, -1));
+        lines[3] = [start].concat(flood(col,row, 1, -1)).concat(flood(col,row, -1, 1));
+        for (const line of lines){
+            if(line.length >= 4){
+                winnerArray = winnerArray.concat(line);
+            }
+        }
+        console.log(winnerArray);
+        let isin = winnerArray.some((arr) => JSON.stringify(arr) === JSON.stringify([2,3]));
+        console.log(isin);
     }
+
 
     const makeMove = async (index) => {
         setErrorMessage("");
@@ -119,13 +152,13 @@ const ConnectFour = () => {
             return;
         }
 
-        let filledCol = true;
+        let rowResult = -1;
         const newBoard = [...game.board];
 
         for(let i=newBoard[index].length-1; i>=0; --i){
             if(!newBoard[index][i]){
                 newBoard[index][i] = funcToken;
-                filledCol=false;
+                rowResult = i;
                 break;
             }
         }
@@ -134,9 +167,7 @@ const ConnectFour = () => {
             board: newBoard,
             currentToken: game.currentToken === "X" ? "O" : "X",
         };
-        //console.log(updatedGame);
-        console.log(filledCol || calculateWinner(newBoard));
-        if (calculateWinner(newBoard) || filledCol) {
+        if (rowResult == -1 || calculateWinner(newBoard,index,rowResult)) {
             setErrorMessage("Invalid move. Please try again.");
             return;
         }
@@ -155,7 +186,7 @@ const ConnectFour = () => {
         }
     };
 
-
+    const isOngoing = true; //game.board.includes(null)
     return (
         <main style={{display:"flex", flexDirection:"row"}}>
             {/*main holds the sidebar and main-page flex boxes*/}
@@ -183,14 +214,13 @@ const ConnectFour = () => {
                             <div
                                 key={colIndex}
                                 className = {styles.column}
-                                //className={(winnerArray).includes(index)!==false ? [styles.cell, styles.cellHighlight].join(" ") : (!isOngoing && winnerArray[0]==null) ? [styles.cell, styles.cellFailure].join(" ") : styles.cell}
-                                //onClick={() => makeMove(index)}
                             >
                             {col.map((cell, cellIndex) => (
                                 <div
                                     key={cellIndex}
-                                    className = {styles.cell}
-                                    //className={(winnerArray).includes(index)!==false ? [styles.cell, styles.cellHighlight].join(" ") : (!isOngoing && winnerArray[0]==null) ? [styles.cell, styles.cellFailure].join(" ") : styles.cell}
+                                    //className = {styles.cell}
+                                    //className={winnerArray.some((arr) => JSON.stringify(arr) == JSON.stringify([colIndex,cellIndex]))!==false ? [styles.cell, styles.cellHighlight].join(" ") : (!isOngoing && winnerArray[0]==null) ? [styles.cell, styles.cellFailure].join(" ") : styles.cell}
+                                    className={winnerArray.some((arr) => JSON.stringify(arr) == JSON.stringify([colIndex,cellIndex]))!==false ? styles.cellHighlight : styles.cell}
                                     onClick={() => makeMove(colIndex)}
                                 >
                                 {cell}
