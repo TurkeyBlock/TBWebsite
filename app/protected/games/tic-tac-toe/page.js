@@ -122,7 +122,7 @@ const TicTacToe = () => {
       setErrorMessage("It's not your turn! (Your Token = "+funcToken+")");
       return;
     }
-    
+
     if (!isOngoing || winner || game.board[index]) {
       setErrorMessage("Invalid move. Please try again.");
       return;

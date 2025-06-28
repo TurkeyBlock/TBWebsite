@@ -36,14 +36,16 @@ export async function callSupabase(functionMethod:"GET"|"PATCH"|"POST", tableNam
 
   //GET methods can't have bodies, and that's a pain in the butt atm.
   if(functionMethod == "GET"){
-    const { data: { returnBody }, error} = await createClient().functions.invoke('postgres-edge', {
+    const { data, error} = await createClient().functions.invoke('postgres-edge', {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${jwt}`,
       },
       body,
     })
-    funcReturn.data = returnBody;
+    if(data){
+      funcReturn.data = data.returnBody;
+    }
     funcReturn.error = error;
   }
   else{
@@ -60,7 +62,7 @@ export async function callSupabase(functionMethod:"GET"|"PATCH"|"POST", tableNam
     }
     funcReturn.error = error;
   }
-  console.log(funcReturn.data);
+  //console.log(funcReturn.data);
   if(funcReturn.data==null){
     console.log("Error in supabaseEdgeCaller: "+funcReturn.error);
   }
