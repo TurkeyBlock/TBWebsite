@@ -265,9 +265,6 @@ const ConnectFour = () => {
                     <button className={styles.resetButton} onClick={resetGame}>
                         Reset Game
                     </button>
-                    <div>
-                        {JSON.stringify(winnerArray)}
-                    </div>
                     {errorMessage && (
                         <p className={styles.errorMessage}>{errorMessage}</p>
                     )}
