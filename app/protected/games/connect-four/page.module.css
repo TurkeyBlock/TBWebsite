@@ -67,7 +67,7 @@
 }
 
 .cellHighlight{
-  box-shadow: 0 0 6px 2px green, inset 0 0 6px 2px green;
+  box-shadow: 0 0 6px 2px red, inset 0 0 6px 2px red;
 }
 .cellFailure{
   box-shadow: 0 0 6px 2px red, inset 0 0 6px 2px red;

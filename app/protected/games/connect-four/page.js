@@ -181,13 +181,11 @@ const ConnectFour = () => {
             currentToken: game.currentToken === "X" ? "O" : "X",
         };
 
-        console.log(game.board);
-
         if (!isOngoing || rowResult == -1) {
             setErrorMessage("Invalid move. Please try again.");
             return;
         }
-        
+
         if(inLobby===true){
             //await api response & set login warning based on result
             try{
