@@ -110,7 +110,6 @@ const TicTacToe = () => {
 
   const makeMove = async (index) => {
     setErrorMessage("");
-    const squares = [...game.board];
 
     //Setting a constant isn't guaranteed to sync, so editing it could fail to be reflected in the function.
     let funcToken = myToken;
@@ -123,18 +122,12 @@ const TicTacToe = () => {
       setErrorMessage("It's not your turn! (Your Token = "+funcToken+")");
       return;
     }
-    if (calculateWinner(squares) || squares[index]) {
+    
+    if (!isOngoing || winner || game.board[index]) {
       setErrorMessage("Invalid move. Please try again.");
       return;
     }
 
-    squares[index] = game.currentToken;
-
-    const updatedGame = {
-      ...game,
-      board: squares,
-      currentToken: game.currentToken === "X" ? "O" : "X",
-    };
     if(inLobby===true){
       //await api response & set login warning based on result
       try{
@@ -145,6 +138,13 @@ const TicTacToe = () => {
       }
     }
     else{
+      const squares = [...game.board]
+      squares[index] = game.currentToken;
+
+      const updatedGame = {
+        board: squares,
+        currentToken: game.currentToken === "X" ? "O" : "X",
+      };
       setGame(updatedGame);
       setMyToken(updatedGame.currentToken);
     }

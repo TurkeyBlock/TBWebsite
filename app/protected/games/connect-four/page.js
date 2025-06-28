@@ -24,18 +24,28 @@ const ConnectFour = () => {
     const newGame = { //7 collumns by 6 rows
         board: Array(7).fill().map(() => Array(6).fill(null)),
         currentToken: "X",
+
+        //Allows for less computation in checkWinner
+        row:-1,
+        col:-1
     };
     //Handle: if id =  null, you're doing singleplayer
     const [game, setGame] = useState({
         board:newGame.board,
-        currentToken:newGame.currentToken
+        currentToken:newGame.currentToken,
+
+        row:newGame.row,
+        col:newGame.col
     });
     
     //Format the recieved-from-subscription payload to client-readable state 
-    function formatPayload(newBoard,nextToken){
+    function formatPayload(newBoard,nextToken, lastRow, lastCol){
         const data = {
             board: newBoard,
             currentToken: nextToken,
+
+            row:lastRow,
+            col:lastCol
         };
         return data;
     };
@@ -51,7 +61,7 @@ const ConnectFour = () => {
                 setErrorMessage("Lobby not found")
                 return;
                 }
-                setGame(formatPayload(payload.board,payload.nextToken));
+                setGame(formatPayload(payload.board,payload.nextToken, payload.lastRow, payload.lastCol));
                 setMyToken(null);
             };
             initGameState();
@@ -62,7 +72,7 @@ const ConnectFour = () => {
                 .channel(`${gameId}`)
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
                 (payload) => {
-                        const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken)
+                        const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken, payload.lastRow, payload.lastCol)
                         setGame(formatedPayload)
                         if(formatedPayload.board.toString()==newGame.board.toString()){
                         setMyToken(null);
@@ -137,6 +147,7 @@ const ConnectFour = () => {
             }
         }
         setWinnerArray(localWinnerArray);
+        return board[col][row];
     };
 
 
@@ -155,7 +166,7 @@ const ConnectFour = () => {
         }
 
         let rowResult = -1;
-        const newBoard = [...game.board];
+        const newBoard = game.board.map(innerArray => [...innerArray]);
 
         for(let i=newBoard[index].length-1; i>=0; --i){
             if(!newBoard[index][i]){
@@ -169,10 +180,14 @@ const ConnectFour = () => {
             board: newBoard,
             currentToken: game.currentToken === "X" ? "O" : "X",
         };
-        if (rowResult == -1 || calculateWinner(newBoard,index,rowResult)) {
+
+        console.log(game.board);
+
+        if (!isOngoing || rowResult == -1) {
             setErrorMessage("Invalid move. Please try again.");
             return;
         }
+        
         if(inLobby===true){
             //await api response & set login warning based on result
             try{
@@ -184,11 +199,15 @@ const ConnectFour = () => {
         }
         else{
             setGame(updatedGame);
+            calculateWinner(newBoard,index,rowResult);
             setMyToken(updatedGame.currentToken);
         }
     };
 
-    const isOngoing = true; //game.board.includes(null)
+    //temp - doesn't account for filled boards.
+    const isOngoing = winnerArray.length == 0;
+    const winner = !isOngoing && game.board[winnerArray[0][0]][winnerArray[0][1]];
+
     return (
         <main style={{display:"flex", flexDirection:"row"}}>
             {/*main holds the sidebar and main-page flex boxes*/}
@@ -227,7 +246,7 @@ const ConnectFour = () => {
                                         : [styles.cell, styles.tokenB].join(" "),
                                     
                                         winnerArray.some((arr) => JSON.stringify(arr) == JSON.stringify([colIndex,cellIndex])) ? styles.cellHighlight
-                                        : (!isOngoing && winnerArray[0]==null) ? styles.cellFailure
+                                        : (!isOngoing && winnerArray.length == 0) ? styles.cellFailure
                                         : ""
                                         ].join(" ")
                                     }
@@ -240,10 +259,10 @@ const ConnectFour = () => {
                         ))}
                     </div>
                     <p className={styles.currentToken}>
-                        {/*{winner
+                        {winner
                         ? `Player ${winner} wins!`:
                         isOngoing ? `Current Player: ${game.currentToken}`:
-                        'Tie game!'}*/}
+                        'Tie game!'}
                     </p>
                     <button className={styles.resetButton} onClick={resetGame}>
                         Reset Game
