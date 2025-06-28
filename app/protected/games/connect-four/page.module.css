@@ -27,7 +27,7 @@
   justify-content:center;
   display: grid;
   grid-template-columns: repeat(7, 104px);
-  grid-gap: 5px;
+  grid-gap: 3px;
 }
 
 .cell {
@@ -45,19 +45,32 @@
   transition: background-color 0.3s;
 }
 
+.tokenA {
+  background-color: #FFC20A
+}
+.tokenB {
+  background-color: #0C7BDC
+}
 
+.column{
+  display: flex;
+  flex-direction:column;
+  align-items: center;
+  justify-content: center;
+  gap:3px;
+}
 .column:hover{
   background-color: silver;
 }
-
 .cell:hover {
   background-color: #f0f0f0;
 }
+
 .cellHighlight{
-  background-color: green;
+  box-shadow: 0 0 6px 2px green, inset 0 0 6px 2px green;
 }
 .cellFailure{
-  background-color: red;
+  box-shadow: 0 0 6px 2px red, inset 0 0 6px 2px red;
 }
 
 .currentToken {

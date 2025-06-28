@@ -32,7 +32,7 @@ export async function callSupabase(functionMethod:"GET"|"PATCH"|"POST", tableNam
     key:playKey,
   }
 
-  let funcReturn:combinedReturn = {};
+  const funcReturn:combinedReturn={};
 
   //GET methods can't have bodies, and that's a pain in the butt atm.
   if(functionMethod == "GET"){

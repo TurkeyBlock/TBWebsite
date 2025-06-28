@@ -11,14 +11,16 @@ import {Sidebar} from '@/app/_components/games/sidebar/page';
 const ConnectFour = () => {
     const tableName = "ConnectFour";
 
-  const [gameId, setGameId] = useState(null);
-  const [gameKey, setGameKey] = useState(null);
+    const [gameId, setGameId] = useState(null);
+    const [gameKey, setGameKey] = useState(null);
 
-  const [inLobby, setInLobby] = useState(false);  //Boolean to check for success in joining a lobby
-  //const [isLocked, setIsLocked] = useState(false); //Display boolean for if the lobby is locked
+    const [inLobby, setInLobby] = useState(false);  //Boolean to check for success in joining a lobby
+    //const [isLocked, setIsLocked] = useState(false); //Display boolean for if the lobby is locked
 
-  const [errorMessage, setErrorMessage] = useState("");
-  const [myToken, setMyToken] = useState(null);
+    const [winnerArray, setWinnerArray] = useState([]);
+
+    const [errorMessage, setErrorMessage] = useState("");
+    const [myToken, setMyToken] = useState(null);
     const newGame = { //7 collumns by 6 rows
         board: Array(7).fill().map(() => Array(6).fill(null)),
         currentToken: "X",
@@ -86,6 +88,7 @@ const ConnectFour = () => {
 
     const resetGame = async () => {
         setErrorMessage("");
+        setWinnerArray([]);
         if(inLobby===true){
         //await api response & set login warning based on result
             try{
@@ -104,9 +107,8 @@ const ConnectFour = () => {
 
 
     //winning array contains ALL positions with connections of 4 or greater, positions may be unordered or repeated.
-    let winnerArray = [];
 
-    const calculateWinner  = (board, col, row) =>{
+    const calculateWinner = (board, col, row) => {
         const flood = (col, row, incCol, incRow) =>{
             //Skip the starting token
             col+=incCol;
@@ -123,19 +125,19 @@ const ConnectFour = () => {
         
         let start = [col,row];
         let lines = new Array(4);
+        let localWinnerArray = winnerArray;
         lines[0] = [start].concat(flood(col,row, 1, 0)).concat(flood(col,row,-1,0));
         lines[1] = [start].concat(flood(col,row, 0, 1)).concat(flood(col,row,0,-1));
         lines[2] = [start].concat(flood(col,row, 1, 1)).concat(flood(col,row, -1, -1));
         lines[3] = [start].concat(flood(col,row, 1, -1)).concat(flood(col,row, -1, 1));
         for (const line of lines){
+            console.log(line);
             if(line.length >= 4){
-                winnerArray = winnerArray.concat(line);
+                localWinnerArray = localWinnerArray.concat(line);
             }
         }
-        console.log(winnerArray);
-        let isin = winnerArray.some((arr) => JSON.stringify(arr) === JSON.stringify([2,3]));
-        console.log(isin);
-    }
+        setWinnerArray(localWinnerArray);
+    };
 
 
     const makeMove = async (index) => {
@@ -219,8 +221,16 @@ const ConnectFour = () => {
                                 <div
                                     key={cellIndex}
                                     //className = {styles.cell}
-                                    //className={winnerArray.some((arr) => JSON.stringify(arr) == JSON.stringify([colIndex,cellIndex]))!==false ? [styles.cell, styles.cellHighlight].join(" ") : (!isOngoing && winnerArray[0]==null) ? [styles.cell, styles.cellFailure].join(" ") : styles.cell}
-                                    className={winnerArray.some((arr) => JSON.stringify(arr) == JSON.stringify([colIndex,cellIndex]))!==false ? styles.cellHighlight : styles.cell}
+                                    className = {
+                                        [game.board[colIndex][cellIndex] == null ? styles.cell
+                                        : (game.board[colIndex][cellIndex] == 'X') ? [styles.cell, styles.tokenA].join(" ")
+                                        : [styles.cell, styles.tokenB].join(" "),
+                                    
+                                        winnerArray.some((arr) => JSON.stringify(arr) == JSON.stringify([colIndex,cellIndex])) ? styles.cellHighlight
+                                        : (!isOngoing && winnerArray[0]==null) ? styles.cellFailure
+                                        : ""
+                                        ].join(" ")
+                                    }
                                     onClick={() => makeMove(colIndex)}
                                 >
                                 {cell}
@@ -238,6 +248,9 @@ const ConnectFour = () => {
                     <button className={styles.resetButton} onClick={resetGame}>
                         Reset Game
                     </button>
+                    <div>
+                        {JSON.stringify(winnerArray)}
+                    </div>
                     {errorMessage && (
                         <p className={styles.errorMessage}>{errorMessage}</p>
                     )}
