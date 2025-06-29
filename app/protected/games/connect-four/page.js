@@ -61,8 +61,10 @@ const ConnectFour = () => {
                 setErrorMessage("Lobby not found")
                 return;
                 }
-                setGame(formatPayload(payload.board,payload.nextToken, payload.lastRow, payload.lastCol));
+                console.log(payload.data.board);
+                setGame(formatPayload(payload.data.board,payload.data.nextToken, payload.data.lastRow, payload.data.lastCol));
                 setMyToken(null);
+                calculateWinner(payload.data.board, payload.data.lastRow, payload.data.lastCol);
             };
             initGameState();
             setInLobby(true);
@@ -76,6 +78,7 @@ const ConnectFour = () => {
                         setGame(formatedPayload)
                         if(formatedPayload.board.toString()==newGame.board.toString()){
                         setMyToken(null);
+                        calculateWinner(payload.new.board, payload.new.lastRow, payload.new.lastCol);
                     }
                     setErrorMessage("");
                 }
@@ -102,7 +105,7 @@ const ConnectFour = () => {
         if(inLobby===true){
         //await api response & set login warning based on result
             try{
-                callSupabase("PATCH", tableName, gameId, "RESET", null);
+                callSupabase("PATCH", tableName, gameId, "RESET", gameKey);
                 setMyToken(null)
             }
             catch{
@@ -147,7 +150,7 @@ const ConnectFour = () => {
             }
         }
         setWinnerArray(localWinnerArray);
-        return board[col][row];
+        //return board[col][row];
     };
 
 
@@ -185,7 +188,6 @@ const ConnectFour = () => {
             setErrorMessage("Invalid move. Please try again.");
             return;
         }
-
         if(inLobby===true){
             //await api response & set login warning based on result
             try{

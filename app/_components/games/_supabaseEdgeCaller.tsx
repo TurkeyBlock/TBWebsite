@@ -1,6 +1,13 @@
 "use client"
 import { createClient } from '@/lib/supabase/client'
 
+//To-do: assign player IDs to in-game "who's turn" array.
+//Increment "Who's turn" counter on null player ID or turn submitted.
+//Check all turn submitors against player ID in the [counter] array slot
+
+//TicTacToe Actions: RESET | MOVE <Pos>
+//ConnectFour Actions: RESET | MOVE <Col>
+
 interface RequestBody {
   table: string,
   id?: number,

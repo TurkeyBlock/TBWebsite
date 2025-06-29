@@ -17,6 +17,7 @@ const TicTacToe = () => {
 
   const [errorMessage, setErrorMessage] = useState("");
   const [myToken, setMyToken] = useState(null);
+  const [winnerArray, setWinnerArray] = useState([]);
 
   const newGame = {
     board: Array(9).fill(null),
@@ -52,6 +53,7 @@ const TicTacToe = () => {
         }
         setGame(formatPayload(payload.data.board, payload.data.nextToken));
         setMyToken(null);
+        calculateWinner(payload.data.board);
       };
       initGameState();
       setInLobby(true);
@@ -66,6 +68,7 @@ const TicTacToe = () => {
             if(formatedPayload.board.toString()==newGame.board.toString()){
               setMyToken(null);
             }
+            calculateWinner(payload.new.board);
             setErrorMessage("");
           }
         )/*
@@ -85,7 +88,7 @@ const TicTacToe = () => {
     }
   }, [gameId]);
   
-  const calculateWinner = (squares) => {
+  function calculateWinner(squares){
     const lines = [
       [0, 1, 2],
       [3, 4, 5],
@@ -100,11 +103,11 @@ const TicTacToe = () => {
     for (let i = 0; i < lines.length; i++) {
       const [a, b, c] = lines[i];
       if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-        winnerArray = [a,b,c];
-        return squares[a];
+        setWinnerArray([a,b,c]);
+        return;
       }
     }
-    return null;
+    setWinnerArray([]);
   };
 
 
@@ -123,7 +126,7 @@ const TicTacToe = () => {
       return;
     }
 
-    if (!isOngoing || winner || game.board[index]) {
+    if (!isOngoing || winnerArray.length > 0 || game.board[index]) {
       setErrorMessage("Invalid move. Please try again.");
       return;
     }
@@ -147,6 +150,7 @@ const TicTacToe = () => {
       };
       setGame(updatedGame);
       setMyToken(updatedGame.currentToken);
+      calculateWinner(squares);
     }
   };
 
@@ -155,7 +159,7 @@ const TicTacToe = () => {
     if(inLobby===true){
       //await api response & set login warning based on result
       try{
-        callSupabase("PATCH", tableName, gameId, "RESET", null);
+        callSupabase("PATCH", tableName, gameId, "RESET", gameKey);
         setMyToken(null)
       }
       catch{
@@ -165,12 +169,11 @@ const TicTacToe = () => {
     else{
       setGame(newGame);
       setMyToken(null);
+      setWinnerArray([]);
     }
   };
-  
-  let winnerArray = new Array(3);
+
   const isOngoing = game.board.includes(null)
-  const winner = calculateWinner(game.board);
   return (
     <main style={{display:"flex", flexDirection:"row"}}>
       {/*main holds the sidebar and main-page flex boxes*/}
@@ -198,7 +201,9 @@ const TicTacToe = () => {
             {game.board.map((cell, index) => (
               <div
                 key={index}
-                className={(winnerArray).includes(index)!==false ? [styles.cell, styles.cellHighlight].join(" ") : (!isOngoing && winnerArray[0]==null) ? [styles.cell, styles.cellFailure].join(" ") : styles.cell}
+                className={(winnerArray).includes(index)!==false ? [styles.cell, styles.cellHighlight].join(" ")
+                : (!isOngoing && !winnerArray.includes(null)) ? [styles.cell, styles.cellFailure].join(" ") 
+                : styles.cell}
                 onClick={() => makeMove(index)}
               >
                 {cell}
@@ -206,8 +211,8 @@ const TicTacToe = () => {
             ))}
           </div>
           <p className={styles.currentToken}>
-            {winner
-              ? `Player ${winner} wins!`:
+            {winnerArray.length > 0
+              ? `Player ${game.board[winnerArray[0]]} wins!`:
               isOngoing ? `Current Player: ${game.currentToken}`:
               'Tie game!'}
               
