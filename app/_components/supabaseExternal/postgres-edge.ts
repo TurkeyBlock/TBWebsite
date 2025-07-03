@@ -117,6 +117,9 @@ Deno.serve(async (req)=>{
                 newToken = 'X';
               } else if (instructions[0] == "MOVE") {
                 let token = instructions[1];
+                if (token!=game.nextToken) {
+                  throw new Error("It's not this user's turn");
+                }
                 newToken = token == "X" ? "O" : "X";
                 col = instructions[2];
                 rowResult = -1;
@@ -125,7 +128,7 @@ Deno.serve(async (req)=>{
                   ]);
                 for(let i = newBoard[col].length - 1; i >= 0; --i){
                   if (newBoard[col][i] == null) {
-                    console.log('bip @ ' + col + ' ' + i);
+                    //console.log('bip @ ' + col + ' ' + i);
                     newBoard[col][i] = token;
                     rowResult = i;
                     break;
@@ -139,7 +142,7 @@ Deno.serve(async (req)=>{
               throw new Error("No action provided");
             }
             //client provided the table updating key, so the services makes their move. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            console.log(newBoard);
+            //console.log(newBoard);
             const { data, error } = await supabaseServicer.from(reqBody.table).update({
               'board': newBoard,
               'nextToken': newToken,
@@ -168,7 +171,7 @@ Deno.serve(async (req)=>{
         }
         if (gameIds.length > 0) {
           const gameIdValues = gameIds.map((obj)=>obj.id);
-          console.log(gameIdValues);
+          //console.log(gameIdValues);
           await supabaseServicer.from(keyTable).delete().in('id', gameIdValues);
         }
         //Create a new KEY row and grab its generated ID

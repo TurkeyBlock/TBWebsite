@@ -76,20 +76,20 @@ const ConnectFour = () => {
                 (payload) => {
                         const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken, payload.row, payload.col)
                         setGame(formatedPayload)
-                        console.log(payload.new.col+" "+payload.new.row);
+                        //console.log(payload.new.col+" "+payload.new.row);
                         calculateWinner(payload.new.board, payload.new.col, payload.new.row);
                     if(formatedPayload.board.toString()==newGame.board.toString()){
                         setMyToken(null);
                     }
                     setErrorMessage("");
                 }
-                )
+                )/*
                 .on('presence', { event: 'join' }, ({ key, newPresences }) => {
                     console.log('join', key, newPresences)
                 })
                 .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
                     console.log('leave', key, leftPresences)
-                })
+                })*/
                 .subscribe();
                 return () => {
                     createClient().removeChannel(channel)
