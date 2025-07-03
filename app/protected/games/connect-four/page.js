@@ -144,7 +144,6 @@ const ConnectFour = () => {
         lines[2] = [start].concat(flood(col,row, 1, 1)).concat(flood(col,row, -1, -1));
         lines[3] = [start].concat(flood(col,row, 1, -1)).concat(flood(col,row, -1, 1));
         for (const line of lines){
-            console.log(line);
             if(line.length >= 4){
                 localWinnerArray = localWinnerArray.concat(line);
             }

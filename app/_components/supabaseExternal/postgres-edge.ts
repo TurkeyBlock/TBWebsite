@@ -107,30 +107,31 @@ Deno.serve(async (req)=>{
           } else if (reqBody.table == "ConnectFour") {
             let newBoard;
             let newToken;
-
             let rowResult;
             let col;
             //confirm that some action was actually requested.
             if (reqBody.action != null) {
               const instructions = reqBody.action.split(" ");
               if (instructions[0] == "RESET") {
-                newBoard = Array(7).fill().map(() => Array(6).fill(null));
+                newBoard = Array(7).fill().map(()=>Array(6).fill(null));
                 newToken = 'X';
               } else if (instructions[0] == "MOVE") {
                 let token = instructions[1];
+                newToken = token == "X" ? "O" : "X";
                 col = instructions[2];
-
                 rowResult = -1;
-                const newBoard = game.board.map(innerArray => [...innerArray]);
-
-                for(let i=newBoard[col].length-1; i>=0; --i){
-                  if(!newBoard[col][i]){
+                newBoard = game.board.map((innerArray)=>[
+                    ...innerArray
+                  ]);
+                for(let i = newBoard[col].length - 1; i >= 0; --i){
+                  if (newBoard[col][i] == null) {
+                    console.log('bip @ ' + col + ' ' + i);
                     newBoard[col][i] = token;
                     rowResult = i;
                     break;
                   }
                 }
-                if(rowResult==-1){
+                if (rowResult == -1) {
                   throw new Error("Invalid move requested");
                 }
               }
@@ -138,6 +139,7 @@ Deno.serve(async (req)=>{
               throw new Error("No action provided");
             }
             //client provided the table updating key, so the services makes their move. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            console.log(newBoard);
             const { data, error } = await supabaseServicer.from(reqBody.table).update({
               'board': newBoard,
               'nextToken': newToken,
@@ -166,7 +168,8 @@ Deno.serve(async (req)=>{
         }
         if (gameIds.length > 0) {
           const gameIdValues = gameIds.map((obj)=>obj.id);
-          supabaseServicer.from(keyTable).delete().in('id', gameIdValues);
+          console.log(gameIdValues);
+          await supabaseServicer.from(keyTable).delete().in('id', gameIdValues);
         }
         //Create a new KEY row and grab its generated ID
         if (!reqBody.key) {
@@ -184,10 +187,9 @@ Deno.serve(async (req)=>{
         let newIdVal = newKey[0].id;
         //Use generated ID to create corresponding GAME row
         let newBoard;
-        if(reqBody.table == 'TicTacToe'){
+        if (reqBody.table == 'TicTacToe') {
           newBoard = Array(9).fill(null);
-        }
-        else if(reqBody.table == 'ConnectFour'){
+        } else if (reqBody.table == 'ConnectFour') {
           newBoard = Array(7).fill().map(()=>Array(6).fill(null));
         }
         const { data, error: creationError } = await supabaseServicer.from(reqBody.table).insert({
@@ -230,7 +232,5 @@ Deno.serve(async (req)=>{
     });
   }
 });
-
-
 
 */
