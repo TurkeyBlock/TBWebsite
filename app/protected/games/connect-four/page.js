@@ -74,11 +74,12 @@ const ConnectFour = () => {
                 .channel(`${gameId}`)
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
                 (payload) => {
-                        const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken, payload.lastRow, payload.lastCol)
+                        const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken, payload.row, payload.col)
                         setGame(formatedPayload)
-                        if(formatedPayload.board.toString()==newGame.board.toString()){
+                        console.log(payload.new.col+" "+payload.new.row);
+                        calculateWinner(payload.new.board, payload.new.col, payload.new.row);
+                    if(formatedPayload.board.toString()==newGame.board.toString()){
                         setMyToken(null);
-                        calculateWinner(payload.new.board, payload.new.lastRow, payload.new.lastCol);
                     }
                     setErrorMessage("");
                 }
