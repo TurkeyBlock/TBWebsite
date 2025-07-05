@@ -100,10 +100,10 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
                     value={inputGameKey}
                     onChange={!inLobby?((event) => {setInputGameKey(event.target.value)}):()=>{}}
                     style={{
-                    marginLeft:'auto',
-                    padding: '5px',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
+                        marginLeft:'auto',
+                        padding: '5px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
                     }}
                 />
                 </div>

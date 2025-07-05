@@ -134,6 +134,7 @@ const TicTacToe = () => {
     if(inLobby===true){
       //await api response & set login warning based on result
       try{
+        console.log("Sending supabase call");
         callSupabase("PATCH", tableName, gameId, ("MOVE "+funcToken+" "+index), gameKey);
       }
       catch{
@@ -159,6 +160,7 @@ const TicTacToe = () => {
     if(inLobby===true){
       //await api response & set login warning based on result
       try{
+        console.log("Sending supabase call");
         callSupabase("PATCH", tableName, gameId, "RESET", gameKey);
         setMyToken(null)
       }

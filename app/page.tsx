@@ -1,38 +1,6 @@
 "use client"
 
 import { createClient } from '@/lib/supabase/client'
-/*
-interface RequestBody {
-  table: string,
-  game?: {
-    token: string,
-    board:Array<string>
-  }
-}
-async function getTable(){
-  //Pull user's current JWT.
-  const { data: { session } } = await supabase.auth.getSession();
-  const jwt = session?.access_token;
-  
-  //Invoke edge function with user's JWT.
-  const { data, error } = await supabase.functions.invoke('postgres-edge', {
-    headers: {
-      'Authorization': `Bearer ${jwt}`,
-    },
-    body: {
-      table: 'TicTacToe',
-      action: 'Move',
-      game: {
-        board: '',
-        token: 'X'
-      }
-    
-    },
-  })
-  console.log(data);
-}
-  <button style={{padding:"3px"}} onClick={getTable}>"Click for Table"</button>
-*/
   async function anonyLogin(){
     const { data, error } = await createClient().auth.signInAnonymously()
     if(error){
