@@ -18,6 +18,13 @@
   flex-direction: row;
   justify-content: center;
 }
+.subContainer {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 
 .link {
   font-weight: bold;
@@ -25,7 +32,7 @@
   height:90vh;
   margin: 10px;
   padding: 10px;
-  font-size: 500%;
+  font-size: 3vw;
   cursor: pointer;
   border: 2px solid #333;
   background-color: #4caf50;
@@ -39,7 +46,7 @@
   background-color: #45a049;
 }
 
-.board {
+.TicTacToe {
   justify-content:center;
   display: grid;
   grid-template-columns: repeat(3, 10vmin);
@@ -52,6 +59,28 @@
   color:black;
   border: 2px solid #333;
   font-size: 10vmin;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-color: #fff;
+  transition: background-color 0.3s;
+}
+
+.ConnectFour {
+  justify-content:center;
+  display: grid;
+  grid-template-columns: repeat(7, 5.5vmin);
+  gap: 3px;
+}
+
+.slot {
+  width: 5vmin;
+  height: 5vmin;
+  border-radius: 50%; /* Makes it a circle */
+  color:black;
+  border: 2px solid #333;
+  font-size: 5vmin;
   display: flex;
   align-items: center;
   justify-content: center;
