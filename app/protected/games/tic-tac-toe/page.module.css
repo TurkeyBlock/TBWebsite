@@ -26,16 +26,16 @@
 .board {
   justify-content:center;
   display: grid;
-  grid-template-columns: repeat(3, 100px);
-  grid-gap: 10px;
+  grid-template-columns: repeat(3, 10vmin);
+  grid-gap: 1vmin;
 }
 
 .cell {
-  width: 100px;
-  height: 100px;
+  width: 10vmin;
+  height: 10vmin;
   color:black;
   border: 2px solid #333;
-  font-size: 2em;
+  font-size: 5vmin;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,15 +54,15 @@
 }
 
 .currentToken {
-  margin-top: 20px;
-  font-size: 1.5em;
+  margin-top: 1vmin;
+  font-size: 3vmin;
   color: #333;
 }
 
 .resetButton {
-  margin-top: 10px;
-  padding: 10px 20px;
-  font-size: 1em;
+  margin-top: 1vmin;
+  padding: 1vmin 2vmin;
+  font-size: 2vmin;
   cursor: pointer;
   background-color: #4caf50;
   color: #fff;
