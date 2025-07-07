@@ -222,7 +222,7 @@ const ConnectFour = () => {
             <div className={styles.body} style={{padding: "0px", flex:"1"}}>
                 {/*main page flex box*/}
                 <div className={styles.appContainer}>
-                    <h1 style={{fontSize:"3em", marginBottom:'2vw'}}>{
+                    <h1 style={{fontSize:"8vmin", marginBottom:'2vmin'}}>{
                         !inLobby
                         ? 'Singleplayer':
                         false

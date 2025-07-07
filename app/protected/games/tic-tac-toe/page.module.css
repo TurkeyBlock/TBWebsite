@@ -27,7 +27,7 @@
   justify-content:center;
   display: grid;
   grid-template-columns: repeat(3, 20vmin);
-  grid-gap: 1vmin;
+  grid-gap: 2vmin;
 }
 
 .cell {

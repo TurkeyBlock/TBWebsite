@@ -40,19 +40,18 @@
 }
 
 .board {
-  margin:20px;
   justify-content:center;
   display: grid;
-  grid-template-columns: repeat(3, 100px);
-  grid-gap: 10px;
+  grid-template-columns: repeat(3, 10vmin);
+  grid-gap: 1vmin;
 }
 
 .cell {
-  width: 100px;
-  height: 100px;
+  width: 10vmin;
+  height: 10vmin;
   color:black;
   border: 2px solid #333;
-  font-size: 2em;
+  font-size: 10vmin;
   display: flex;
   align-items: center;
   justify-content: center;
