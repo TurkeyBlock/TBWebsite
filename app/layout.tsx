@@ -28,18 +28,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Navigation/>
-          {children}
-          <Analytics mode="production" />
-        </ThemeProvider>
-      </body>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <body className={`${geistSans.className} antialiased`}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Navigation/>
+            {children}
+            <Analytics mode="production" />
+          </ThemeProvider>
+        </body>
     </html>
   );
 }

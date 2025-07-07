@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import styles from "./page.module.css";
-import background from ""
 
 const Games = () => {
     const board = new Array(9).fill(null);
@@ -22,7 +21,7 @@ const Games = () => {
             </div>
             Play TicTacToe
         </Link>
-        <Link href="./games/connect-four" className={styles.link}>Connect-Four</Link>
+        <Link href="./games/connect-four" className={styles.link}>Play Connect-Four</Link>
         </div>
 
 
