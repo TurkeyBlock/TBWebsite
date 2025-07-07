@@ -26,16 +26,16 @@
 .board {
   justify-content:center;
   display: grid;
-  grid-template-columns: repeat(3, 10vmin);
+  grid-template-columns: repeat(3, 20vmin);
   grid-gap: 1vmin;
 }
 
 .cell {
-  width: 10vmin;
-  height: 10vmin;
+  width: 20vmin;
+  height: 20vmin;
   color:black;
   border: 2px solid #333;
-  font-size: 5vmin;
+  font-size: 10vmin;
   display: flex;
   align-items: center;
   justify-content: center;
