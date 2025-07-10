@@ -7,7 +7,7 @@ import styles from "./page.module.css";
 const Games = () => {
     const TicTacToe = [null,null,'O',null,'X','O','X',null,null];
     //new Array(9).fill(null);
-    const ConnectFour = new Array(7).fill().map(() => Array(6).fill(null));
+    const ConnectFour = new Array(7).fill(null).map(() => Array(6).fill(null));
 
     return(
         <main className={styles.background}>

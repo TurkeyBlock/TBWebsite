@@ -24,7 +24,7 @@ const ConnectFour = () => {
     const [errorMessage, setErrorMessage] = useState("");
     const [myToken, setMyToken] = useState(null);
     const newGame = { //7 collumns by 6 rows
-        board: Array(7).fill().map(() => Array(6).fill(null)),
+        board: Array(7).fill(null).map(() => Array(6).fill(null)),
         currentToken: "X",
 
         //Allows for less computation in checkWinner
