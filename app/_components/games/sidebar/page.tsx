@@ -64,7 +64,7 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
     }
 
     return (
-        <div className="sidebar" style={{display:"flex", flexDirection:"row", backgroundColor:"darkgrey", flexShrink:"0", fontSize:`clamp(1rem, 0.95rem + 0.25vmin, 1.25rem)`}}>
+        <div className="sidebar" style={{display:"flex", flexDirection:"row", backgroundColor:"darkgrey", flexShrink:"0", fontSize:`clamp(1rem, 0.95rem + 0.25vmin, 1.25rem)`, overflowY:"auto"}}>
             {/* sidebar flexbox*/}
             <div className="sidebarContents" style={{flex:"1", display:sidebar==true?"flex":"none", flexDirection:"column", alignItems:"stretch"}}>
             {/*<TextInput boxLabel="Lobby Code:" inputText={inputText} buttonLabel="Submit" setInputText={setInputText} handleSubmit={ handleSubmit }/>*/}
@@ -163,7 +163,7 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
             <span style={{height:"2px",width:"100%", backgroundColor:"lightGrey"}}></span>
             
             {/* Width = 0, minWidth = 100%  (or contain:"size") ensures that this box does not contribute to the size of the sidebar, and instead matches what is forced by the other children. */}
-            <div className="secondBox" style={{padding:"5%", width:"0", minWidth:"100%", overflowY:"auto"}}>
+            <div className="secondBox" style={{padding:"5%", width:"0", minWidth:"100%"}}>
                 <div style={{fontWeight:'bold'}}>Joining a game:</div>
                 <span>Enter the Game ID, and the Game Key if it requires one, then click [Join Game]. If you do not have a required Game Key, you will join in spectate-only. </span>
                 <div  style={{marginTop:'15px', fontWeight:'bold'}}>Creating a game:</div>
