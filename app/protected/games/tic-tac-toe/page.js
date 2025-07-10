@@ -1,7 +1,7 @@
 "use client"
+import styles from "./page.module.css";
 
 import { useEffect, useState} from "react";
-import styles from "./page.module.css";
 import { createClient } from '@/lib/supabase/client';
 import {callSupabase} from '@/app/_components/games/_supabaseEdgeCaller';
 import {Sidebar} from '@/app/_components/games/sidebar/page';
@@ -187,7 +187,7 @@ const TicTacToe = () => {
       {/*-------------------------------------------------------------------*/}
 
 
-      <div className={styles.body} style={{padding: "0px", flex:"1"}}>
+      <div className={styles.appContainer} style={{padding: "0px", flex:"1"}}>
         {/*main page flex box*/}
         <div className={styles.appContainer}>
           <h1 style={{fontSize:"8vmin", marginBottom:'2vmin'}}>{

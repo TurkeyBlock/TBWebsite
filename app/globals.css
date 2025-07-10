@@ -65,5 +65,9 @@
   body {
     @apply bg-background text-foreground;
     padding-top:50px;
+    background-color:red;
+  }
+  main {    
+    min-height:calc(100dvh - 50px);
   }
 }

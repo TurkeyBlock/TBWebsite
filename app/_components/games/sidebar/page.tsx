@@ -64,7 +64,7 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
     }
 
     return (
-        <div className="sidebar" style={{display:"flex", flexDirection:"row", backgroundColor:"darkgrey"}}>
+        <div className="sidebar" style={{display:"flex", flexDirection:"row", backgroundColor:"darkgrey", fontSize:"1vw"}}>
             {/* sidebar flexbox*/}
             <div className="sidebarContents" style={{flex:"1", display:sidebar==true?"flex":"none", flexDirection:"column", alignItems:"stretch"}}>
             {/*<TextInput boxLabel="Lobby Code:" inputText={inputText} buttonLabel="Submit" setInputText={setInputText} handleSubmit={ handleSubmit }/>*/}
@@ -137,10 +137,10 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
                     value={chosenGameKey}
                     onChange={(event) => { setChosenGameKey(event.target.value) }}
                     style={{
-                    marginLeft:'auto',
-                    padding: '5px',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
+                        marginLeft:'auto',
+                        padding: '5px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
                     }}
                 />
                 </div>
@@ -176,7 +176,7 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
 
             </div>
             <span className="sidebarEdge" style={{backgroundColor:"grey"}}>
-            <button style={{padding:"3px"}} onClick={toggleSidebar}>{sidebar==true?"<<":">>"}</button>
+            <button style={{padding:"3px", minHeight:"100%"}} onClick={toggleSidebar}>{sidebar==true?"<<":">>"}</button>
             </span>
         </div>
     );
