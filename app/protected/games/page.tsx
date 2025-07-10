@@ -42,7 +42,7 @@ const Games = () => {
                                     <div
                                         key={slotIndex}
                                         className = {ConnectFour[colIndex][slotIndex] == null ? styles.slot
-                                        : (ConnectFour[colIndex][cellIndex] == 'X') ? [styles.slot, styles.tokenA].join(" ")
+                                        : (ConnectFour[colIndex][slotIndex] == 'X') ? [styles.slot, styles.tokenA].join(" ")
                                         : [styles.slot, styles.tokenB].join(" ")}
                                     >
                                     {slot}
