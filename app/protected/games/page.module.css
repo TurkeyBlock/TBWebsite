@@ -64,7 +64,6 @@
   justify-content:center;
   display: grid;
   grid-template-columns: repeat(7, 5.5vmin);
-  gap: 3px;
 }
 
 .slot {
