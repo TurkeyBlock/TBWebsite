@@ -221,7 +221,7 @@ const ConnectFour = () => {
             {/*-------------------------------------------------------------------*/}
 
 
-            <div className={styles.appContainer} style={{padding: "0px", flex:"1"}}>
+            <div className={styles.appContainer}>
                 {/*main page flex box*/}
                 <div className={styles.appContainer}>
                     <h1 style={{fontSize:"8vmin", marginBottom:'2vmin'}}>{

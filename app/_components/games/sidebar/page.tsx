@@ -64,9 +64,9 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
     }
 
     return (
-        <div className="sidebar" style={{display:"flex", flexDirection:"row", backgroundColor:"darkgrey", flexShrink:"0", fontSize:`clamp(1rem, 0.95rem + 0.25vmin, 1.25rem)`, overflowY:"auto"}}>
+        <div className="sidebar" style={{display:"inline-flex", flex:"0 0 auto", flexDirection:"row", backgroundColor:"darkgrey", fontSize:`clamp(1rem, 0.95rem + 0.25vmin, 1.25rem)`, overflowY:"auto"}}>
             {/* sidebar flexbox*/}
-            <div className="sidebarContents" style={{flex:"1", display:sidebar==true?"flex":"none", flexDirection:"column", alignItems:"stretch"}}>
+            <div className="sidebarContents" style={{flex:"1", display:sidebar==true?"inline-flex":"none", flexDirection:"column", alignItems:"stretch"}}>
             {/*<TextInput boxLabel="Lobby Code:" inputText={inputText} buttonLabel="Submit" setInputText={setInputText} handleSubmit={ handleSubmit }/>*/}
 
             {/*Game ID / Key submission form*/}
