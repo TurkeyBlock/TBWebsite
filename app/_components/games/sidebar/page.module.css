@@ -1,0 +1,64 @@
+
+.sidebar{
+    display:inline-flex;
+    flex: 0 1 auto;
+    flex-direction:row;
+    background-color:darkgrey;
+    font-size:clamp(1rem, 0.95rem + 0.25vmin, 1.25rem);
+}
+.sidebarContents{
+    display:flex;
+    flex: 1 0 auto;
+    flex-direction:column;
+    align-items:stretch;
+    overflow:hidden;
+}
+.sidebarEdge{
+    background-color: grey;
+}
+.sidebarButton {
+    padding:3px;
+    min-height:100%;
+}
+.form{
+    display:flex;
+    flex-direction:column;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    overflow:hidden;
+}
+.displayGrouping{
+    display:flex;
+    flex-direction:"row"
+}
+.line{
+    height:2px;
+    width:100%;
+    background-color:lightGrey;
+}
+.label{
+    margin-right: 10px;
+    align-content:center;
+    font-weight:bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.text{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.submitButton{
+    align-self:stretch;
+    margin-top:5px;
+    background-color:#0070f3;
+    color:#fff;
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow:clip;
+}
