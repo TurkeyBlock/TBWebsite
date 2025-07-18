@@ -29,9 +29,8 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
     useEffect(() => {
         // Function to update the window width
         const handleResize = () => {
-            let value = document.getElementById("contents")!.offsetWidth
+            const value = document.getElementById("contents")!.offsetWidth
             setSidebarWidth(value);
-            console.log(value);
         };
 
         // Add event listener on component mount
