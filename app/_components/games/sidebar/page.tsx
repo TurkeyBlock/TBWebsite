@@ -85,7 +85,7 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
     return (
         <div className={styles.sidebar}>
             {/* sidebar flexbox*/}
-            <div id="contents" className={styles.sidebarContents} style={{marginLeft: sidebar?``:-`${sidebarWidth}`, maxHeight: sidebar?`100%`:`0%`, transition:("margin-left .5s ease 0s, max-height 0s ease ").concat(sidebar?"0s":".5s")}}>
+            <div id="contents" className={styles.sidebarContents} style={{marginLeft: sidebar?``:-`${sidebarWidth}`, maxHeight: sidebar?`100%`:`0`, transition:("margin-left .5s ease 0s, max-height 0s ease ").concat(sidebar?"0s":".5s")}}>
                 {  /*<TextInput boxLabel="Lobby Code:" inputText={inputText} buttonLabel="Submit" setInputText={setInputText} handleSubmit={ handleSubmit }/>*/}
 
                 {/*Game ID / Key submission form*/}
