@@ -24,6 +24,7 @@ export function LoginForm({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingGuest, setIsLoadingGuest] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -39,13 +40,29 @@ export function LoginForm({
       });
       if (error) throw error;
       // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push("/protected");
+      router.push("/protected/games");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
   };
+
+  async function anonyLogin(){
+    const supabase = createClient();
+    setIsLoadingGuest(true);
+    setError(null);
+
+    try {
+      const { error } = await supabase.auth.signInAnonymously();
+      if (error) throw error;
+      router.push("/protected/games");
+    }catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "An error occurred");
+    } finally {
+      setIsLoadingGuest(false);
+    }
+  }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -101,8 +118,14 @@ export function LoginForm({
               >
                 Sign up
               </Link>
+              {" "}or...{" "}
             </div>
           </form>
+          <div className="mt-4 text-center text-sm">
+            <Button style={{backgroundColor:"red"}} onClick={anonyLogin}>
+            {isLoadingGuest ? "Loading..." : "Continue as Guest"}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
