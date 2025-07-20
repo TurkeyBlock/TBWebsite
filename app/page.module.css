@@ -1,0 +1,20 @@
+.container {
+    border:2px solid black;
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+    background-color: #f0f0f0;
+}
+.subContainer {
+    /*border:2px solid black;*/
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 10px;
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    flex-direction: column;
+    background-color: #f0f0f0;
+}

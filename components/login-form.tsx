@@ -54,8 +54,13 @@ export function LoginForm({
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInAnonymously();
-      if (error) throw error;
+      if(await supabase.auth.getSession()){
+        console.log("An authenticated session is already active");
+      }else{
+        console.log("Making an Anonymous user");
+        const { error } = await supabase.auth.signInAnonymously();
+        if (error) throw error;
+      }
       router.push("/protected/games");
     }catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
