@@ -6,15 +6,10 @@ import Turkey from "@/public/images/Turkey.png"
 export default function Page() {
   return (
     <div className={styles.container}>
-      <div className={styles.subContainer}>
-        <h1>Hello D&D Nerds</h1>
-        <h2>@Turkeyblock.org</h2>
-        <a>aa</a>
-        And this is text 1
-        And this is text 2
-        Etc Etc
+      <div className={styles.textContainer}>
+       Turkeyblock.org
       </div>
-      <div className={styles.subContainer}>
+      <div className={styles.imageContainer}>
         <Image
           src={Turkey}
           alt="Turkey"
