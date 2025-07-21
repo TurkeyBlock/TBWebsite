@@ -1,4 +1,5 @@
 "use client"
+import { useState } from "react";
 import styles from "./page.module.css";
 import Image from "next/image"
 import Turkey from "@/public/images/Turkey.png"
@@ -13,7 +14,8 @@ export default function Page() {
       <div className={styles.imageContainer}>
         <Image
           src={Turkey}
-          alt="Turkey"
+          priority={true}
+          alt="Image of a Turkey"
           className="h-[60vmin] w-[60vmin] rounded-full object-cover border-[2px] border-[black]"
         />
       </div>
