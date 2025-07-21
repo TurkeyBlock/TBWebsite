@@ -1,5 +1,6 @@
 "use client"
 
+import {useState, useEffect} from "react";
 import Link from "next/link";
 import styles from "./page.module.css";
 
@@ -9,9 +10,28 @@ const Games = () => {
     //new Array(9).fill(null);
     const ConnectFour = new Array(7).fill(null).map(() => Array(6).fill(null));
 
+    const [isHeightGreater, setIsHeightGreater] = useState(false);
+
+    useEffect(() => {
+        const checkDimensions = () => {
+            setIsHeightGreater(window.innerHeight > window.innerWidth);
+        };
+
+        // Initial check
+        checkDimensions();
+
+        // Add event listener for window resize
+        window.addEventListener('resize', checkDimensions);
+
+        // Cleanup event listener on component unmount
+        return () => {
+            window.removeEventListener('resize', checkDimensions);
+        };
+    }, []);
+
     return(
         <main className={styles.background}>
-            <div className={styles.container}>
+            <div className={styles.container}  style={{flexDirection: isHeightGreater?'column':'row'}}>
                 <Link href="./games/tic-tac-toe" className={[styles.link, styles.subContainer].join(" ")}>
                     <div className={styles.subContainer}>
                         <div className = {styles.TicTacToe}>
