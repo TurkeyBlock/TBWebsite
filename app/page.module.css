@@ -4,6 +4,7 @@
     margin: 2.5%;
     padding: 10px;
     display: flex;
+    flex-wrap:wrap;
     align-items:center;
     flex-direction: row;
     background-color: #f0f0f0;
@@ -12,9 +13,10 @@
     margin: 0;
     padding: 10px;
     padding-left:0;
+    padding-top:20px;
 
     display: flex;
-    flex: 1 1 auto;
+    flex: 1 0 auto;
     align-items: center;
     flex-direction: column;
     background-color: #f0f0f0;
