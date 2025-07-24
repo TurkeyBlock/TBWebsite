@@ -124,14 +124,14 @@ const ConnectFour = () => {
 
     //winning array contains ALL positions with connections of 4 or greater, positions may be unordered or repeated.
 
-    const calculateWinner = (board, col, row) => {
+    const calculateWinner = (board, col, row, token) => {
         const flood = (col, row, incCol, incRow) =>{
             //Skip the starting token
             col+=incCol;
             row+=incRow;
 
             let connectedPositions = [];
-            while(board[col] && board[col][row]==game.currentToken){
+            while(board[col] && board[col][row]==token){
                 connectedPositions.push([col,row]);
                 col+=incCol;
                 row+=incRow;
