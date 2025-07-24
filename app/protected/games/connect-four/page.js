@@ -60,13 +60,13 @@ const ConnectFour = () => {
             async function initGameState() {
                 const payload = await callSupabase("GET", tableName, gameId, null, null);
                 if(payload==undefined){
-                setErrorMessage("Lobby not found")
-                return;
+                    setErrorMessage("Lobby not found")
+                    return;
                 }
                 console.log(payload.data.board);
                 setGame(formatPayload(payload.data.board,payload.data.nextToken, payload.data.lastRow, payload.data.lastCol));
                 setMyToken(null);
-                calculateWinner(payload.data.board, payload.data.lastRow, payload.data.lastCol, payload.data.nextToken);
+                calculateWinner(payload.data.board, payload.data.lastRow, payload.data.lastCol, payload.data.nextToken == "X" ? "O" : "X");
             };
             initGameState();
             setInLobby(true);
@@ -79,7 +79,7 @@ const ConnectFour = () => {
                         const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken, payload.row, payload.col)
                         setGame(formatedPayload)
                         //console.log(payload.new.col+" "+payload.new.row);
-                        calculateWinner(payload.new.board, payload.new.col, payload.new.row, payload.new.nextToken === "X" ? "O" : "X");
+                        calculateWinner(payload.new.board, payload.new.col, payload.new.row, payload.new.nextToken == "X" ? "O" : "X");
                     if(formatedPayload.board.toString()==newGame.board.toString()){
                         setMyToken(null);
                     }
