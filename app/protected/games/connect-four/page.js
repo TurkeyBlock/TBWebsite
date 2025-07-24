@@ -201,7 +201,7 @@ const ConnectFour = () => {
         }
         else{
             setGame(updatedGame);
-            calculateWinner(newBoard,index,rowResult);
+            calculateWinner(newBoard,index,rowResult,funcToken);
             setMyToken(updatedGame.currentToken);
         }
     };
