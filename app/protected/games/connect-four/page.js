@@ -63,11 +63,8 @@ const ConnectFour = () => {
                     setErrorMessage("Lobby not found")
                     return;
                 }
-                console.log(payload.data.board)
-                console.log(payload.data.lastRow+" "+payload.data.lastCol);
-                setGame(formatPayload(payload.data.board,payload.data.nextToken, payload.data.lastRow, payload.data.lastCol));
-                console.log(payload.data.nextToken === "X" ? "O" : "X");
-                calculateWinner(payload.data.board, payload.data.lastCol, payload.data.lastRow, payload.data.nextToken === "X" ? "O" : "X");
+                setGame(formatPayload(payload.data.board,payload.data.nextToken, payload.data.row, payload.data.col));
+                calculateWinner(payload.data.board, payload.data.col, payload.data.row, payload.data.nextToken === "X" ? "O" : "X");
                 setMyToken(null);
             };
             initGameState();
