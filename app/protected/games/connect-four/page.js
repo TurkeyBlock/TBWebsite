@@ -66,7 +66,7 @@ const ConnectFour = () => {
                 console.log(payload.data.board);
                 setGame(formatPayload(payload.data.board,payload.data.nextToken, payload.data.lastRow, payload.data.lastCol));
                 setMyToken(null);
-                calculateWinner(payload.data.board, payload.data.lastRow, payload.data.lastCol, payload.data.nextToken === "X" ? "O" : "X");
+                calculateWinner(payload.data.board, payload.data.lastRow, payload.data.lastCol, payload.data.nextToken);
             };
             initGameState();
             setInLobby(true);
