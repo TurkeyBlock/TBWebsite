@@ -150,7 +150,6 @@ const ConnectFour = () => {
                 localWinnerArray = localWinnerArray.concat(line);
             }
         }
-        console.log(localWinnerArray);
         setWinnerArray(localWinnerArray);
         //return board[col][row];
     };
