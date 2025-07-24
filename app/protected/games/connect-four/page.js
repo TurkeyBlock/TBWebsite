@@ -79,7 +79,7 @@ const ConnectFour = () => {
                         const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken, payload.row, payload.col)
                         setGame(formatedPayload)
                         //console.log(payload.new.col+" "+payload.new.row);
-                        calculateWinner(payload.new.board, payload.new.col, payload.new.row);
+                        calculateWinner(payload.new.board, payload.new.col, payload.new.row, payload.new.nextToken === "X" ? "O" : "X",);
                     if(formatedPayload.board.toString()==newGame.board.toString()){
                         setMyToken(null);
                     }
