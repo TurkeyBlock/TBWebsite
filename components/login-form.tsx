@@ -53,8 +53,9 @@ export function LoginForm({
     setIsLoadingGuest(true);
     setError(null);
 
+    const {data} = await supabase.auth.getSession()
     try {
-      if(await supabase.auth.getSession()){
+      if(data.session){
         console.log("An authenticated session is already active");
       }else{
         console.log("Making an Anonymous user");
