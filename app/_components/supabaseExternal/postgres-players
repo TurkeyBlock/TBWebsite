@@ -1,0 +1,138 @@
+import { createClient } from 'npm:@supabase/supabase-js@2';
+
+Deno.serve(async (req)=>{
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': '*',
+        'Access-Control-Allow-Methods': '*'
+      },
+      status: 200
+    });
+  }
+  try {
+    const supabaseClient = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_ANON_KEY') ?? '', {
+      global: {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': '*',
+          Authorization: req.headers.get('Authorization')
+        }
+      }
+    });
+    // Get the session or user object
+    const token = req.headers.get('Authorization')?.replace('Bearer ', '');
+    const { data: { user }, error } = await supabaseClient.auth.getUser(token);
+    if (error || !user) {
+      return new Response(JSON.stringify({
+        error: 'Unauthorized'
+      }), {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': '*',
+          'Content-Type': 'application/json'
+        },
+        status: 401
+      });
+    }
+    //console.log("Is Authenticated Anonymous = " + user.is_anonymous);
+    const keyTable = 'GameKeys';
+    //-----------------------------------------------------------------------------------------------------------------
+    //Begin undertaking requests
+    let returnBody = null;
+    const supabaseServicer = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
+    const reqBody = await req.json();
+
+    const { data:editKeyArray, error:editKeyArrayError } = await supabaseServicer.from(keyTable).select('editKey').eq('id', reqBody.id).limit(1);
+    if (editKeyArrayError) {throw new Error("Issue confirming edit key");}
+    const editKey = editKeyArray[0].editKey;
+    if (editKey != null && editKey != "" && editKey != reqBody.key) {throw new Error("Invalid edit key provided");}
+    
+    //confirm that some action was actually requested.
+    if (reqBody.action == null) { throw new Error("No action provided");}
+    const instructions = reqBody.action.split(" ");
+    
+    //grab relevant player turn/owner data
+    const { data:playerValidatorsArray, error:playerValidatorsArrayError } = await supabaseServicer.from(keyTable).select('creatorId, playerIds, currentPlayerIndex').eq('id', reqBody.id).limit(1);
+    if(playerValidatorsArrayError){
+        throw new Error("Issue retrieving list of game's players; unable to validate action");
+    }
+    const creatorId = playerValidatorsArray[0].creatorId;
+    const playerIds = playerValidatorsArray[0].playerIds;
+    const currentPlayerIndex = playerValidatorsArray[0].currentPlayerIndex;
+
+    console.log(creatorId," ", playerIds, " ", currentPlayerIndex);
+
+    //If the game-owner wants to kick a player...
+    if(instructions[0]=="KICK" && user.id == creatorId && playerIds.length > instructions[1]){
+        playerIds.splice(instructions[1],1);
+        let nextPlayerIndex = currentPlayerIndex;
+        if(instructions[1] < currentPlayerIndex){
+        nextPlayerIndex-=1;
+        }
+        const { error:kickError } = await supabaseServicer.from(keyTable).update({
+        'playerIds': playerIds,
+        'currentPlayerIndex': nextPlayerIndex
+        }).eq('id', reqBody.id);
+        if(kickError){throw new Error("Error attempting to kick a player");}
+    }
+
+    //If a player wants to join the game...
+    else if(instructions[0]=="JOIN"){
+        if(playerIds.indexOf(user.id)!=-1){
+        //Do nothing, the player left and rejoined.
+        }
+        else{
+            //TicTacToe & ConnectFour are 2-player games
+            if(playerIds.length >= 2){
+                throw new Error("Game is full");
+            }
+            playerIds.push(user.id);
+            const { error:joinError } = await supabaseServicer.from(keyTable).update({
+                'playerIds': playerIds
+            }).eq('id', reqBody.id);
+            if(joinError){throw new Error("Error attempting to join game", joinError );}
+        }
+    }
+    else if(instructions[0]=="LEAVE"){
+        const requestingPlayerIndex = playerIds.indexOf(user.id);
+        if(requestingPlayerIndex!=-1){
+            playerIds.splice(requestingPlayerIndex,1);
+            let nextPlayerIndex = currentPlayerIndex;
+            if(requestingPlayerIndex < currentPlayerIndex){
+                nextPlayerIndex-=1;
+            }
+            const { error:leaveError } = await supabaseServicer.from(keyTable).update({
+                'playerIds': playerIds,
+                'currentPlayerIndex': nextPlayerIndex
+            }).eq('id', reqBody.id);
+            if(leaveError){throw new Error("Error attempting to leave the game:", leaveError );}
+        }
+    }
+    returnBody = "OK";
+    //return the new/current gameState
+    return new Response(JSON.stringify({
+      returnBody
+    }), {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': '*',
+        'Content-Type': 'application/json'
+      },
+      status: 200
+    });
+  } catch (error) {
+    console.log(error);
+    return new Response(JSON.stringify({
+      error: error.message
+    }), {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': '*',
+        'Content-Type': 'application/json'
+      },
+      status: 500
+    });
+  }
+});

@@ -27,7 +27,7 @@ interface combinedReturn{
   error?:string
 }
 
-export async function callSupabase(functionMethod:"GET"|"PATCH"|"POST", tableName:string, gameId?:number, gameAction?:string, playKey?:string):Promise<combinedReturn>{
+export async function callSupabase(functionMethod:"GET"|"PATCH"|"POST"|"PlayerTracking", tableName:string, gameId?:number, gameAction?:string, playKey?:string):Promise<combinedReturn>{
   //Pull user's current JWT.
   const { data: { session } } = await createClient().auth.getSession();
   const jwt = session?.access_token;
@@ -38,12 +38,23 @@ export async function callSupabase(functionMethod:"GET"|"PATCH"|"POST", tableNam
     action:gameAction,
     key:playKey,
   }
-
   const funcReturn:combinedReturn={};
-
+  if(functionMethod == "PlayerTracking"){
+    const { data, error} = await createClient().functions.invoke('postgres-players', {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${jwt}`,
+      },
+      body,
+    })
+    if(data){
+      funcReturn.data = data.returnBody;
+    }
+    funcReturn.error = error;
+  }
   //GET methods can't have bodies, and that's a pain in the butt atm.
-  if(functionMethod == "GET"){
-    const { data, error} = await createClient().functions.invoke('postgres-edge', {
+  else if(functionMethod == "GET"){
+    const { data, error} = await createClient().functions.invoke('postgres-edge-testing', {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${jwt}`,
@@ -57,7 +68,7 @@ export async function callSupabase(functionMethod:"GET"|"PATCH"|"POST", tableNam
   }
   else{
     //Invoke edge function with user's JWT.
-    const { data, error } = await createClient().functions.invoke('postgres-edge', {
+    const { data, error } = await createClient().functions.invoke('postgres-edge-testing', {
       method: `${functionMethod}`,
       headers: {
         'Authorization': `Bearer ${jwt}`,

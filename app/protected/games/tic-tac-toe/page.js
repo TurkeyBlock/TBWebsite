@@ -59,6 +59,7 @@ const TicTacToe = () => {
       setInLobby(true);
 
       //Subscribe the game's channel, inform client of table updates (and joins/leaves)
+      callSupabase("PlayerTracking", tableName, gameId, "JOIN", gameKey);
       const channel = createClient()
         .channel(`${gameId}`)
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
@@ -80,6 +81,7 @@ const TicTacToe = () => {
         })*/
         .subscribe();
       return () => {
+        callSupabase("PlayerTracking", tableName, gameId, "LEAVE", gameKey);
         createClient().removeChannel(channel)
       }
     }

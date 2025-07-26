@@ -60,8 +60,8 @@ const ConnectFour = () => {
             async function initGameState() {
                 const payload = await callSupabase("GET", tableName, gameId, null, null);
                 if(payload==undefined){
-                setErrorMessage("Lobby not found")
-                return;
+                    setErrorMessage("Lobby not found")
+                    return;
                 }
                 console.log(payload.data.board);
                 setGame(formatPayload(payload.data.board,payload.data.nextToken, payload.data.lastRow, payload.data.lastCol));
@@ -72,6 +72,7 @@ const ConnectFour = () => {
             setInLobby(true);
 
             //Subscribe the game's channel, inform client of table updates (and joins/leaves)
+            callSupabase("PlayerTracking", tableName, gameId, "JOIN", gameKey);
             const channel = createClient()
                 .channel(`${gameId}`)
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
@@ -94,6 +95,7 @@ const ConnectFour = () => {
                 })*/
                 .subscribe();
                 return () => {
+                    callSupabase("PlayerTracking", tableName, gameId, "LEAVE", gameKey);
                     createClient().removeChannel(channel)
                 }
         }
