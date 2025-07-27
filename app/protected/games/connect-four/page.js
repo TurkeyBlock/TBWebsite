@@ -17,7 +17,10 @@ const ConnectFour = () => {
     const [gameKey, setGameKey] = useState(null);
 
     const [inLobby, setInLobby] = useState(false);  //Boolean to check for success in joining a lobby
-    //const [isLocked, setIsLocked] = useState(false); //Display boolean for if the lobby is locked
+
+    const [userId, setUserId] = useState(null);
+    const [playerIds, setPlayerIds] = useState([]);
+    const [playerIndex, setPlayerIndex] = useState(null);
 
     const [winnerArray, setWinnerArray] = useState([]);
 
@@ -54,7 +57,14 @@ const ConnectFour = () => {
 
     //Game channel subscription
     useEffect(() => {
-    //Induce singleplayer
+
+        async function getUserId(){
+            const supabase = await createClient();
+            const {data:supabaseSession} = await supabase.auth.getSession();
+            setUserId(supabaseSession.session.user.id);
+        }
+        getUserId();
+        //Induce singleplayer
         if(gameId!=null){
             //Boot the client-side-render of the game, fetched from database
             async function initGameState() {
@@ -86,6 +96,12 @@ const ConnectFour = () => {
                     }
                     setErrorMessage("");
                 }
+                )
+                .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'GamePlayers', filter: `id=eq.${gameId}`},
+                (payload) => {
+                    setPlayerIds(payload.new.playerIds);
+                    setPlayerIndex((payload.new.playerIds).indexOf(userId));
+                }
                 )/*
                 .on('presence', { event: 'join' }, ({ key, newPresences }) => {
                     console.log('join', key, newPresences)
@@ -111,7 +127,6 @@ const ConnectFour = () => {
         //await api response & set login warning based on result
             try{
                 callSupabase("PATCH", tableName, gameId, "RESET", gameKey);
-                setMyToken(null)
             }
             catch{
                 console.log("Client unable to send event. Try refreshing your page.")
@@ -119,7 +134,6 @@ const ConnectFour = () => {
         }
         else{
             setGame(newGame);
-            setMyToken(null);
         }
     }
 
@@ -160,18 +174,7 @@ const ConnectFour = () => {
 
     const makeMove = async (index) => {
         setErrorMessage("");
-        //Setting a constant isn't guaranteed to sync, so editing it could fail to be reflected in the function.
-        let funcToken = myToken;
-        if(funcToken==null){
-            setMyToken(game.currentToken);
-            funcToken = game.currentToken;
-            //console.log(funcToken);
-        }
-        else if(funcToken!=game.currentToken){
-            setErrorMessage("It's not your turn! (Your Token = "+funcToken+")");
-            return;
-        }
-
+  
         let rowResult = -1;
         const newBoard = game.board.map(innerArray => [...innerArray]);
 
@@ -192,10 +195,15 @@ const ConnectFour = () => {
             setErrorMessage("Invalid move. Please try again.");
             return;
         }
+
+        //Multiplayer
         if(inLobby===true){
+            if(userId!=playerIds[playerIndex]){
+                setErrorMessage("It's not your turn! There are "+playerIds.length+" players in this game.");
+            }
             //await api response & set login warning based on result
             try{
-                callSupabase("PATCH", tableName, gameId, ("MOVE "+funcToken+" "+index), gameKey);
+                callSupabase("PATCH", tableName, gameId, ("MOVE "+index), gameKey);
             }
             catch{
                 console.log("Client unable to send event. Try refreshing your page.")
@@ -204,7 +212,6 @@ const ConnectFour = () => {
         else{
             setGame(updatedGame);
             calculateWinner(newBoard,index,rowResult);
-            setMyToken(updatedGame.currentToken);
         }
     };
 
