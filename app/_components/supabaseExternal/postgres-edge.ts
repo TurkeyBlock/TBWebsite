@@ -79,13 +79,14 @@ Deno.serve(async (req)=>{
         const instructions = reqBody.action.split(" ");
         
         //grab relevant player turn/owner data
-        const { data:playerValidatorsArray, error:playerValidatorsArrayError } = await supabaseServicer.from(playerTable).select('playerIds, currentPlayerIndex').eq('id', reqBody.id).limit(1);
+        const { data:playerValidatorsArray, error:playerValidatorsArrayError } = await supabaseServicer.from(playerTable).select('playerIds, currentPlayerIndex, maxPlayers').eq('id', reqBody.id).limit(1);
         if(playerValidatorsArrayError){
           throw new Error("Issue retrieving list of game's players; unable to validate action");
         }
         const playerIds = playerValidatorsArray[0].playerIds;
         const currentPlayerIndex = playerValidatorsArray[0].currentPlayerIndex;
         const thisUserIndex = playerIds.indexOf(user.id);
+        const maxPlayers = playerValidatorsArray[0].maxPlayers;
 
         //Commit game-specific actions <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         if (reqBody.table == "TicTacToe") {
@@ -174,7 +175,7 @@ Deno.serve(async (req)=>{
         //Exceptions exist to incremental turn order, so next increment must
           //be based on the user that went, not the user that was expected.
         let nextPlayerIndex = thisUserIndex+1;
-        if(nextPlayerIndex >= playerIds.length){
+        if(nextPlayerIndex >= maxPlayers){
           nextPlayerIndex = 0;
         }
         const { error:currentPlayerUpdateError } = await supabaseServicer.from(playerTable).update({
@@ -222,7 +223,8 @@ Deno.serve(async (req)=>{
 
         //Use generated ID to create corresponding PLAYERS row
         const {error: playerTableError} = await supabaseServicer.from(playerTable).insert({
-          'id':newIdVal
+          'id':newIdVal,
+          'playerIds':["",""]
         });
         if(playerTableError) {
           throw new Error("Failed to create Player Table");

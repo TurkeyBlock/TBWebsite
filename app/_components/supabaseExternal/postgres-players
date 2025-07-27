@@ -67,14 +67,9 @@ Deno.serve(async (req)=>{
 
     //If the game-owner wants to kick a player...
     if(instructions[0]=="KICK" && user.id == creatorId && playerIds.length > instructions[1]){
-        playerIds.splice(instructions[1],1);
-        //let nextPlayerIndex = currentPlayerIndex;
-        //if(instructions[1] < currentPlayerIndex){
-        //  nextPlayerIndex-=1;
-        }
+        playerIds[instructions[1]] = null;
         const { error:kickError } = await supabaseServicer.from(playerTable).update({
         'playerIds': playerIds,
-        'currentPlayerIndex': nextPlayerIndex
         }).eq('id', reqBody.id);
         if(kickError){throw new Error("Error attempting to kick a player");}
     }
@@ -85,13 +80,22 @@ Deno.serve(async (req)=>{
         //Do nothing, the player left and rejoined.
         }
         else{
-            //TicTacToe & ConnectFour are 2-player games
-            if(playerIds.length >= 2){
+            //Check for an open slot, or make one if the current array isn't @ maxPlayers.
+            var openSpace = playerIds.indexOf(null);
+            if(openSpace == -1){
+              if(playerIds.length < maxPlayers){
+                playerIds.append(user.id);
+              }
+              else{
                 throw new Error("Game is full");
+              }
+            }else{
+              playerIds[openSpace] = user.id;
             }
-            playerIds.push({id:user.id, turnNumber:);
+
+
             const { error:joinError } = await supabaseServicer.from(playerTable).update({
-              'playerIds': playerIds
+                'playerIds': playerIds
             }).eq('id', reqBody.id);
             if(joinError){throw new Error("Error attempting to join game", joinError );}
         }
@@ -99,12 +103,7 @@ Deno.serve(async (req)=>{
     else if(instructions[0]=="LEAVE"){
         const requestingPlayerIndex = playerIds.indexOf(user.id);
         if(requestingPlayerIndex!=-1){
-            playerIds.splice(requestingPlayerIndex,1);
-            //let nextPlayerIndex = currentPlayerIndex;
-            //This could be good for x->y player games, but with a constant number it's unneccessary & problematic.
-            //if(requestingPlayerIndex < currentPlayerIndex){
-            //    nextPlayerIndex-=1;
-            //}
+            playerIds[requestingPlayerIndex] = null;
             const { error:leaveError } = await supabaseServicer.from(playerTable).update({
                 'playerIds': playerIds,
                 //'currentPlayerIndex': nextPlayerIndex

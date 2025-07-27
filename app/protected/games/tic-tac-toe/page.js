@@ -18,7 +18,8 @@ const TicTacToe = () => {
 
   const [userId, setUserId] = useState(null);
   const [playerIds, setPlayerIds] = useState([]);
-  const [playerIndex, setPlayerIndex] = useState(null);
+  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(null);
+  const [myPlayerIndex, setMyPlayerIndex] = useState(null);
 
   const [errorMessage, setErrorMessage] = useState("");
   const [winnerArray, setWinnerArray] = useState([]);
@@ -86,7 +87,8 @@ const TicTacToe = () => {
           (payload) => {
             console.log(payload);
             setPlayerIds(payload.new.playerIds);
-            setPlayerIndex((payload.new.playerIds).indexOf(userId));
+            setCurrentPlayerIndex(payload.new.currentPlayerIndex);
+            setMyPlayerIndex((payload.new.playerIds).indexOf(userId));
           }
         )
         /*
@@ -140,8 +142,9 @@ const TicTacToe = () => {
 
     //Multiplayer
     if(inLobby===true){
-      if(userId!=playerIds[playerIndex]){
-        setErrorMessage("It's not your turn! There are "+playerIds.length+" players in this game.");
+      if(userId!=playerIds[currentPlayerIndex] && JSON.stringify(game.board)!=JSON.stringify(newGame.board)){
+        setErrorMessage("It's not your turn! There are "+playerIds.length+" players in this game."); //Non accurate
+        return;
       }
       //await api response & set login warning based on result
       try{

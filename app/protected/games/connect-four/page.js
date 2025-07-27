@@ -198,8 +198,9 @@ const ConnectFour = () => {
 
         //Multiplayer
         if(inLobby===true){
-            if(userId!=playerIds[playerIndex]){
+            if(userId!=playerIds[playerIndex] && JSON.stringify(game.board)!=JSON.stringify(newGame.board)){
                 setErrorMessage("It's not your turn! There are "+playerIds.length+" players in this game.");
+                return;
             }
             //await api response & set login warning based on result
             try{
