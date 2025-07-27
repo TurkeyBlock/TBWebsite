@@ -224,7 +224,7 @@ Deno.serve(async (req)=>{
         //Use generated ID to create corresponding PLAYERS row
         const {error: playerTableError} = await supabaseServicer.from(playerTable).insert({
           'id':newIdVal,
-          'playerIds':["",""]
+          'playerIds':[null, null]
         });
         if(playerTableError) {
           throw new Error("Failed to create Player Table");
