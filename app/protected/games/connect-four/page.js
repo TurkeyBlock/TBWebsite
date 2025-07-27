@@ -175,7 +175,7 @@ const ConnectFour = () => {
 
         for(let i=newBoard[index].length-1; i>=0; --i){
             if(!newBoard[index][i]){
-                newBoard[index][i] = funcToken;
+                newBoard[index][i] = game.currentToken;
                 rowResult = i;
                 break;
             }
