@@ -72,9 +72,9 @@ const ConnectFour = () => {
                     setErrorMessage("Lobby not found")
                     return;
                 }
-                console.log(payload.data.board);
                 setGame(formatPayload(payload.data.board,payload.data.nextToken, payload.data.lastRow, payload.data.lastCol));
                 calculateWinner(payload.data.board, payload.data.lastRow, payload.data.lastCol);
+
             };
             initGameState();
             setInLobby(true);
@@ -85,6 +85,7 @@ const ConnectFour = () => {
                 .channel(`${gameId}`)
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
                 (payload) => {
+
                     const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken, payload.row, payload.col)
                     setGame(formatedPayload)
                     calculateWinner(payload.new.board, payload.new.col, payload.new.row);
@@ -134,14 +135,14 @@ const ConnectFour = () => {
 
     //winning array contains ALL positions with connections of 4 or greater, positions may be unordered or repeated.
 
-    const calculateWinner = (board, col, row) => {
+    const calculateWinner = (board, col, row, token) => {
         const flood = (col, row, incCol, incRow) =>{
             //Skip the starting token
             col+=incCol;
             row+=incRow;
 
             let connectedPositions = [];
-            while(board[col] && board[col][row]==game.currentToken){
+            while(board[col] && board[col][row]==token){
                 connectedPositions.push([col,row]);
                 col+=incCol;
                 row+=incRow;
