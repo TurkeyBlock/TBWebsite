@@ -5,7 +5,6 @@ import { useEffect, useState} from "react";
 import { createClient } from '@/lib/supabase/client';
 import {callSupabase} from '@/app/_components/games/_supabaseEdgeCaller';
 import {Sidebar} from '@/app/_components/games/sidebar/page';
-import { SupabaseClient } from "@supabase/supabase-js";
 
 const TicTacToe = () => {
   const tableName = "TicTacToe";

@@ -25,7 +25,6 @@ const ConnectFour = () => {
     const [winnerArray, setWinnerArray] = useState([]);
 
     const [errorMessage, setErrorMessage] = useState("");
-    const [myToken, setMyToken] = useState(null);
     const newGame = { //7 collumns by 6 rows
         board: Array(7).fill(null).map(() => Array(6).fill(null)),
         currentToken: "X",
@@ -75,7 +74,6 @@ const ConnectFour = () => {
                 }
                 console.log(payload.data.board);
                 setGame(formatPayload(payload.data.board,payload.data.nextToken, payload.data.lastRow, payload.data.lastCol));
-                setMyToken(null);
                 calculateWinner(payload.data.board, payload.data.lastRow, payload.data.lastCol);
             };
             initGameState();
@@ -87,13 +85,9 @@ const ConnectFour = () => {
                 .channel(`${gameId}`)
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
                 (payload) => {
-                        const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken, payload.row, payload.col)
-                        setGame(formatedPayload)
-                        //console.log(payload.new.col+" "+payload.new.row);
-                        calculateWinner(payload.new.board, payload.new.col, payload.new.row);
-                    if(formatedPayload.board.toString()==newGame.board.toString()){
-                        setMyToken(null);
-                    }
+                    const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken, payload.row, payload.col)
+                    setGame(formatedPayload)
+                    calculateWinner(payload.new.board, payload.new.col, payload.new.row);
                     setErrorMessage("");
                 }
                 )
