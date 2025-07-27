@@ -19,7 +19,6 @@ const TicTacToe = () => {
   const [userId, setUserId] = useState(null);
   const [playerIds, setPlayerIds] = useState([]);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(null);
-  const [myPlayerIndex, setMyPlayerIndex] = useState(null);
 
   const [errorMessage, setErrorMessage] = useState("");
   const [winnerArray, setWinnerArray] = useState([]);
@@ -88,7 +87,6 @@ const TicTacToe = () => {
             console.log(payload);
             setPlayerIds(payload.new.playerIds);
             setCurrentPlayerIndex(payload.new.currentPlayerIndex);
-            setMyPlayerIndex((payload.new.playerIds).indexOf(userId));
           }
         )
         /*
