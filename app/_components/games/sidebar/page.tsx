@@ -136,7 +136,7 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
 
                 <span className={styles.line} style={{display:inLobby?'none':''}}></span>
 
-                <form className = {styles.form} onSubmit={handleCreate}>
+                <form className = {styles.form} style={{display:inLobby?'none':''}} onSubmit={handleCreate}>
                     <div className={styles.displayGrouping}>
                         <label htmlFor="textInput" className={styles.label}>
                             Game Key
