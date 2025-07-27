@@ -73,7 +73,7 @@ const ConnectFour = () => {
                     return;
                 }
                 setGame(formatPayload(payload.data.board,payload.data.nextToken, payload.data.lastRow, payload.data.lastCol));
-                calculateWinner(payload.data.board, payload.data.lastRow, payload.data.lastCol);
+                calculateWinner(payload.data.board, payload.data.lastRow, payload.data.lastCol, payload.data.nextToken);
 
             };
             initGameState();
@@ -88,7 +88,7 @@ const ConnectFour = () => {
 
                     const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken, payload.row, payload.col)
                     setGame(formatedPayload)
-                    calculateWinner(payload.new.board, payload.new.col, payload.new.row);
+                    calculateWinner(payload.new.board, payload.new.col, payload.new.row,payload.new.nextToken=='X'?'O':'X');
                     setErrorMessage("");
                 }
                 )
@@ -136,6 +136,7 @@ const ConnectFour = () => {
     //winning array contains ALL positions with connections of 4 or greater, positions may be unordered or repeated.
 
     const calculateWinner = (board, col, row, token) => {
+        //console.log("Checking for ",token," win.");
         const flood = (col, row, incCol, incRow) =>{
             //Skip the starting token
             col+=incCol;
