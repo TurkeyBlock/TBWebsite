@@ -173,9 +173,11 @@ const ConnectFour = () => {
         let rowResult = -1;
         const newBoard = game.board.map(innerArray => [...innerArray]);
 
+        let funcToken = game.currentToken;
+
         for(let i=newBoard[index].length-1; i>=0; --i){
             if(!newBoard[index][i]){
-                newBoard[index][i] = game.currentToken;
+                newBoard[index][i] = funcToken;
                 rowResult = i;
                 break;
             }
@@ -207,7 +209,7 @@ const ConnectFour = () => {
         }
         else{
             setGame(updatedGame);
-            calculateWinner(newBoard,index,rowResult);
+            calculateWinner(newBoard,index,rowResult, funcToken);
         }
     };
 
