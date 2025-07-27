@@ -15,6 +15,11 @@ interface PostReturn {
   id:number
   key:string
 }
+const publicLobbies: {[key: string]: string } ={
+    TicTacToe:'[1->5]',
+    ConnectFour:'[6->10]'
+};
+
 export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:Props) => {
 
     const [inputGameId, setInputGameId] = useState("");  //Form input for lobby id.
@@ -136,7 +141,7 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
 
                 <span className={styles.line} style={{display:inLobby?'none':''}}></span>
 
-                <form className = {styles.form} onSubmit={handleCreate}>
+                <form className = {styles.form} style={{display:inLobby?'none':''}} onSubmit={handleCreate}>
                     <div className={styles.displayGrouping}>
                         <label htmlFor="textInput" className={styles.label}>
                             Game Key
@@ -172,7 +177,7 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
                     <div  style={{marginTop:'15px', fontWeight:'bold'}}>Creating a game:</div>
                     <span>Enter a Game Key of your choosing, which you will share with others, then click [Create Game]. If no Game Key is entered, the game will be open to all.</span>
                     <div  style={{marginTop:'15px', fontWeight:'bold'}}>Additionally:</div>
-                    <span style={{marginTop:'5px'}}>Game IDs {'[1 -> 5]'} are public lobbies. </span>
+                    <span style={{marginTop:'5px'}}>Game IDs {publicLobbies[tableName]} are public lobbies. </span>
                     <div style={{marginTop:'20px'}}>You will need to be logged into a non-anonymous account to create a game. </div>
                     
                 </div>

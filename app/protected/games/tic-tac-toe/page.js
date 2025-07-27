@@ -15,8 +15,11 @@ const TicTacToe = () => {
   const [inLobby, setInLobby] = useState(false);  //Boolean to check for success in joining a lobby
   //const [isLocked, setIsLocked] = useState(false); //Display boolean for if the lobby is locked
 
+  const [userId, setUserId] = useState(null);
+  const [playerIds, setPlayerIds] = useState([]);
+  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(null);
+
   const [errorMessage, setErrorMessage] = useState("");
-  const [myToken, setMyToken] = useState(null);
   const [winnerArray, setWinnerArray] = useState([]);
 
   const newGame = {
@@ -41,6 +44,14 @@ const TicTacToe = () => {
   
   //Game channel subscription
   useEffect(() => {
+
+    async function getUserId(){
+      const supabase = await createClient();
+      const {data:supabaseSession} = await supabase.auth.getSession();
+      setUserId(supabaseSession.session.user.id);
+    }
+    getUserId();
+
     //Induce singleplayer
     if(gameId!=null){
       //setSidebar(false);
@@ -49,29 +60,35 @@ const TicTacToe = () => {
         const payload = await callSupabase("GET", tableName, gameId, null, null);
         if(payload.data==undefined){
           setErrorMessage("Lobby not found")
+          setGameId(null);
           return;
         }
         setGame(formatPayload(payload.data.board, payload.data.nextToken));
-        setMyToken(null);
         calculateWinner(payload.data.board);
       };
       initGameState();
       setInLobby(true);
 
       //Subscribe the game's channel, inform client of table updates (and joins/leaves)
+      callSupabase("PlayerTracking", tableName, gameId, "JOIN", gameKey);
       const channel = createClient()
         .channel(`${gameId}`)
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
           (payload) => {
-            const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken)
-            setGame(formatedPayload)
-            if(formatedPayload.board.toString()==newGame.board.toString()){
-              setMyToken(null);
-            }
+            const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken);
+            setGame(formatedPayload);
             calculateWinner(payload.new.board);
             setErrorMessage("");
           }
-        )/*
+        )
+        .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'GamePlayers', filter: `id=eq.${gameId}`},
+          (payload) => {
+            console.log(payload);
+            setPlayerIds(payload.new.playerIds);
+            setCurrentPlayerIndex(payload.new.currentPlayerIndex);
+          }
+        )
+        /*
         .on('presence', { event: 'join' }, ({ key, newPresences }) => {
           console.log('join', key, newPresences)
         })
@@ -80,6 +97,7 @@ const TicTacToe = () => {
         })*/
         .subscribe();
       return () => {
+        callSupabase("PlayerTracking", tableName, gameId, "LEAVE", gameKey);
         createClient().removeChannel(channel)
       }
     }
@@ -114,33 +132,27 @@ const TicTacToe = () => {
   const makeMove = async (index) => {
     setErrorMessage("");
 
-    //Setting a constant isn't guaranteed to sync, so editing it could fail to be reflected in the function.
-    let funcToken = myToken;
-    if(funcToken==null){
-      setMyToken(game.currentToken);
-      funcToken = game.currentToken;
-      console.log(funcToken);
-    }
-    else if(funcToken!=game.currentToken){
-      setErrorMessage("It's not your turn! (Your Token = "+funcToken+")");
-      return;
-    }
-
     if (!isOngoing || winnerArray.length > 0 || game.board[index]) {
       setErrorMessage("Invalid move. Please try again.");
       return;
     }
 
+    //Multiplayer
     if(inLobby===true){
+      if(userId!=playerIds[currentPlayerIndex] && JSON.stringify(game.board)!=JSON.stringify(newGame.board)){
+        setErrorMessage("It's not your turn! There are "+playerIds.length+" players in this game."); //Non accurate
+        return;
+      }
       //await api response & set login warning based on result
       try{
         console.log("Sending supabase call");
-        callSupabase("PATCH", tableName, gameId, ("MOVE "+funcToken+" "+index), gameKey);
+        callSupabase("PATCH", tableName, gameId, ("MOVE "+index), gameKey);
       }
       catch{
         console.log("Client unable to send event. Try refreshing your page.")
       }
     }
+    //Singleplayer
     else{
       const squares = [...game.board]
       squares[index] = game.currentToken;
@@ -150,7 +162,6 @@ const TicTacToe = () => {
         currentToken: game.currentToken === "X" ? "O" : "X",
       };
       setGame(updatedGame);
-      setMyToken(updatedGame.currentToken);
       calculateWinner(squares);
     }
   };
@@ -162,7 +173,6 @@ const TicTacToe = () => {
       try{
         console.log("Sending supabase call");
         callSupabase("PATCH", tableName, gameId, "RESET", gameKey);
-        setMyToken(null)
       }
       catch{
         console.log("Client unable to send event. Try refreshing your page.")
@@ -170,7 +180,6 @@ const TicTacToe = () => {
     }
     else{
       setGame(newGame);
-      setMyToken(null);
       setWinnerArray([]);
     }
   };
