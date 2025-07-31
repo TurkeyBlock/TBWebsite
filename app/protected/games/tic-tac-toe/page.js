@@ -196,7 +196,7 @@ const TicTacToe = () => {
       {/*-------------------------------------------------------------------*/}
 
 
-      <div className={styles.appContainer} style={{padding: "0px", flexGrow:"1"}}>
+      <div className={`color1 ${styles.appContainer}`} style={{padding: "0px", flexGrow:"1"}}>
         {/*main page flex box*/}
         <div className={styles.appContainer}>
           <h1 style={{fontSize:"8vmin", marginBottom:'2vmin'}}>{
@@ -206,15 +206,15 @@ const TicTacToe = () => {
             ? `[X] Game ID: ${gameId}`
             : `[*] Game ID: ${gameId}`
           }</h1>
-          <div className = {styles.board}>
 
+          <div className = {styles.board}>
           {/*--------------------*/}
             {game.board.map((cell, index) => (
               <div
                 key={index}
-                className={(winnerArray).includes(index)!==false ? [styles.cell, styles.cellHighlight].join(" ")
-                : (!isOngoing && !winnerArray.includes(null)) ? [styles.cell, styles.cellFailure].join(" ") 
-                : styles.cell}
+                className={`color0 ${(winnerArray).includes(index)!==false ? `${styles.cell} ${styles.cellHighlight}`
+                : (!isOngoing && !winnerArray.includes(null)) ? `${styles.cell} ${styles.cellFailure}` 
+                : styles.cell}`}
                 onClick={() => makeMove(index)}
               >
                 {cell}

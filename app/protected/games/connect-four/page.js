@@ -229,7 +229,7 @@ const ConnectFour = () => {
             {/*-------------------------------------------------------------------*/}
 
 
-            <div className={styles.appContainer}>
+            <div className={`color1 ${styles.appContainer}`}>
                 {/*main page flex box*/}
                 <div className={styles.appContainer}>
                     <h1 style={{fontSize:"8vmin", marginBottom:'2vmin'}}>{
@@ -250,15 +250,14 @@ const ConnectFour = () => {
                                 <div
                                     key={cellIndex}
                                     //className = {styles.cell}
-                                    className = {
-                                        [game.board[colIndex][cellIndex] == null ? styles.cell
-                                        : (game.board[colIndex][cellIndex] == 'X') ? [styles.cell, styles.tokenA].join(" ")
-                                        : [styles.cell, styles.tokenB].join(" "),
+                                    className = {`color0
+                                        ${game.board[colIndex][cellIndex] == null ? styles.cell
+                                        : (game.board[colIndex][cellIndex] == 'X') ? `${styles.cell} ${styles.tokenA}`
+                                        : `${styles.cell} ${styles.tokenB}`}
                                     
-                                        winnerArray.some((arr) => JSON.stringify(arr) == JSON.stringify([colIndex,cellIndex])) ? styles.cellHighlight
-                                        : (!isOngoing && winnerArray.length == 0) ? styles.cellFailure
-                                        : ""
-                                        ].join(" ")
+                                        ${winnerArray.some((arr) => JSON.stringify(arr) == JSON.stringify([colIndex,cellIndex])) ? `${styles.cellHighlight}`
+                                        : (!isOngoing && winnerArray.length == 0) ? `${styles.cellFailure}`
+                                        : ''}`
                                     }
                                     onClick={() => makeMove(colIndex)}
                                 >

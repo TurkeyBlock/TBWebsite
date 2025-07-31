@@ -2,6 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
+
+/** Root colors */
+:root {
+  --clr: #000000;
+
+  /** Theme primary colors */
+  --clr-primary-a0: #92e5d7;
+  --clr-primary-a10: #91d9cd;
+  --clr-primary-a20: #90cec3;
+  --clr-primary-a30: #8fc2b9;
+  --clr-primary-a40: #8db7af;
+  --clr-primary-a50: #8baca6;
+
+  /** Theme surface colors */
+  --clr-surface-a0: #ffffff;
+  --clr-surface-a10: #f0f0f0;
+  --clr-surface-a20: #e1e1e1;
+  --clr-surface-a30: #d3d3d3;
+  --clr-surface-a40: #c5c5c5;
+  --clr-surface-a50: #b6b6b6;
+
+  /** Theme tonal surface colors */
+  --clr-surface-tonal-a0: #f5fdfb;
+  --clr-surface-tonal-a10: #e7eeed;
+  --clr-surface-tonal-a20: #dae0de;
+  --clr-surface-tonal-a30: #ccd2d0;
+  --clr-surface-tonal-a40: #bfc4c2;
+  --clr-surface-tonal-a50: #b2b6b5;
+
+  --cellcolor: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root{
+    /** Base colors */
+    --clr: #ffffff;
+
+    /** Theme primary colors */
+    --clr-primary-a0: #2432ac;
+    --clr-primary-a10: #4846b6;
+    --clr-primary-a20: #635bbf;
+    --clr-primary-a30: #7b71c9;
+    --clr-primary-a40: #9287d2;
+    --clr-primary-a50: #a89edc;
+
+    /** Theme surface colors */
+    --clr-surface-a0: #121212;
+    --clr-surface-a10: #282828;
+    --clr-surface-a20: #3f3f3f;
+    --clr-surface-a30: #575757;
+    --clr-surface-a40: #717171;
+    --clr-surface-a50: #8b8b8b;
+
+    /** Theme tonal surface colors */
+    --clr-surface-tonal-a0: #181620;
+    --clr-surface-tonal-a10: #2d2b35;
+    --clr-surface-tonal-a20: #44424b;
+    --clr-surface-tonal-a30: #5c5a62;
+    --clr-surface-tonal-a40: #75737a;
+    --clr-surface-tonal-a50: #8f8d93;
+
+    --cellcolor: #3f3f3f;
+  }
+}
+
+/*Supabase layer*/
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -65,9 +130,51 @@
   body {
     @apply bg-background text-foreground;
     padding-top:50px;
-    background-color:red;
+    font-family: Arial, sans-serif;
+    
+    background-color: var(--clr-surface-a0);
+    color: var(--clr);
   }
   main {    
     min-height:calc(100dvh - 50px);
   }
+}
+
+.cellColor {
+  background-color:var(--cellcolor);
+}
+.color0 {
+  background-color: var(--clr-surface-a0);
+  color: var(--clr);
+  border-color: var(--clr-surface-tonal-a0);
+}
+
+.color1 {
+  background-color: var(--clr-surface-a10);
+  color: var(--clr);
+  border-color: var(--clr-surface-tonal-a10);
+}
+
+.color2 {
+  background-color: var(--clr-surface-a20);
+  color: var(--clr);
+  border-color: var(--clr-surface-tonal-a20);
+}
+
+.color3 {
+  background-color: var(--clr-surface-a30);
+  color: var(--clr);
+  border-color: var(--clr-surface-tonal-a30);
+}
+
+.color4 {
+  background-color: var(--clr-surface-a40);
+  color: var(--clr);
+  border-color: var(--clr-surface-tonal-a40);
+}
+
+.color5 {
+  background-color: var(--clr-surface-a50);
+  color: var(--clr);
+  border-color: var(--clr-surface-tonal-a50);
 }

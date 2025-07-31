@@ -30,27 +30,25 @@ const Games = () => {
     }, []);
 
     return(
-        <main className={styles.background}>
-            <div className={styles.container}  style={{flexDirection: isHeightGreater?'column':'row'}}>
-                <Link href="./games/tic-tac-toe" className={[styles.link, styles.subContainer].join(" ")}>
-                    <div className={styles.subContainer}>
+        <main className = "main">
+            <div className={`color3 ${styles.container}`}  style={{flexDirection: isHeightGreater?'column':'row'}}>
+                <Link href="./games/tic-tac-toe" className={`${styles.link} ${styles.subContainer}`}>
+                    <div className={styles.subContainer} >
                         <div className = {styles.TicTacToe}>
                             {/*--------------------*/}
                             {TicTacToe.map((cell, index) => (
                                 <div
                                 key={index}
-                                className={styles.cell}
+                                className={`color0 ${styles.cell}`}
                                 >
                                 {cell}
                                 </div>
                             ))}
                         </div>
                     </div>
-                    <div className={styles.subContainer}>
-                        Play TicTacToe
-                    </div>
+                    Play TicTacToe
                 </Link>
-                <Link href="./games/connect-four" className={[styles.link, styles.subContainer].join(" ")}>
+                <Link href="./games/connect-four" className={`${styles.link} ${styles.subContainer}`}>
                     <div className = {styles.subContainer}>
                         <div className = {styles.ConnectFour}>
                             {ConnectFour.map((col, colIndex) => (
@@ -61,9 +59,9 @@ const Games = () => {
                                 {col.map((slot, slotIndex) => (
                                     <div
                                         key={slotIndex}
-                                        className = {ConnectFour[colIndex][slotIndex] == null ? styles.slot
+                                        className = {`color0 ${ConnectFour[colIndex][slotIndex] == null ? styles.slot
                                         : (ConnectFour[colIndex][slotIndex] == 'X') ? [styles.slot, styles.tokenA].join(" ")
-                                        : [styles.slot, styles.tokenB].join(" ")}
+                                        : [styles.slot, styles.tokenB].join(" ")}`}
                                     >
                                     {slot}
                                     </div>
@@ -72,9 +70,7 @@ const Games = () => {
                             ))}
                         </div>
                     </div>
-                    <div className = {styles.subContainer}>
-                        Play Connect-Four
-                    </div>
+                    Play Connect-Four
                 </Link>
             </div>
         </main>

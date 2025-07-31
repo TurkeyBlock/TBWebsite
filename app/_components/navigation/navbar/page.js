@@ -6,11 +6,11 @@ import styles from "./page.module.css";
 
 const Navbar = () => {
   return (
-      <div className={styles.body}>
+      <div className={`color0 ${styles.body}`}>
         <Logo />
-        <Link href="/" className={styles.link}>Homepage</Link>
-        <Link href="/protected/games" className={styles.link}>Games</Link>
-        <Link href="/auth/login" className={styles.link} style={{position:'absolute', right:'0px', marginRight:"30px"}}>Login</Link>
+        <Link href="/" className={`color0 ${styles.link}`}>Homepage</Link>
+        <Link href="/protected/games" className={`color0 ${styles.link}`}>Games</Link>
+        <Link href="/auth/login" className={`color0 ${styles.link}`}>Login</Link>
         
         <Button />
       </div>

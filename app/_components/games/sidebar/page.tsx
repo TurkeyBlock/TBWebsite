@@ -90,11 +90,11 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
     return (
         <div className={styles.sidebar}>
             {/* sidebar flexbox*/}
-            <div id="contents" className={styles.sidebarContents} style={{marginLeft: sidebar?``:-`${sidebarWidth}`, maxHeight: sidebar?`100%`:`0`, transition:("margin-left .5s ease 0s, max-height 0s ease ").concat(sidebar?"0s":".5s")}}>
+            <div id="contents" className={`color4 ${styles.sidebarContents}`} style={{marginLeft: sidebar?``:-`${sidebarWidth}`, maxHeight: sidebar?`100%`:`0`, transition:("margin-left .5s ease 0s, max-height 0s ease ").concat(sidebar?"0s":".5s")}}>
                 {  /*<TextInput boxLabel="Lobby Code:" inputText={inputText} buttonLabel="Submit" setInputText={setInputText} handleSubmit={ handleSubmit }/>*/}
 
                 {/*Game ID / Key submission form*/}
-                <form className = {styles.form} onSubmit={handleJoin}>
+                <form className = {`${styles.form}`} onSubmit={handleJoin}>
                     <div className={styles.displayGrouping}>
                         <label htmlFor="textInput" className={styles.label}>
                             Game ID
@@ -139,9 +139,9 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
                     </button>
                 </form>
 
-                <span className={styles.line} style={{display:inLobby?'none':''}}></span>
+                <span className={`color2 ${styles.line}`} style={{display:inLobby?'none':''}}></span>
 
-                <form className = {styles.form} style={{display:inLobby?'none':''}} onSubmit={handleCreate}>
+                <form className = {`${styles.form}`} style={{display:inLobby?'none':''}} onSubmit={handleCreate}>
                     <div className={styles.displayGrouping}>
                         <label htmlFor="textInput" className={styles.label}>
                             Game Key
@@ -168,10 +168,10 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
                     </button>
                 </form>
 
-                <span className={styles.line}></span>
+                <span className={`color2 ${styles.line}`}></span>
                 
                 {/* Width = 0, minWidth = 100%  (or contain:"size") ensures that this box does not contribute to the size of the sidebar, and instead matches what is forced by the other children. */}
-                <div className="secondBox" style={{display:'flex', flexDirection:'column', padding:"5%", width:"0", minWidth:"100%",overflow:'hidden'}}>
+                <div className='secondBox' style={{display:'flex', flexDirection:'column', padding:"5%", width:"0", minWidth:"100%",overflow:'hidden'}}>
                     <div style={{fontWeight:'bold'}}>Joining a game:</div>
                     <span>Enter the Game ID, and the Game Key if it requires one, then click [Join Game]. If you do not have a required Game Key, you will join in spectate-only. </span>
                     <div  style={{marginTop:'15px', fontWeight:'bold'}}>Creating a game:</div>
@@ -183,7 +183,7 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
                 </div>
 
             </div>
-            <span className={styles.sidebarEdge}>
+            <span className='color5'>
             <button className={styles.sidebarButton} onClick={toggleSidebar}>{sidebar==true?"<<":">>"}</button>
             </span>
         </div>

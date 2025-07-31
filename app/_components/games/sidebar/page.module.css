@@ -3,7 +3,6 @@
     display:inline-flex;
     flex: 0 1 auto;
     flex-direction:row;
-    background-color:darkgrey;
     font-size:clamp(1rem, 0.95rem + 0.25vmin, 1.25rem);
 }
 .sidebarContents{
@@ -12,9 +11,6 @@
     flex-direction:column;
     align-items:stretch;
     overflow:hidden;
-}
-.sidebarEdge{
-    background-color: grey;
 }
 .sidebarButton {
     padding:3px;
@@ -34,7 +30,6 @@
 .line{
     height:2px;
     width:100%;
-    background-color:lightGrey;
 }
 .label{
     margin-right: 10px;
