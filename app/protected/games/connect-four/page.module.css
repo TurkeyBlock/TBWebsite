@@ -117,24 +117,17 @@
   margin-right:15px;
 }
 
-.column:hover{
-  background-color: var(--clr-surface-a20);
-}
-.cell:hover {
-  background-color: var(--clr-surface-a10);
-}
-.resetButton:hover {
-  background-color: #45a049;
-}
-.exitButton:hover{
-  color:black;
-}
-
-/*I'm unsure if old browsers may lack support for media queries, so I'm
-reverting hover changes for touchscreen instead of adding them for desktop-mouse*/
-@media (hover: none) {
-  .column:hover{background-color: inherit}
-  .cell:hover { background-color: inherit;}
-  .resetButton:hover {background-color: inherit;}
-  .exitButton:hover{ color: inherit;}
+@media (hover: hover) {
+  .column:hover{
+    background-color: var(--clr-surface-a20);
+  }
+  .cell:hover {
+    background-color: var(--clr-surface-a10);
+  }
+  .resetButton:hover {
+    background-color: #45a049;
+  }
+  .exitButton:hover{
+    color:black;
+  }
 }
