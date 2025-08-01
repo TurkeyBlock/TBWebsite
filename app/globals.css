@@ -140,9 +140,16 @@
   }
 }
 
+.header {
+  background-color:#181620;
+  color: #ffffff;
+  border-color: var(--clr-primary-a50);
+}
+
 .cellColor {
   background-color:var(--cellcolor);
 }
+
 .color0 {
   background-color: var(--clr-surface-a0);
   color: var(--clr);
