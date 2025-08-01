@@ -58,12 +58,7 @@
   padding: 10px;
   border-radius: 10px;
 }
-.column:hover{
-  background-color: var(--clr-surface-a20);
-}
-.cell:hover {
-  background-color: var(--clr-surface-a10);
-}
+
 .cellHighlight{
   box-shadow: 0 0 6px 2px red, inset 0 0 6px 2px red;
   @media (prefers-color-scheme: dark) {
@@ -94,22 +89,21 @@
   transition: background-color 0.3s;
 }
 
-.resetButton:hover {
-  background-color: #45a049;
-}
-
 .errorMessage {
   color: #ff0000;
   margin-top: 10px;
   font-size: 1.2em;
 }
+
 .winner {
   background-color: #4caf50;
   color: #fff;
 }
+
 .inactiveAlert{
   display:none
 }
+
 .authAlert {
   margin-bottom: 15px;
   padding: 20px;
@@ -122,6 +116,25 @@
   font-weight:bold;
   margin-right:15px;
 }
+
+.column:hover{
+  background-color: var(--clr-surface-a20);
+}
+.cell:hover {
+  background-color: var(--clr-surface-a10);
+}
+.resetButton:hover {
+  background-color: #45a049;
+}
 .exitButton:hover{
   color:black;
+}
+
+/*I'm unsure if old browsers may lack support for media queries, so I'm
+reverting hover changes for touchscreen instead of adding them for desktop-mouse*/
+@media (hover: none) {
+  .column:hover{background-color: inherit}
+  .cell:hover { background-color: inherit;}
+  .resetButton:hover {background-color: inherit;}
+  .exitButton:hover{ color: inherit;}
 }

@@ -34,9 +34,6 @@
   }
 }
 
-.cell:hover {
-  background-color: var(--clr-surface-a10);
-}
 .cellHighlight{
   background-color: green;
   @media (prefers-color-scheme: dark) {
@@ -68,10 +65,6 @@
   transition: background-color 0.3s;
 }
 
-.resetButton:hover {
-  background-color: #45a049;
-}
-
 .errorMessage {
   color: #ff0000;
   margin-top: 10px;
@@ -96,6 +89,16 @@
   font-weight:bold;
   margin-right:15px;
 }
-.exitButton:hover{
-  color:black;
+
+
+@media (hover: hover) {
+  .cell:hover {
+    background-color: var(--clr-surface-a10);
+  }
+  .resetButton:hover {
+    background-color: #45a049;
+  }
+  .exitButton:hover{
+    color:black;
+  }
 }
