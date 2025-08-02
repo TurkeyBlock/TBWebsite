@@ -12,7 +12,7 @@ const defaultUrl = process.env.VERCEL_URL
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
   title: "Turkeyblock",
-  description: "Testing Website",
+  description: "Hobby Website",
 };
 
 const geistSans = Geist({

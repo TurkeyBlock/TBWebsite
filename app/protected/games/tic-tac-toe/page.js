@@ -4,7 +4,11 @@ import styles from "./page.module.css";
 import { useEffect, useState} from "react";
 import { createClient } from '@/lib/supabase/client';
 import {callSupabase} from '@/app/_components/games/_supabaseEdgeCaller';
+
+import {DndContext} from '@dnd-kit/core';
+
 import {Sidebar} from '@/app/_components/games/sidebar/page';
+import {PlayerDisplay} from '@/app/_components/games/playerDisplay/page';
 
 const TicTacToe = () => {
   const tableName = "TicTacToe";
@@ -187,17 +191,16 @@ const TicTacToe = () => {
   const isOngoing = game.board.includes(null)
   return (
     <main style={{display:"flex", flexDirection:"row"}}>
+    <DndContext>
       {/*main holds the sidebar and main-page flex boxes*/}
-
 
       {/*Game-create and game-join caller. Does not hold the subscriber TO the game, only the create and join logic.*/}
       <Sidebar tableName={tableName} setGameId={setGameId} setGameKey={setGameKey} setInLobby={setInLobby} inLobby={inLobby}/>
+      
+      <PlayerDisplay/>
+      <div className={`gameBox color1 ${styles.appContainer}`} style={{padding: "0px", flexGrow:"1"}}>
+        {/*game page flex box*/}
 
-      {/*-------------------------------------------------------------------*/}
-
-
-      <div className={`color1 ${styles.appContainer}`} style={{padding: "0px", flexGrow:"1"}}>
-        {/*main page flex box*/}
         <div className={styles.appContainer}>
           <h1 style={{fontSize:"8vmin", marginBottom:'2vmin'}}>{
             !inLobby
@@ -221,23 +224,23 @@ const TicTacToe = () => {
               </div>
             ))}
           </div>
-          <p className={styles.currentToken}>
-            {winnerArray.length > 0
-              ? `Player ${game.board[winnerArray[0]]} wins!`:
-              isOngoing ? `Current Player: ${game.currentToken}`:
-              'Tie game!'}
-              
-          </p>
-          
-          <button className={styles.resetButton} onClick={resetGame}>
-            Reset Game
-          </button>
+          <div style={{display:'flex', flex:'0 0 auto', flexDirection:'column'}}>
+            <p className={styles.currentToken}>
+              {winnerArray.length > 0
+                ? `Player ${game.board[winnerArray[0]]} wins!`:
+                isOngoing ? `Current Player: ${game.currentToken}`:
+                'Tie game!'}
+            </p>
+            <button className={styles.resetButton} onClick={resetGame}>
+              Reset Game
+            </button>
+          </div>
           {errorMessage && (
             <p className={styles.errorMessage}>{errorMessage}</p>
           )}
-          
         </div>
       </div>
+      </DndContext>
     </main>
   );
 };

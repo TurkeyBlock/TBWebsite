@@ -130,6 +130,7 @@
   body {
     @apply bg-background text-foreground;
     padding-top:50px;
+    padding-bottom:0px;
     font-family: Arial, sans-serif;
     
     background-color: var(--clr-surface-a0);
