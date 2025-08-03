@@ -6,3 +6,10 @@
     cursor: "not-allowed";
     background-color:red;
 }
+
+.cell {
+  width: 20vmin;
+  height: 20vmin;
+  border: 5 solid red;
+  background-color:green;
+}

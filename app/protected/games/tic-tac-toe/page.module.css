@@ -11,6 +11,11 @@
   justify-content: center;
 }
 
+.gameMode{
+  font-size:8vmin;
+  margin-bottom:1.5vmin;
+}
+
 .board {
   justify-content:center;
   display: grid;
