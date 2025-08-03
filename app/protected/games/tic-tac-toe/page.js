@@ -5,8 +5,6 @@ import { useEffect, useState} from "react";
 import { createClient } from '@/lib/supabase/client';
 import {callSupabase} from '@/app/_components/games/_supabaseEdgeCaller';
 
-import {DndContext} from '@dnd-kit/core';
-
 import {Sidebar} from '@/app/_components/games/sidebar/page';
 import {PlayerDisplay} from '@/app/_components/games/playerDisplay/page';
 
@@ -191,7 +189,6 @@ const TicTacToe = () => {
   const isOngoing = game.board.includes(null)
   return (
     <main style={{display:"flex", flexDirection:"row"}}>
-    <DndContext>
       {/*main holds the sidebar and main-page flex boxes*/}
 
       {/*Game-create and game-join caller. Does not hold the subscriber TO the game, only the create and join logic.*/}
@@ -240,7 +237,6 @@ const TicTacToe = () => {
           )}
         </div>
       </div>
-      </DndContext>
     </main>
   );
 };
