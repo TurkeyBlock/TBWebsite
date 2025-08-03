@@ -8,26 +8,33 @@ interface Props {
     playerNames:string[],
 
     gameId:number,
-    gameKey:string
+    gameKey:string,
+    hide:boolean
 }
 
 
-export const PlayerDisplay = ({tableName, playerNames=["Error - improper leave/rejoin"], gameId, gameKey}:Props) => {
+export const PlayerDisplay = ({tableName, playerNames=["Error - improper leave/rejoin"], gameId, gameKey, hide=false}:Props) => {
     async function kickPlayer(index:number){
         callSupabase("PlayerTracking", tableName, gameId, ("KICK "+index), gameKey);
     }
     return(
-        <main style={{width:"400px"}}>
+        <main className={`color3 ${styles.card}`}>
             playerNames length = {playerNames.length}
-            {playerNames.map((cell, index) => (
-                <div
-                key={index}
-                className={styles.cell}
-                onClick={() => kickPlayer(index)}
-                >
-                    {cell==null?"Waiting for player...":cell}
-                </div>
-            ))}
+            <div className={`color3`}>
+                {playerNames.map((cell, index) => (
+                    <div
+                    key={index}
+                    className={styles.cell}
+                    style={{
+                        borderBottom:index+1==playerNames.length?"none":"",
+                        backgroundColor:index%2==0?"var(--clr-surface-tonal-a20)":"var(--clr-surface-tonal-a40)",
+                    }}
+                    onClick={() => kickPlayer(index)}
+                    >
+                        {cell==null?"Waiting for player...":cell}
+                    </div>
+                ))}
+            </div>
         </main>
     );
 };

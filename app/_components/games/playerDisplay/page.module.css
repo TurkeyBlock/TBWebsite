@@ -9,7 +9,19 @@
 
 .cell {
   width: 20vmin;
-  height: 20vmin;
-  border: 5 solid red;
-  background-color:green;
+  border-bottom:.5px solid var(--clr-primary-a40);
+}
+
+.card {
+    border:2px solid var(--clr-primary-a0);
+    font-family: 'Arial', sans-serif;
+    margin: 2.5%;
+    padding: 10px;
+    display: flex;
+    flex-wrap:wrap;
+    align-items:center;
+    
+    flex-direction: column;
+
+    border-radius: 30px;
 }
