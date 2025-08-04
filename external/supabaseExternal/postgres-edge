@@ -54,7 +54,6 @@ Deno.serve(async (req)=>{
         status: 401
       });
     }
-    //console.log("Is Authenticated Anonymous = " + user.is_anonymous);
     const keyTable = 'GameKeys';
     const playerTable = 'GamePlayers'
     //-----------------------------------------------------------------------------------------------------------------
@@ -66,84 +65,76 @@ Deno.serve(async (req)=>{
     const reqBody = await req.json();
     if (req.method == 'GET' || req.method == 'PATCH') {
       const { data: gameArray, error:gameArrayError } = await supabaseServicer.from(reqBody.table).select('*').eq('id', reqBody.id).limit(1);
-      //console.log(data.length);
+
       if (gameArrayError || gameArray.length == 0) { throw new Error("Issue retrieving row using GET/PATCH");}
-      const game = gameArray[0];
+      const gameName = gameArray[0].name;
+      const game = gameArray[0].game;
+
+      let action; //User-requested reqBody action
       if (req.method == 'GET' || reqBody.action == null) {
         returnBody = game;
       } else {
-        console.log("patch function called");
-
+        //update game
         //confirm that some action was actually requested.
         if (reqBody.action == null) { throw new Error("No action provided");}
-        const instructions = reqBody.action.split(" ");
+        action = reqBody.action.split(" ");
         
         //grab relevant player turn/owner data
         const { data:playerValidatorsArray, error:playerValidatorsArrayError } = await supabaseServicer.from(playerTable).select('playerIds, currentPlayerIndex, maxPlayers').eq('id', reqBody.id).limit(1);
-        if(playerValidatorsArrayError){
-          throw new Error("Issue retrieving list of game's players; unable to validate action");
-        }
+        if(playerValidatorsArrayError){throw new Error("Issue retrieving list of game's players; unable to validate action");}
+
         const playerIds = playerValidatorsArray[0].playerIds;
         const currentPlayerIndex = playerValidatorsArray[0].currentPlayerIndex;
         const thisUserIndex = playerIds.indexOf(user.id);
         const maxPlayers = playerValidatorsArray[0].maxPlayers;
 
-        //Commit game-specific actions <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-        if (reqBody.table == "TicTacToe") {
+        if(thisUserIndex==-1){throw new Error("User is not in the game's player list");}
 
-          //Validate that it's this Player's turn. valid turn orders may change based on the game played.
-          if(!validatePlayerTurn(playerIds,currentPlayerIndex,user.id) && instructions[0]!="RESET" && JSON.stringify(game.board)!=JSON.stringify(getNewBoard(reqBody.table))){
+        //Reset
+        
+        let newGamestate;
+
+        if (action[0] == "RESET"){
+          if (reqBody.table == "TicTacToe" || reqBody.table == "ConnectFour") {
+            newGamestate = {
+              board: getNewBoard(reqBody.table),
+              nextToken: 'X'
+            }
+          }
+          const { error:resetError } = await supabaseServicer.from(reqBody.table).update({
+            game:newGamestate
+          }).eq('id', reqBody.id);
+        }
+        //Move action
+        else if (action[0] == "MOVE") {
+          //First, validate the user's turn.
+          if(!validatePlayerTurn(playerIds,currentPlayerIndex,user.id) && JSON.stringify(game.board)!=JSON.stringify(getNewBoard(reqBody.table))){
             throw new Error("Issue validating requesting player's action in the turn order");
           }
 
-          let newBoard;
-          let newToken;
-          
-          if (instructions[0] == "RESET") {
-            newBoard = getNewBoard(reqBody.table);
-            newToken = 'X';
-          } else if (instructions[0] == "MOVE") {
-            //Validate the move action
-            let position = instructions[1];
+          //Second, validate the action at hand
+          if(reqBody.table == "TicTacToe"){
+            let position = action[1];
             if (game.board[position] == null) {
-              newBoard = game.board;
+              let newBoard = game.board;
               newBoard[position] = game.nextToken;
-              newToken = game.nextToken == "X" ? "O" : "X";
+              let newToken = game.nextToken == "X" ? "O" : "X";
+
+              newGamestate = {
+                board:newBoard,
+                nextToken:newToken
+              }
             } else {
               throw new Error("Invalid move requested");
             }
-          }
-          //client provided the table updating key, so the services makes their move. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-          const { error } = await supabaseServicer.from(reqBody.table).update({
-            'board': newBoard,
-            'nextToken': newToken
-          }).eq('id', reqBody.id);
-
-          if (error) {
-            throw new Error("Move validated, Update failed.");
-          }
-        } else if (reqBody.table == "ConnectFour") {
-
-          //Validate that it's this Player's turn. valid turn orders may change based on the game played.
-          if(!validatePlayerTurn(playerIds,currentPlayerIndex,user.id) && instructions[0]!="RESET" && JSON.stringify(game.board)!=JSON.stringify(getNewBoard(reqBody.table))){
-            throw new Error("Issue validating requesting player's action in the turn order");
-          }
-
-          let newBoard;
-          let newToken;
-          let rowResult;
-          let col;
-
-          if (instructions[0] == "RESET") {
-            newBoard = getNewBoard(reqBody.table);
-            newToken = 'X';
-          } else if (instructions[0] == "MOVE") {
-            newToken = game.nextToken == "X" ? "O" : "X";
-            col = instructions[1];
-            rowResult = -1;
-            newBoard = game.board.map((innerArray)=>[
-                ...innerArray
-              ]);
+          } 
+          else if (reqBody.table == "ConnectFour") {
+            let newToken = game.nextToken == "X" ? "O" : "X";
+            let col = action[1];
+            let rowResult = -1;
+            let newBoard = game.board.map((innerArray)=>[
+              ...innerArray
+            ]);
             for(let i = newBoard[col].length - 1; i >= 0; --i){
               if (newBoard[col][i] == null) {
                 newBoard[col][i] = game.nextToken;
@@ -154,45 +145,35 @@ Deno.serve(async (req)=>{
             if (rowResult == -1) {
               throw new Error("Invalid move requested");
             }
+            else{
+              newGamestate = {
+                board:newBoard,
+                nextToken:newToken,
+                col:col,
+                row:rowResult
+              }
+            }
           }
-          //client provided the table updating key, so the services makes their move. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-          const { error } = await supabaseServicer.from(reqBody.table).update({
-            'board': newBoard,
-            'nextToken': newToken,
-            'col': col,
-            'row': rowResult
+          const { error:updateError } = await supabaseServicer.from(reqBody.table).update({
+            game:newGamestate
           }).eq('id', reqBody.id);
 
-          if (error) {
-            throw new Error("Move validated, Update failed.");
+          let nextPlayerIndex = thisUserIndex+1;
+          if(nextPlayerIndex >= maxPlayers){
+            nextPlayerIndex = 0;
           }
-        } else {
-          throw new Error("Invalid table requested");
+          const { error:currentIndexUpdateError } = await supabaseServicer.from(playerTable).update({
+            'currentPlayerIndex':nextPlayerIndex
+          }).eq('id', reqBody.id);
         }
-        
-        //Everything was successful, update the player-turn indicator
-
-        //Exceptions exist to incremental turn order, so next increment must
-          //be based on the user that went, not the user that was expected.
-        let nextPlayerIndex = thisUserIndex+1;
-        if(nextPlayerIndex >= maxPlayers){
-          nextPlayerIndex = 0;
-        }
-        const { error:currentPlayerUpdateError } = await supabaseServicer.from(playerTable).update({
-          'currentPlayerIndex':nextPlayerIndex
-        }).eq('id', reqBody.id);
-        if(currentPlayerUpdateError){
-          throw new Error("Move was processed without updating current player. Desync is non-recoverable.")
-        }
-        returnBody = "OK";
       }
-    } else {
-      ////
-      ////
-      //POST Method -----------------------------------------------------------------------------------
+    }
+    //Creation of a game request
+    else{ //POST
       if (user.is_anonymous) {
         throw new Error("Invalid method; game creation is unavailable to guest accounts");
-      } else {
+      }
+      else {
 
         const { data: gameIds, error: searchingError } = await supabaseServicer.from(keyTable).select('id').eq('creatorId', user.id);
         if (searchingError) {
@@ -232,10 +213,16 @@ Deno.serve(async (req)=>{
 
         //Use generated ID to create corresponding GAME row
         let newBoard = getNewBoard(reqBody.table);
+        let newToken = 'X';
+        let game = {
+          board:newBoard,
+          nextToken:newToken
+        }
+
         const {error: gameTableError } = await supabaseServicer.from(reqBody.table).insert({
           'id': newIdVal,
           'name': 'userTable',
-          'board': newBoard
+          'game': game
         });
         if (gameTableError) {
           throw new Error("Failed to create Game Table");
@@ -259,7 +246,7 @@ Deno.serve(async (req)=>{
       status: 200
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return new Response(JSON.stringify({
       error: error.message
     }), {

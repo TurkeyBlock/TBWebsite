@@ -19,6 +19,7 @@ const TicTacToe = () => {
 
   const [userId, setUserId] = useState(null);
   const [playerIds, setPlayerIds] = useState([]);
+  const [playerNames, setPlayerNames] = useState([]);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(null);
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -26,23 +27,10 @@ const TicTacToe = () => {
 
   const newGame = {
     board: Array(9).fill(null),
-    currentToken: "X",
+    nextToken: "X",
   };
   //Handle: if id =  null, you're doing singleplayer
-  const [game, setGame] = useState({
-    board:newGame.board,
-    currentToken:newGame.currentToken
-  });
- 
-
-  //Format the recieved-from-subscription payload to client-readable state 
-  function formatPayload(newBoard,nextToken){
-    const data = {
-      board: newBoard,
-      currentToken: nextToken,
-    };
-    return data;
-  };
+  const [game, setGame] = useState(newGame);
   
   //Game channel subscription
   useEffect(() => {
@@ -56,17 +44,20 @@ const TicTacToe = () => {
 
     //Induce singleplayer
     if(gameId!=null){
-      //setSidebar(false);
       //Boot the client-side-render of the game, fetched from database
       async function initGameState() {
         const payload = await callSupabase("GET", tableName, gameId, null, null);
-        if(payload.data==undefined){
+        const returnedGame = payload.data;
+        console.log(returnedGame);
+        if(returnedGame==undefined){
           setErrorMessage("Lobby not found")
+          setInLobby(false);
           setGameId(null);
           return;
         }
-        setGame(formatPayload(payload.data.board, payload.data.nextToken));
-        calculateWinner(payload.data.board);
+        //TicTacToe JSON contains board and token
+        setGame(returnedGame);
+        calculateWinner(returnedGame.board);
       };
       initGameState();
       setInLobby(true);
@@ -77,28 +68,24 @@ const TicTacToe = () => {
         .channel(`${gameId}`)
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
           (payload) => {
-            const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken);
-            setGame(formatedPayload);
-            calculateWinner(payload.new.board);
+            console.log(payload.new);
+            const returnedGame = payload.new.game;
+            console.log(returnedGame);
+            setGame(returnedGame);
+            calculateWinner(returnedGame);
             setErrorMessage("");
           }
         )
         .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'GamePlayers', filter: `id=eq.${gameId}`},
           (payload) => {
-            console.log(payload);
             setPlayerIds(payload.new.playerIds);
+            setPlayerNames(payload.new.playerNames);
             setCurrentPlayerIndex(payload.new.currentPlayerIndex);
           }
         )
-        /*
-        .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-          console.log('join', key, newPresences)
-        })
-        .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-          console.log('leave', key, leftPresences)
-        })*/
         .subscribe();
       return () => {
+        console.log("Leaving the SQL-tracking channels")
         callSupabase("PlayerTracking", tableName, gameId, "LEAVE", gameKey);
         createClient().removeChannel(channel)
       }
@@ -147,7 +134,7 @@ const TicTacToe = () => {
       }
       //await api response & set login warning based on result
       try{
-        console.log("Sending supabase call");
+        console.log("Sending supabase patch call");
         callSupabase("PATCH", tableName, gameId, ("MOVE "+index), gameKey);
       }
       catch{
@@ -157,11 +144,11 @@ const TicTacToe = () => {
     //Singleplayer
     else{
       const squares = [...game.board]
-      squares[index] = game.currentToken;
+      squares[index] = game.nextToken;
 
       const updatedGame = {
         board: squares,
-        currentToken: game.currentToken === "X" ? "O" : "X",
+        nextToken: game.nextToken === "X" ? "O" : "X",
       };
       setGame(updatedGame);
       calculateWinner(squares);
@@ -173,7 +160,7 @@ const TicTacToe = () => {
     if(inLobby===true){
       //await api response & set login warning based on result
       try{
-        console.log("Sending supabase call");
+        console.log("Sending supabase reset call");
         callSupabase("PATCH", tableName, gameId, "RESET", gameKey);
       }
       catch{
@@ -194,17 +181,15 @@ const TicTacToe = () => {
       {/*Game-create and game-join caller. Does not hold the subscriber TO the game, only the create and join logic.*/}
       <Sidebar tableName={tableName} setGameId={setGameId} setGameKey={setGameKey} setInLobby={setInLobby} inLobby={inLobby}/>
       
-      <PlayerDisplay/>
-      <div className={`gameBox color1 ${styles.appContainer}`} style={{padding: "0px", flexGrow:"1"}}>
+      <div className={`color1 ${styles.appContainer}`} style={{padding: "0px", flexGrow:"1"}}>
         {/*game page flex box*/}
 
         <div className={styles.appContainer}>
-          <h1 style={{fontSize:"8vmin", marginBottom:'2vmin'}}>{
+          <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey} currentPlayerIndex={currentPlayerIndex} hide={!inLobby}/>
+          <h1 className = {styles.gameMode}>{
             !inLobby
             ? 'Singleplayer':
-            false
-            ? `[X] Game ID: ${gameId}`
-            : `[*] Game ID: ${gameId}`
+            `Game ID: ${gameId}`
           }</h1>
 
           <div className = {styles.board}>
@@ -222,10 +207,10 @@ const TicTacToe = () => {
             ))}
           </div>
           <div style={{display:'flex', flex:'0 0 auto', flexDirection:'column'}}>
-            <p className={styles.currentToken}>
+            <p className={styles.nextToken}>
               {winnerArray.length > 0
                 ? `Player ${game.board[winnerArray[0]]} wins!`:
-                isOngoing ? `Current Player: ${game.currentToken}`:
+                isOngoing ? `Current Player: ${game.nextToken}`:
                 'Tie game!'}
             </p>
             <button className={styles.resetButton} onClick={resetGame}>

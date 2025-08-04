@@ -27,7 +27,7 @@ const ConnectFour = () => {
     const [errorMessage, setErrorMessage] = useState("");
     const newGame = { //7 collumns by 6 rows
         board: Array(7).fill(null).map(() => Array(6).fill(null)),
-        currentToken: "X",
+        nextToken: "X",
 
         //Allows for less computation in checkWinner
         row:-1,
@@ -36,23 +36,11 @@ const ConnectFour = () => {
     //Handle: if id =  null, you're doing singleplayer
     const [game, setGame] = useState({
         board:newGame.board,
-        currentToken:newGame.currentToken,
+        nextToken:newGame.nextToken,
 
         row:newGame.row,
         col:newGame.col
     });
-    
-    //Format the recieved-from-subscription payload to client-readable state 
-    function formatPayload(newBoard,nextToken, lastRow, lastCol){
-        const data = {
-            board: newBoard,
-            currentToken: nextToken,
-
-            row:lastRow,
-            col:lastCol
-        };
-        return data;
-    };
 
     //Game channel subscription
     useEffect(() => {
@@ -68,11 +56,12 @@ const ConnectFour = () => {
             //Boot the client-side-render of the game, fetched from database
             async function initGameState() {
                 const payload = await callSupabase("GET", tableName, gameId, null, null);
+                const returnedGame = payload.data;
                 if(payload==undefined){
                     setErrorMessage("Lobby not found")
                     return;
                 }
-                setGame(formatPayload(payload.data.board,payload.data.nextToken, payload.data.lastRow, payload.data.lastCol));
+                setGame(returnedGame);
                 calculateWinner(payload.data.board, payload.data.lastRow, payload.data.lastCol, payload.data.nextToken);
 
             };
@@ -85,10 +74,10 @@ const ConnectFour = () => {
                 .channel(`${gameId}`)
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
                 (payload) => {
-
-                    const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken, payload.row, payload.col)
-                    setGame(formatedPayload)
-                    calculateWinner(payload.new.board, payload.new.col, payload.new.row,payload.new.nextToken=='X'?'O':'X');
+                    console.log(payload.new);
+                    const returnedGame = payload.new.game;
+                    setGame(returnedGame)
+                    calculateWinner(returnedGame.board, returnedGame.col, returnedGame.row, returnedGame.nextToken=='X'?'O':'X');
                     setErrorMessage("");
                 }
                 )
@@ -97,13 +86,7 @@ const ConnectFour = () => {
                     setPlayerIds(payload.new.playerIds);
                     setPlayerIndex((payload.new.playerIds).indexOf(userId));
                 }
-                )/*
-                .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-                    console.log('join', key, newPresences)
-                })
-                .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-                    console.log('leave', key, leftPresences)
-                })*/
+                )
                 .subscribe();
                 return () => {
                     callSupabase("PlayerTracking", tableName, gameId, "LEAVE", gameKey);
@@ -267,10 +250,10 @@ const ConnectFour = () => {
                             </div>
                         ))}
                     </div>
-                    <p className={styles.currentToken}>
+                    <p className={styles.nextToken}>
                         {winner
                         ? `Player ${winner} wins!`:
-                        isOngoing ? `Current Player: ${game.currentToken}`:
+                        isOngoing ? `Current Player: ${game.nextToken}`:
                         'Tie game!'}
                     </p>
                     <button className={styles.resetButton} onClick={resetGame}>

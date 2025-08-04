@@ -11,6 +11,11 @@
   justify-content: center;
 }
 
+.gameMode{
+  font-size:8vmin;
+  margin-bottom:1.5vmin;
+}
+
 .board {
   justify-content:center;
   display: grid;
@@ -48,7 +53,7 @@
   }
 }
 
-.currentToken {
+.nexttToken {
   margin-top: 1vmin;
   font-size: 3vmin;
 }
