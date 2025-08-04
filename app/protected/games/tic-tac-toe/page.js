@@ -5,8 +5,6 @@ import { useEffect, useState} from "react";
 import { createClient } from '@/lib/supabase/client';
 import {callSupabase} from '@/app/_components/games/_supabaseEdgeCaller';
 
-import {DndContext} from '@dnd-kit/core';
-
 import {Sidebar} from '@/app/_components/games/sidebar/page';
 import {PlayerDisplay} from '@/app/_components/games/playerDisplay/page';
 
@@ -36,16 +34,6 @@ const TicTacToe = () => {
     board:newGame.board,
     currentToken:newGame.currentToken
   });
- 
-
-  //Format the recieved-from-subscription payload to client-readable state 
-  function formatPayload(newBoard,nextToken){
-    const data = {
-      board: newBoard,
-      currentToken: nextToken,
-    };
-    return data;
-  };
   
   //Game channel subscription
   useEffect(() => {
@@ -59,7 +47,6 @@ const TicTacToe = () => {
 
     //Induce singleplayer
     if(gameId!=null){
-      //setSidebar(false);
       //Boot the client-side-render of the game, fetched from database
       async function initGameState() {
         const payload = await callSupabase("GET", tableName, gameId, null, null);
@@ -68,8 +55,11 @@ const TicTacToe = () => {
           setGameId(null);
           return;
         }
-        setGame(formatPayload(payload.data.board, payload.data.nextToken));
-        calculateWinner(payload.data.board);
+        //TicTacToe JSON contains board and token
+        const game = payload.data.game;
+        console.log(game);
+        setGame(game);
+        calculateWinner(game.board);
       };
       initGameState();
       setInLobby(true);
@@ -80,9 +70,10 @@ const TicTacToe = () => {
         .channel(`${gameId}`)
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
           (payload) => {
-            const formatedPayload = formatPayload(payload.new.board, payload.new.nextToken);
-            setGame(formatedPayload);
-            calculateWinner(payload.new.board);
+            const game = payload.new.game;
+            console.log(game);
+            setGame(game);
+            calculateWinner(game.board);
             setErrorMessage("");
           }
         )
@@ -190,11 +181,12 @@ const TicTacToe = () => {
 
       {/*Game-create and game-join caller. Does not hold the subscriber TO the game, only the create and join logic.*/}
       <Sidebar tableName={tableName} setGameId={setGameId} setGameKey={setGameKey} setInLobby={setInLobby} inLobby={inLobby}/>
-      <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey}/>
+      
       <div className={`color1 ${styles.appContainer}`} style={{padding: "0px", flexGrow:"1"}}>
         {/*game page flex box*/}
 
         <div className={styles.appContainer}>
+          <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey} currentPlayerIndex={currentPlayerIndex} hide={!inLobby}/>
           <h1 className = {styles.gameMode}>{
             !inLobby
             ? 'Singleplayer':

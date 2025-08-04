@@ -3,25 +3,42 @@
     border: 3px solid #73AD21;
 }
 .dragHandle{
-    cursor: "not-allowed";
+    cursor: not-allowed;
     background-color:red;
 }
+.text {
+    display:inline;
+    padding: 4px;
+    border-radius: 5px;
 
+}
 .cell {
   width: 20vmin;
+  flex-direction: row;
   border-bottom:.5px solid var(--clr-primary-a40);
 }
 
 .card {
+
     border:2px solid var(--clr-primary-a0);
     font-family: 'Arial', sans-serif;
     margin: 2.5%;
     padding: 10px;
-    display: flex;
     flex-wrap:wrap;
     align-items:center;
     
     flex-direction: column;
+    border-radius: 15px;
+}
 
-    border-radius: 30px;
+.button{
+    background-color: #ff2121bd;
+    padding: 2px;
+    padding-right: 7px;
+    padding-left: 5px;
+
+    margin:5px;
+    margin-right:8px;
+    text-align:center;
+    border-radius: 5px;
 }
