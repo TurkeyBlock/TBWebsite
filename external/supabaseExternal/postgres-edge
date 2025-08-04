@@ -54,7 +54,6 @@ Deno.serve(async (req)=>{
         status: 401
       });
     }
-    //console.log("Is Authenticated Anonymous = " + user.is_anonymous);
     const keyTable = 'GameKeys';
     const playerTable = 'GamePlayers'
     //-----------------------------------------------------------------------------------------------------------------
@@ -69,16 +68,16 @@ Deno.serve(async (req)=>{
 
       if (gameArrayError || gameArray.length == 0) { throw new Error("Issue retrieving row using GET/PATCH");}
       const gameName = gameArray[0].name;
-      const game = gameArray[0].game; 
+      const game = gameArray[0].game;
 
-
+      let action; //User-requested reqBody action
       if (req.method == 'GET' || reqBody.action == null) {
         returnBody = game;
       } else {
         //update game
         //confirm that some action was actually requested.
         if (reqBody.action == null) { throw new Error("No action provided");}
-        const instructions = reqBody.action.split(" ");
+        action = reqBody.action.split(" ");
         
         //grab relevant player turn/owner data
         const { data:playerValidatorsArray, error:playerValidatorsArrayError } = await supabaseServicer.from(playerTable).select('playerIds, currentPlayerIndex, maxPlayers').eq('id', reqBody.id).limit(1);
@@ -91,24 +90,23 @@ Deno.serve(async (req)=>{
 
         if(thisUserIndex==-1){throw new Error("User is not in the game's player list");}
 
-        //Reset action
+        //Reset
         
         let newGamestate;
 
-
-        if (instructions[0] == "RESET"){
+        if (action[0] == "RESET"){
           if (reqBody.table == "TicTacToe" || reqBody.table == "ConnectFour") {
-            newGame = {
-              newBoard: getNewBoard(reqBody.table),
-              newToken: 'X'
+            newGamestate = {
+              board: getNewBoard(reqBody.table),
+              nextToken: 'X'
             }
           }
           const { error:resetError } = await supabaseServicer.from(reqBody.table).update({
             game:newGamestate
           }).eq('id', reqBody.id);
         }
-        //Move actions
-        else if (instructions[0] == "MOVE") {
+        //Move action
+        else if (action[0] == "MOVE") {
           //First, validate the user's turn.
           if(!validatePlayerTurn(playerIds,currentPlayerIndex,user.id) && JSON.stringify(game.board)!=JSON.stringify(getNewBoard(reqBody.table))){
             throw new Error("Issue validating requesting player's action in the turn order");
@@ -116,7 +114,7 @@ Deno.serve(async (req)=>{
 
           //Second, validate the action at hand
           if(reqBody.table == "TicTacToe"){
-            let position = instructions[1];
+            let position = action[1];
             if (game.board[position] == null) {
               let newBoard = game.board;
               newBoard[position] = game.nextToken;
@@ -132,7 +130,7 @@ Deno.serve(async (req)=>{
           } 
           else if (reqBody.table == "ConnectFour") {
             let newToken = game.nextToken == "X" ? "O" : "X";
-            let col = instructions[1];
+            let col = action[1];
             let rowResult = -1;
             let newBoard = game.board.map((innerArray)=>[
               ...innerArray
@@ -168,67 +166,72 @@ Deno.serve(async (req)=>{
             'currentPlayerIndex':nextPlayerIndex
           }).eq('id', reqBody.id);
         }
+      }
+    }
+    //Creation of a game request
+    else{ //POST
+      if (user.is_anonymous) {
+        throw new Error("Invalid method; game creation is unavailable to guest accounts");
+      }
+      else {
 
-        //Creation of a game request
-        else{
-          if (user.is_anonymous) {
-            throw new Error("Invalid method; game creation is unavailable to guest accounts");
-          }
-          else {
-
-            const { data: gameIds, error: searchingError } = await supabaseServicer.from(keyTable).select('id').eq('creatorId', user.id);
-            if (searchingError) {
-              throw new Error("Failed during search for pre-existing games");
-            }
-
-            if (gameIds.length > 0) {
-              const gameIdValues = gameIds.map((obj)=>obj.id);
-              await supabaseServicer.from(keyTable).delete().in('id', gameIdValues);
-            }
-
-            //Create a new KEY row and grab its generated ID
-            if (!reqBody.key) {
-              reqBody.key = "";
-            }
-
-            const { data: newKey, error:keyTableError } = await supabaseServicer.from(keyTable).insert({
-              'editKey': reqBody.key,
-              'creatorId': user.id
-            }).select('*');
-
-            if (keyTableError) {
-              console.error('Error inserting data:', error);
-              throw new Error("Failed to create Game keys");
-            }
-            let newKeyVal = newKey[0].editKey;
-            let newIdVal = newKey[0].id;
-
-            //Use generated ID to create corresponding PLAYERS row
-            const {error: playerTableError} = await supabaseServicer.from(playerTable).insert({
-              'id':newIdVal,
-              'playerIds':[null, null]
-            });
-            if(playerTableError) {
-              throw new Error("Failed to create Player Table");
-            }
-
-            //Use generated ID to create corresponding GAME row
-            let newBoard = getNewBoard(reqBody.table);
-            const {error: gameTableError } = await supabaseServicer.from(reqBody.table).insert({
-              'id': newIdVal,
-              'name': 'userTable',
-              'board': newBoard
-            });
-            if (gameTableError) {
-              throw new Error("Failed to create Game Table");
-            }
-            //Upon successful creation of the rows, send user their game ID.
-            returnBody = {
-              id: newIdVal,
-              key: newKeyVal
-            };
-          }
+        const { data: gameIds, error: searchingError } = await supabaseServicer.from(keyTable).select('id').eq('creatorId', user.id);
+        if (searchingError) {
+          throw new Error("Failed during search for pre-existing games");
         }
+
+        if (gameIds.length > 0) {
+          const gameIdValues = gameIds.map((obj)=>obj.id);
+          await supabaseServicer.from(keyTable).delete().in('id', gameIdValues);
+        }
+
+        //Create a new KEY row and grab its generated ID
+        if (!reqBody.key) {
+          reqBody.key = "";
+        }
+
+        const { data: newKey, error:keyTableError } = await supabaseServicer.from(keyTable).insert({
+          'editKey': reqBody.key,
+          'creatorId': user.id
+        }).select('*');
+
+        if (keyTableError) {
+          console.error('Error inserting data:', error);
+          throw new Error("Failed to create Game keys");
+        }
+        let newKeyVal = newKey[0].editKey;
+        let newIdVal = newKey[0].id;
+
+        //Use generated ID to create corresponding PLAYERS row
+        const {error: playerTableError} = await supabaseServicer.from(playerTable).insert({
+          'id':newIdVal,
+          'playerIds':[null, null]
+        });
+        if(playerTableError) {
+          throw new Error("Failed to create Player Table");
+        }
+
+        //Use generated ID to create corresponding GAME row
+        let newBoard = getNewBoard(reqBody.table);
+        let newToken = 'X';
+        let game = {
+          board:newBoard,
+          nextToken:newToken
+        }
+
+        const {error: gameTableError } = await supabaseServicer.from(reqBody.table).insert({
+          'id': newIdVal,
+          'name': 'userTable',
+          'game': game
+        });
+        if (gameTableError) {
+          throw new Error("Failed to create Game Table");
+        }
+        //Upon successful creation of the rows, send user their game ID.
+        returnBody = {
+          id: newIdVal,
+          key: newKeyVal
+        };
       }
     }
     //return the new/current gameState
@@ -243,7 +246,7 @@ Deno.serve(async (req)=>{
       status: 200
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return new Response(JSON.stringify({
       error: error.message
     }), {

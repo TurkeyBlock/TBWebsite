@@ -17,7 +17,8 @@ interface Props {
 export const PlayerDisplay = ({tableName, playerNames=["Error - improper leave/rejoin"], gameId, gameKey, currentPlayerIndex, hide=false}:Props) => {
     const kickPlayer = async (index:number) => {
         console.log("Calling...")
-        callSupabase("PlayerTracking", tableName, gameId, ("KICK "+index), gameKey);
+        await callSupabase("PlayerTracking", tableName, gameId, ("KICK "+index), gameKey);
+        console.log("Calling completed.")
     }
     return(
         <div className={`color3 ${styles.card}`} style={{display:hide?"none":""}}>

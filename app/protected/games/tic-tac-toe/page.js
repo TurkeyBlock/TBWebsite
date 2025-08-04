@@ -27,13 +27,10 @@ const TicTacToe = () => {
 
   const newGame = {
     board: Array(9).fill(null),
-    currentToken: "X",
+    nextToken: "X",
   };
   //Handle: if id =  null, you're doing singleplayer
-  const [game, setGame] = useState({
-    board:newGame.board,
-    currentToken:newGame.currentToken
-  });
+  const [game, setGame] = useState(newGame);
   
   //Game channel subscription
   useEffect(() => {
@@ -50,16 +47,17 @@ const TicTacToe = () => {
       //Boot the client-side-render of the game, fetched from database
       async function initGameState() {
         const payload = await callSupabase("GET", tableName, gameId, null, null);
-        if(payload.data==undefined){
+        const returnedGame = payload.data;
+        console.log(returnedGame);
+        if(returnedGame==undefined){
           setErrorMessage("Lobby not found")
+          setInLobby(false);
           setGameId(null);
           return;
         }
         //TicTacToe JSON contains board and token
-        const game = payload.data.game;
-        console.log(game);
-        setGame(game);
-        calculateWinner(game.board);
+        setGame(returnedGame);
+        calculateWinner(returnedGame.board);
       };
       initGameState();
       setInLobby(true);
@@ -70,16 +68,16 @@ const TicTacToe = () => {
         .channel(`${gameId}`)
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
           (payload) => {
-            const game = payload.new.game;
-            console.log(game);
-            setGame(game);
-            calculateWinner(game.board);
+            console.log(payload.new);
+            const returnedGame = payload.new.game;
+            console.log(returnedGame);
+            setGame(returnedGame);
+            calculateWinner(returnedGame);
             setErrorMessage("");
           }
         )
         .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'GamePlayers', filter: `id=eq.${gameId}`},
           (payload) => {
-            console.log(payload);
             setPlayerIds(payload.new.playerIds);
             setPlayerNames(payload.new.playerNames);
             setCurrentPlayerIndex(payload.new.currentPlayerIndex);
@@ -87,6 +85,7 @@ const TicTacToe = () => {
         )
         .subscribe();
       return () => {
+        console.log("Leaving the SQL-tracking channels")
         callSupabase("PlayerTracking", tableName, gameId, "LEAVE", gameKey);
         createClient().removeChannel(channel)
       }
@@ -135,7 +134,7 @@ const TicTacToe = () => {
       }
       //await api response & set login warning based on result
       try{
-        console.log("Sending supabase call");
+        console.log("Sending supabase patch call");
         callSupabase("PATCH", tableName, gameId, ("MOVE "+index), gameKey);
       }
       catch{
@@ -145,11 +144,11 @@ const TicTacToe = () => {
     //Singleplayer
     else{
       const squares = [...game.board]
-      squares[index] = game.currentToken;
+      squares[index] = game.nextToken;
 
       const updatedGame = {
         board: squares,
-        currentToken: game.currentToken === "X" ? "O" : "X",
+        nextToken: game.nextToken === "X" ? "O" : "X",
       };
       setGame(updatedGame);
       calculateWinner(squares);
@@ -161,7 +160,7 @@ const TicTacToe = () => {
     if(inLobby===true){
       //await api response & set login warning based on result
       try{
-        console.log("Sending supabase call");
+        console.log("Sending supabase reset call");
         callSupabase("PATCH", tableName, gameId, "RESET", gameKey);
       }
       catch{
@@ -208,10 +207,10 @@ const TicTacToe = () => {
             ))}
           </div>
           <div style={{display:'flex', flex:'0 0 auto', flexDirection:'column'}}>
-            <p className={styles.currentToken}>
+            <p className={styles.nextToken}>
               {winnerArray.length > 0
                 ? `Player ${game.board[winnerArray[0]]} wins!`:
-                isOngoing ? `Current Player: ${game.currentToken}`:
+                isOngoing ? `Current Player: ${game.nextToken}`:
                 'Tie game!'}
             </p>
             <button className={styles.resetButton} onClick={resetGame}>
