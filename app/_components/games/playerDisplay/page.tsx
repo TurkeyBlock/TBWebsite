@@ -6,6 +6,7 @@ import {callSupabase} from '@/app/_components/games/_supabaseEdgeCaller';
 interface Props {
     tableName:string,
     playerNames:string[],
+    thisPlayerIndex:number,
 
     gameId:number,
     gameKey:string,
@@ -14,7 +15,7 @@ interface Props {
 }
 
 
-export const PlayerDisplay = ({tableName, playerNames=["Error - improper leave/rejoin"], gameId, gameKey, currentPlayerIndex, hide=false}:Props) => {
+export const PlayerDisplay = ({tableName, playerNames=["Error - improper leave/rejoin"], thisPlayerIndex=0, gameId, gameKey, currentPlayerIndex, hide=false}:Props) => {
     const kickPlayer = async (index:number) => {
         console.log("Calling...")
         await callSupabase("PlayerTracking", tableName, gameId, ("KICK "+index), gameKey);
@@ -35,7 +36,7 @@ export const PlayerDisplay = ({tableName, playerNames=["Error - improper leave/r
                     }}
                     >
                     <button className={styles.button} onClick={() => kickPlayer(index)}>Kick</button>
-                    <div className={styles.text} style={{backgroundColor:currentPlayerIndex==index?"green":""}}>{cell==null?"Waiting for player...":cell}</div>
+                    <div className={styles.text} style={{backgroundColor:currentPlayerIndex==index?"green":""}}>{cell==null?"Waiting for player...":cell}{thisPlayerIndex==index?"*":""}</div>
                     </div>
                 ))}
             </div>

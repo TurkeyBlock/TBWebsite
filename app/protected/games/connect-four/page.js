@@ -57,7 +57,7 @@ const ConnectFour = () => {
             async function initGameState() {
                 const payload = await callSupabase("GET", tableName, gameId, null, null);
                 const returnedGame = payload.data;
-                if(payload==undefined){
+                if(returnedGame==undefined){
                     setErrorMessage("Lobby not found")
                     return;
                 }
