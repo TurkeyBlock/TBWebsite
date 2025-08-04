@@ -185,7 +185,7 @@ const TicTacToe = () => {
         {/*game page flex box*/}
 
         <div className={styles.appContainer}>
-          <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey} currentPlayerIndex={currentPlayerIndex} hide={!inLobby}/>
+          <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey} thisPlayerIndex={playerIds.indexOf(userId)} currentPlayerIndex={currentPlayerIndex} hide={!inLobby}/>
           <h1 className = {styles.gameMode}>{
             !inLobby
             ? 'Singleplayer':
