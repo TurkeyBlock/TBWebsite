@@ -11,11 +11,6 @@ interface Props {
     setInLobby:Dispatch<SetStateAction<boolean>>
     inLobby:boolean,
 }
-interface PostReturn {
-  id:number
-  key:string
-  error:string
-}
 const publicLobbies: {[key: string]: string } ={
     TicTacToe:'[1->5]',
     ConnectFour:'[6->10]'
@@ -69,7 +64,6 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
 
     async function submitGameCreate(){
         if(!inLobby){
-
             const payload = await upsertSupabaseGame("POST", tableName, null, chosenGameKey, null);
             console.log(payload);
             if(payload.error == null){
