@@ -1,7 +1,7 @@
 "use client"
 
 import {useState, useEffect, Dispatch, SetStateAction } from "react";
-import {callSupabase} from '@/app/_components/games/_supabaseEdgeCaller';
+import {upsertSupabaseGame} from '@/app/_components/games/_supabaseEdgeCaller';
 import styles from "./page.module.css";
 
 interface Props {
@@ -14,6 +14,7 @@ interface Props {
 interface PostReturn {
   id:number
   key:string
+  error:string
 }
 const publicLobbies: {[key: string]: string } ={
     TicTacToe:'[1->5]',
@@ -62,6 +63,7 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
             setInLobby(false);
             return;
         }
+        console.log('updated Id');
         setGameId(inputGameId);
         setGameKey(inputGameKey);
     }
@@ -69,16 +71,15 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
     async function submitGameCreate(){
         if(!inLobby){
 
-            const payload = await callSupabase("POST", tableName, undefined, undefined, chosenGameKey);
-            //console.log(payload);
-            if(payload.data){
-                const data = payload.data as PostReturn;
-                setGameId(data.id.toString());
-                setGameKey(data.key);
+            const payload = await upsertSupabaseGame("POST", tableName, null, chosenGameKey, null);
+            console.log(payload);
+            if(payload.error == null){
+                setGameId(payload.id!.toString());
+                setGameKey(payload.key);
 
                 //For visual sidebar purposes
-                setInputGameId(data.id.toString());
-                setInputGameKey(data.key);
+                setInputGameId(payload.id!.toString());
+                setInputGameKey(payload.key);
             }
         }
     }

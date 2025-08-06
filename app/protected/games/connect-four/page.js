@@ -1,14 +1,13 @@
 
 "use client"
-
-
 import styles from "./page.module.css";
-import "@/app/globals.css";
 
-import { useEffect, useState} from "react";
-import { createClient } from '@/lib/supabase/client'
-import {callSupabase} from '@/app/_components/games/_supabaseEdgeCaller';
+import {useState, useEffect} from "react";
+import { createClient } from '@/lib/supabase/client';
+import {getSupabaseGame, upsertSupabaseGame, upsertSupabaseGamePlayers} from '@/app/_components/games/_supabaseEdgeCaller';
+
 import {Sidebar} from '@/app/_components/games/sidebar/page';
+import {PlayerDisplay} from '@/app/_components/games/playerDisplay/page';
 
 const ConnectFour = () => {
     const tableName = "ConnectFour";
@@ -20,7 +19,8 @@ const ConnectFour = () => {
 
     const [userId, setUserId] = useState(null);
     const [playerIds, setPlayerIds] = useState([]);
-    const [playerIndex, setPlayerIndex] = useState(null);
+    const [playerNames, setPlayerNames] = useState([]);
+    const [currentPlayerIndex, setCurrentPlayerIndex] = useState(null);
 
     const [winnerArray, setWinnerArray] = useState([]);
 
@@ -42,59 +42,65 @@ const ConnectFour = () => {
         col:newGame.col
     });
 
-    //Game channel subscription
     useEffect(() => {
-
+        console.log("pip!");
         async function getUserId(){
-            const supabase = await createClient();
-            const {data:supabaseSession} = await supabase.auth.getSession();
-            setUserId(supabaseSession.session.user.id);
+            const {data:supabaseSession} = await createClient().auth.getSession();
+            if(supabaseSession.session){
+                setUserId(supabaseSession.session.user.id);
+            }
         }
         getUserId();
         //Induce singleplayer
         if(gameId!=null){
             //Boot the client-side-render of the game, fetched from database
             async function initGameState() {
-                const payload = await callSupabase("GET", tableName, gameId, null, null);
-                const returnedGame = payload.data;
-                if(returnedGame==undefined){
+                const payload = await getSupabaseGame(tableName, gameId);
+                const game = payload.game;
+                console.log(game);
+                if(game==undefined){
                     setErrorMessage("Lobby not found")
+                    setInLobby(false);
+                    setGameId(null);
                     return;
                 }
-                setGame(returnedGame);
-                calculateWinner(payload.data.board, payload.data.lastRow, payload.data.lastCol, payload.data.nextToken);
-
+                //TicTacToe JSON contains board and token
+                setGame(game);
+                calculateWinner(game);
             };
             initGameState();
             setInLobby(true);
 
             //Subscribe the game's channel, inform client of table updates (and joins/leaves)
-            callSupabase("PlayerTracking", tableName, gameId, "JOIN", gameKey);
             const channel = createClient()
-                .channel(`${gameId}`)
-                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
-                (payload) => {
-                    console.log(payload.new);
-                    const returnedGame = payload.new.game;
-                    setGame(returnedGame)
-                    calculateWinner(returnedGame.board, returnedGame.col, returnedGame.row, returnedGame.nextToken=='X'?'O':'X');
-                    setErrorMessage("");
-                }
-                )
-                .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'GamePlayers', filter: `id=eq.${gameId}`},
-                (payload) => {
-                    setPlayerIds(payload.new.playerIds);
-                    setPlayerIndex((payload.new.playerIds).indexOf(userId));
-                }
-                )
-                .subscribe();
-                return () => {
-                    callSupabase("PlayerTracking", tableName, gameId, "LEAVE", gameKey);
-                    createClient().removeChannel(channel)
-                }
+            .channel(`${gameId}`)
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
+            (payload) => {
+                const returnedGame = payload.new.game;
+                setGame(returnedGame);
+                calculateWinner(returnedGame);
+                setErrorMessage("");
+            }
+            )
+            .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'GamePlayers', filter: `id=eq.${gameId}`},
+            (payload) => {
+                setPlayerIds(payload.new.playerIds);
+                setPlayerNames(payload.new.playerNames);
+                setCurrentPlayerIndex(payload.new.currentPlayerIndex);
+            }
+            )
+            .subscribe();
+
+            //Insert self after subscribing so it updates the GUI appropriately
+            upsertSupabaseGamePlayers(gameId, gameKey,"JOIN");
+            
+            return () => {
+                upsertSupabaseGamePlayers(gameId, gameKey,"LEAVE");
+                createClient().removeChannel(channel)
+            }
         }
         else{
-            resetGame();
+            resetGame;
         }
     }, [gameId]);
 
@@ -104,7 +110,7 @@ const ConnectFour = () => {
         if(inLobby===true){
         //await api response & set login warning based on result
             try{
-                callSupabase("PATCH", tableName, gameId, "RESET", gameKey);
+                upsertSupabaseGame("PATCH", tableName, gameId, gameKey, "RESET");
             }
             catch{
                 console.log("Client unable to send event. Try refreshing your page.")
@@ -118,7 +124,12 @@ const ConnectFour = () => {
 
     //winning array contains ALL positions with connections of 4 or greater, positions may be unordered or repeated.
 
-    const calculateWinner = (board, col, row, token) => {
+    const calculateWinner = (funcGame) => {
+        const board = funcGame.board;
+        const col = funcGame.col;
+        const row = funcGame.row;
+        const nextToken = funcGame.nextToken=='X'?'O':'X'; //funcGame.token is the token that WILL be placed. We need to check what WAS placed.
+
         //console.log("Checking for ",token," win.");
         const flood = (col, row, incCol, incRow) =>{
             //Skip the starting token
@@ -126,7 +137,7 @@ const ConnectFour = () => {
             row+=incRow;
 
             let connectedPositions = [];
-            while(board[col] && board[col][row]==token){
+            while(board[col] && board[col][row]==nextToken){
                 connectedPositions.push([col,row]);
                 col+=incCol;
                 row+=incRow;
@@ -156,8 +167,7 @@ const ConnectFour = () => {
   
         let rowResult = -1;
         const newBoard = game.board.map(innerArray => [...innerArray]);
-
-        let funcToken = game.currentToken;
+        let funcToken = game.nextToken;
 
         for(let i=newBoard[index].length-1; i>=0; --i){
             if(!newBoard[index][i]){
@@ -169,7 +179,7 @@ const ConnectFour = () => {
         const updatedGame = {
             ...game,
             board: newBoard,
-            currentToken: game.currentToken === "X" ? "O" : "X",
+            nextToken: funcToken === "X" ? "O" : "X",
         };
 
         if (!isOngoing || rowResult == -1) {
@@ -179,13 +189,13 @@ const ConnectFour = () => {
 
         //Multiplayer
         if(inLobby===true){
-            if(userId!=playerIds[playerIndex] && JSON.stringify(game.board)!=JSON.stringify(newGame.board)){
+            if(userId!=playerIds[currentPlayerIndex] && JSON.stringify(game.board)!=JSON.stringify(newGame.board)){
                 setErrorMessage("It's not your turn! There are "+playerIds.length+" players in this game.");
                 return;
             }
             //await api response & set login warning based on result
             try{
-                callSupabase("PATCH", tableName, gameId, ("MOVE "+index), gameKey);
+                upsertSupabaseGame("PATCH", tableName, gameId, gameKey, ("MOVE "+index));
             }
             catch{
                 console.log("Client unable to send event. Try refreshing your page.")
@@ -193,7 +203,13 @@ const ConnectFour = () => {
         }
         else{
             setGame(updatedGame);
-            calculateWinner(newBoard,index,rowResult, funcToken);
+            const calcGame = {
+                board: updatedGame.board,
+                col: index,
+                row: rowResult,
+                nextToken: updatedGame.nextToken
+            }
+            calculateWinner(calcGame);
         }
     };
 
@@ -250,7 +266,7 @@ const ConnectFour = () => {
                             </div>
                         ))}
                     </div>
-                    <p className={styles.nextToken}>
+                    <p className={styles.token}>
                         {winner
                         ? `Player ${winner} wins!`:
                         isOngoing ? `Current Player: ${game.nextToken}`:

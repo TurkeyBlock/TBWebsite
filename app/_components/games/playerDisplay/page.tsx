@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from "./page.module.css";
 
-import {callSupabase} from '@/app/_components/games/_supabaseEdgeCaller';
+import {upsertSupabaseGamePlayers} from '@/app/_components/games/_supabaseEdgeCaller';
 
 interface Props {
     tableName:string,
@@ -18,7 +18,7 @@ interface Props {
 export const PlayerDisplay = ({tableName, playerNames=["Error - improper leave/rejoin"], thisPlayerIndex=0, gameId, gameKey, currentPlayerIndex, hide=false}:Props) => {
     const kickPlayer = async (index:number) => {
         console.log("Calling...")
-        await callSupabase("PlayerTracking", tableName, gameId, ("KICK "+index), gameKey);
+        await upsertSupabaseGamePlayers(gameId, gameKey, ("KICK "+index));
         console.log("Calling completed.")
     }
     return(

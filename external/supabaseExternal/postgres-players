@@ -66,7 +66,7 @@ Deno.serve(async (req)=>{
     const maxPlayers = playerValidatorsArray[0].maxPlayers;
 
     //If the game-owner wants to kick a player...
-    if(instructions[0]=="KICK" && user.id == creatorId && playerIds.length > instructions[1]){
+    if(instructions[0]=="KICK" && (user.id == creatorId || user.id == Deno.env.get('ADMIN_UID')) && playerIds.length > instructions[1]){
         playerIds[instructions[1]] = null;
         playerNames[instructions[1]] = null;
         const { error:kickError } = await supabaseServicer.from(playerTable).update({
@@ -84,10 +84,10 @@ Deno.serve(async (req)=>{
         else{
             //Check for an open slot, or make one if the current array isn't @ maxPlayers.
             var openSpace = playerIds.indexOf(null);
-            if(openSpace == -1){
-              if(playerIds.length < maxPlayers){
-                playerIds.append(user.id);
-                playerNames.append(("User "+openSpace));
+            if(openSpace == -1){ //No explicitly open spot
+              if(playerIds.length < maxPlayers){ //The storage array isn't appropriately sized. (Increase it)
+                playerIds.push(user.id);
+                playerNames.push(("User "+openSpace));
               }
               else{
                 throw new Error("Game is full");

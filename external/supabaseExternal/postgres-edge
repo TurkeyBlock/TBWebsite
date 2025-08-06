@@ -11,6 +11,25 @@ function getNewBoard(gameName:string){
   return newBoard;
 }
 
+function getNewGame(gameName:string){
+  let newGame = {};
+  if(gameName == "ConnectFour"){
+    newGame = {
+      'board':getNewBoard(gameName),
+      'token':"X",
+      'col':0,
+      'row':0
+    }
+  }
+  else if(gameName == "TicTacToe"){
+    newGame = {
+      'board':getNewBoard(gameName),
+      'nextToken':"X"
+    }
+  }
+  return newGame;
+}
+
 function validatePlayerTurn(playerIds:string[], currentPlayerIndex:number, requestingPlayerId:string){
   if(playerIds.length > currentPlayerIndex && playerIds[currentPlayerIndex] == requestingPlayerId){
     return true;
@@ -54,6 +73,7 @@ Deno.serve(async (req)=>{
         status: 401
       });
     }
+    //console.log("Is Authenticated Anonymous = " + user.is_anonymous);
     const keyTable = 'GameKeys';
     const playerTable = 'GamePlayers'
     //-----------------------------------------------------------------------------------------------------------------
@@ -63,21 +83,28 @@ Deno.serve(async (req)=>{
     //There is no GET method atm. All GETs are processed as an actionless PATCH.
     //This is because the GET methods don't appear to allow the clients to pass data for their request.
     const reqBody = await req.json();
+    if(reqBody.table!=="TicTacToe" && reqBody.table!=="ConnectFour"){
+      throw new Error("Unavailable table requested");
+    }
+
+    //Used in both PATCH and POST
+    let newGamestate;
+
     if (req.method == 'GET' || req.method == 'PATCH') {
       const { data: gameArray, error:gameArrayError } = await supabaseServicer.from(reqBody.table).select('*').eq('id', reqBody.id).limit(1);
 
       if (gameArrayError || gameArray.length == 0) { throw new Error("Issue retrieving row using GET/PATCH");}
       const gameName = gameArray[0].name;
-      const game = gameArray[0].game;
+      const game = gameArray[0].game; 
 
-      let action; //User-requested reqBody action
+
       if (req.method == 'GET' || reqBody.action == null) {
         returnBody = game;
-      } else {
+      } else{
         //update game
         //confirm that some action was actually requested.
         if (reqBody.action == null) { throw new Error("No action provided");}
-        action = reqBody.action.split(" ");
+        const instructions = reqBody.action.split(" ");
         
         //grab relevant player turn/owner data
         const { data:playerValidatorsArray, error:playerValidatorsArrayError } = await supabaseServicer.from(playerTable).select('playerIds, currentPlayerIndex, maxPlayers').eq('id', reqBody.id).limit(1);
@@ -90,23 +117,16 @@ Deno.serve(async (req)=>{
 
         if(thisUserIndex==-1){throw new Error("User is not in the game's player list");}
 
-        //Reset
-        
-        let newGamestate;
-
-        if (action[0] == "RESET"){
-          if (reqBody.table == "TicTacToe" || reqBody.table == "ConnectFour") {
-            newGamestate = {
-              board: getNewBoard(reqBody.table),
-              nextToken: 'X'
-            }
-          }
+        //Reset action
+        if (instructions[0] == "RESET"){
+          newGamestate = getNewGame(reqBody.table);
+          console.log(newGamestate);
           const { error:resetError } = await supabaseServicer.from(reqBody.table).update({
             game:newGamestate
           }).eq('id', reqBody.id);
         }
-        //Move action
-        else if (action[0] == "MOVE") {
+        //Move actions
+        else if (instructions[0] == "MOVE") {
           //First, validate the user's turn.
           if(!validatePlayerTurn(playerIds,currentPlayerIndex,user.id) && JSON.stringify(game.board)!=JSON.stringify(getNewBoard(reqBody.table))){
             throw new Error("Issue validating requesting player's action in the turn order");
@@ -114,7 +134,7 @@ Deno.serve(async (req)=>{
 
           //Second, validate the action at hand
           if(reqBody.table == "TicTacToe"){
-            let position = action[1];
+            let position = instructions[1];
             if (game.board[position] == null) {
               let newBoard = game.board;
               newBoard[position] = game.nextToken;
@@ -130,7 +150,7 @@ Deno.serve(async (req)=>{
           } 
           else if (reqBody.table == "ConnectFour") {
             let newToken = game.nextToken == "X" ? "O" : "X";
-            let col = action[1];
+            let col = instructions[1];
             let rowResult = -1;
             let newBoard = game.board.map((innerArray)=>[
               ...innerArray
@@ -169,7 +189,7 @@ Deno.serve(async (req)=>{
       }
     }
     //Creation of a game request
-    else{ //POST
+    else{
       if (user.is_anonymous) {
         throw new Error("Invalid method; game creation is unavailable to guest accounts");
       }
@@ -212,17 +232,11 @@ Deno.serve(async (req)=>{
         }
 
         //Use generated ID to create corresponding GAME row
-        let newBoard = getNewBoard(reqBody.table);
-        let newToken = 'X';
-        let game = {
-          board:newBoard,
-          nextToken:newToken
-        }
-
+        newGamestate = getNewGame(reqBody.table);
         const {error: gameTableError } = await supabaseServicer.from(reqBody.table).insert({
           'id': newIdVal,
           'name': 'userTable',
-          'game': game
+          'game':newGamestate
         });
         if (gameTableError) {
           throw new Error("Failed to create Game Table");
@@ -246,7 +260,7 @@ Deno.serve(async (req)=>{
       status: 200
     });
   } catch (error) {
-    console.error(error);
+    console.log(error);
     return new Response(JSON.stringify({
       error: error.message
     }), {

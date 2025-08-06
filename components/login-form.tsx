@@ -40,7 +40,7 @@ export function LoginForm({
       });
       if (error) throw error;
       // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push("/protected/games");
+      router.push("/");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -52,9 +52,9 @@ export function LoginForm({
     const supabase = createClient();
     setIsLoadingGuest(true);
     setError(null);
-
-    const {data} = await supabase.auth.getSession()
     try {
+      const {data, error} = await supabase.auth.getSession()
+      if (error) throw error;
       if(data.session){
         console.log("An authenticated session is already active");
       }else{
@@ -62,7 +62,7 @@ export function LoginForm({
         const { error } = await supabase.auth.signInAnonymously();
         if (error) throw error;
       }
-      router.push("/protected/games");
+      router.push("/");
     }catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {

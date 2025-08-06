@@ -1,9 +1,9 @@
 "use client"
 import styles from "./page.module.css";
 
-import { useEffect, useState} from "react";
+import {useState, useEffect} from "react";
 import { createClient } from '@/lib/supabase/client';
-import {callSupabase} from '@/app/_components/games/_supabaseEdgeCaller';
+import {getSupabaseGame, upsertSupabaseGame, upsertSupabaseGamePlayers} from '@/app/_components/games/_supabaseEdgeCaller';
 
 import {Sidebar} from '@/app/_components/games/sidebar/page';
 import {PlayerDisplay} from '@/app/_components/games/playerDisplay/page';
@@ -32,70 +32,70 @@ const TicTacToe = () => {
   //Handle: if id =  null, you're doing singleplayer
   const [game, setGame] = useState(newGame);
   
-  //Game channel subscription
   useEffect(() => {
-
-    async function getUserId(){
-      const supabase = await createClient();
-      const {data:supabaseSession} = await supabase.auth.getSession();
-      setUserId(supabaseSession.session.user.id);
-    }
-    getUserId();
-
-    //Induce singleplayer
-    if(gameId!=null){
-      //Boot the client-side-render of the game, fetched from database
-      async function initGameState() {
-        const payload = await callSupabase("GET", tableName, gameId, null, null);
-        const returnedGame = payload.data;
-        console.log(returnedGame);
-        if(returnedGame==undefined){
-          setErrorMessage("Lobby not found")
-          setInLobby(false);
-          setGameId(null);
-          return;
+        console.log("pip!");
+        async function getUserId(){
+            const {data:supabaseSession} = await createClient().auth.getSession();
+            if(supabaseSession.session){
+                setUserId(supabaseSession.session.user.id);
+            }
         }
-        //TicTacToe JSON contains board and token
-        setGame(returnedGame);
-        calculateWinner(returnedGame.board);
-      };
-      initGameState();
-      setInLobby(true);
+        getUserId();
+        //Induce singleplayer
+        if(gameId!=null){
+          //Boot the client-side-render of the game, fetched from database
+          async function initGameState() {
+              const payload = await getSupabaseGame(tableName, gameId);
+              const game = payload.game;
+              if(game==undefined){
+                  setErrorMessage("Lobby not found")
+                  setInLobby(false);
+                  setGameId(null);
+                  return;
+              }
+              //TicTacToe JSON contains board and token
+              setGame(game);
+              calculateWinner(game.board);
+          };
+          initGameState();
+          setInLobby(true);
 
-      //Subscribe the game's channel, inform client of table updates (and joins/leaves)
-      callSupabase("PlayerTracking", tableName, gameId, "JOIN", gameKey);
-      const channel = createClient()
-        .channel(`${gameId}`)
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
+          //Subscribe the game's channel, inform client of table updates (and joins/leaves)
+          const channel = createClient()
+          .channel(`${gameId}`)
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
           (payload) => {
-            console.log(payload.new);
-            const returnedGame = payload.new.game;
-            console.log(returnedGame);
-            setGame(returnedGame);
-            calculateWinner(returnedGame);
-            setErrorMessage("");
+              const returnedGame = payload.new.game;
+              setGame(returnedGame);
+              calculateWinner(returnedGame);
+              setErrorMessage("");
           }
-        )
-        .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'GamePlayers', filter: `id=eq.${gameId}`},
+          )
+          .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'GamePlayers', filter: `id=eq.${gameId}`},
           (payload) => {
-            setPlayerIds(payload.new.playerIds);
-            setPlayerNames(payload.new.playerNames);
-            setCurrentPlayerIndex(payload.new.currentPlayerIndex);
+              setPlayerIds(payload.new.playerIds);
+              setPlayerNames(payload.new.playerNames);
+              setCurrentPlayerIndex(payload.new.currentPlayerIndex);
           }
-        )
-        .subscribe();
-      return () => {
-        console.log("Leaving the SQL-tracking channels")
-        callSupabase("PlayerTracking", tableName, gameId, "LEAVE", gameKey);
-        createClient().removeChannel(channel)
-      }
-    }
-    else{
-      resetGame();
-    }
-  }, [gameId]);
-  
-  function calculateWinner(squares){
+          )
+          .subscribe();
+
+          //Insert self after subscribing so it updates the GUI appropriately
+          upsertSupabaseGamePlayers(gameId, gameKey,"JOIN");
+          
+          return () => {
+              upsertSupabaseGamePlayers(gameId, gameKey,"LEAVE");
+              createClient().removeChannel(channel)
+          }
+        }
+        else{
+            resetGame;
+        }
+    }, [gameId]);
+
+
+
+  function calculateWinner(board){
     const lines = [
       [0, 1, 2],
       [3, 4, 5],
@@ -109,7 +109,7 @@ const TicTacToe = () => {
 
     for (let i = 0; i < lines.length; i++) {
       const [a, b, c] = lines[i];
-      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
         setWinnerArray([a,b,c]);
         return;
       }
@@ -135,7 +135,7 @@ const TicTacToe = () => {
       //await api response & set login warning based on result
       try{
         console.log("Sending supabase patch call");
-        callSupabase("PATCH", tableName, gameId, ("MOVE "+index), gameKey);
+        upsertSupabaseGame("PATCH", tableName, gameId, gameKey, ("MOVE "+index));
       }
       catch{
         console.log("Client unable to send event. Try refreshing your page.")
@@ -143,15 +143,15 @@ const TicTacToe = () => {
     }
     //Singleplayer
     else{
-      const squares = [...game.board]
-      squares[index] = game.nextToken;
+      const updatedBoard = [...game.board]
+      updatedBoard[index] = game.nextToken;
 
       const updatedGame = {
-        board: squares,
+        board: updatedBoard,
         nextToken: game.nextToken === "X" ? "O" : "X",
       };
       setGame(updatedGame);
-      calculateWinner(squares);
+      calculateWinner(updatedBoard);
     }
   };
 
@@ -161,7 +161,7 @@ const TicTacToe = () => {
       //await api response & set login warning based on result
       try{
         console.log("Sending supabase reset call");
-        callSupabase("PATCH", tableName, gameId, "RESET", gameKey);
+        upsertSupabaseGame("PATCH", tableName, gameId, gameKey, "RESET");
       }
       catch{
         console.log("Client unable to send event. Try refreshing your page.")
