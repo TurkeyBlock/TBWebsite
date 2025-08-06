@@ -33,7 +33,6 @@ const TicTacToe = () => {
   const [game, setGame] = useState(newGame);
   
   useEffect(() => {
-        console.log("pip!");
         async function getUserId(){
             const {data:supabaseSession} = await createClient().auth.getSession();
             if(supabaseSession.session){
@@ -89,7 +88,7 @@ const TicTacToe = () => {
           }
         }
         else{
-            resetGame;
+            resetGame();
         }
     }, [gameId]);
 
@@ -179,7 +178,7 @@ const TicTacToe = () => {
       {/*main holds the sidebar and main-page flex boxes*/}
 
       {/*Game-create and game-join caller. Does not hold the subscriber TO the game, only the create and join logic.*/}
-      <Sidebar tableName={tableName} setGameId={setGameId} setGameKey={setGameKey} setInLobby={setInLobby} inLobby={inLobby}/>
+      <Sidebar setGameId={setGameId} setGameKey={setGameKey} setInLobby={setInLobby} inLobby={inLobby}/>
       
       <div className={`color1 ${styles.appContainer}`} style={{padding: "0px", flexGrow:"1"}}>
         {/*game page flex box*/}

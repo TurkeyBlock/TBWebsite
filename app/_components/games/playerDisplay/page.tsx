@@ -4,7 +4,6 @@ import styles from "./page.module.css";
 import {upsertSupabaseGamePlayers} from '@/app/_components/games/_supabaseEdgeCaller';
 
 interface Props {
-    tableName:string,
     playerNames:string[],
     thisPlayerIndex:number,
 
@@ -15,7 +14,7 @@ interface Props {
 }
 
 
-export const PlayerDisplay = ({tableName, playerNames=["Error - improper leave/rejoin"], thisPlayerIndex=0, gameId, gameKey, currentPlayerIndex, hide=false}:Props) => {
+export const PlayerDisplay = ({playerNames=["Error - improper leave/rejoin"], thisPlayerIndex=0, gameId, gameKey, currentPlayerIndex, hide=false}:Props) => {
     const kickPlayer = async (index:number) => {
         console.log("Calling...")
         await upsertSupabaseGamePlayers(gameId, gameKey, ("KICK "+index));
@@ -23,8 +22,8 @@ export const PlayerDisplay = ({tableName, playerNames=["Error - improper leave/r
     }
     return(
         <div className={`color3 ${styles.card}`} style={{display:hide?"none":""}}>
-            playerNames length = {playerNames.length}
-            current index = {currentPlayerIndex}
+            <p>playerNames length = {playerNames.length}</p>
+            <p>current index = {currentPlayerIndex}</p>
             <div className={`color3`}>
                 {playerNames.map((cell, index) => (
                     <div

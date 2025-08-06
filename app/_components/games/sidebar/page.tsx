@@ -63,7 +63,6 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
             setInLobby(false);
             return;
         }
-        console.log('updated Id');
         setGameId(inputGameId);
         setGameKey(inputGameKey);
     }

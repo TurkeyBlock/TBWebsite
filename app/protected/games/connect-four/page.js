@@ -100,7 +100,7 @@ const ConnectFour = () => {
             }
         }
         else{
-            resetGame;
+            resetGame();
         }
     }, [gameId]);
 
@@ -229,6 +229,8 @@ const ConnectFour = () => {
 
 
             <div className={`color1 ${styles.appContainer}`}>
+                <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey} thisPlayerIndex={playerIds.indexOf(userId)} currentPlayerIndex={currentPlayerIndex} hide={!inLobby}/>
+
                 {/*main page flex box*/}
                 <div className={styles.appContainer}>
                     <h1 style={{fontSize:"8vmin", marginBottom:'2vmin'}}>{

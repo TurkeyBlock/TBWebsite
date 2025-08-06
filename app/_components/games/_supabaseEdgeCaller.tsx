@@ -15,7 +15,7 @@ interface UpsertReturn {
 }
 interface GetReturn {
   game:{
-    board:Object,
+    board:object,
     [key: string]: unknown;
   }|null
   error:string|null
