@@ -150,7 +150,7 @@ const TicTacToe = () => {
         nextToken: game.nextToken === "X" ? "O" : "X",
       };
       setGame(updatedGame);
-      calculateWinner(updatedBoard);
+      calculateWinner(updatedGame);
     }
   };
 
