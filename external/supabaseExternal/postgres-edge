@@ -16,7 +16,7 @@ function getNewGame(gameName:string){
   if(gameName == "ConnectFour"){
     newGame = {
       'board':getNewBoard(gameName),
-      'token':"X",
+      'nextToken':"X",
       'col':0,
       'row':0
     }
