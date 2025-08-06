@@ -129,18 +129,18 @@ const ConnectFour = () => {
         const col = funcGame.col;
         const row = funcGame.row;
         const nextToken = funcGame.nextToken=='X'?'O':'X'; //funcGame.token is the token that WILL be placed. We need to check what WAS placed.
-
         //console.log("Checking for ",token," win.");
-        const flood = (col, row, incCol, incRow) =>{
+        const flood = (curCol, curRow, incCol, incRow) =>{
+            console.log(board);
             //Skip the starting token
-            col+=incCol;
-            row+=incRow;
+            curCol+=incCol;
+            curRow+=incRow;
 
             let connectedPositions = [];
-            while(board[col] && board[col][row]==nextToken){
-                connectedPositions.push([col,row]);
-                col+=incCol;
-                row+=incRow;
+            while(board[curCol] && board[curCol][curRow]==nextToken){
+                connectedPositions.push([curCol,curRow]);
+                curCol+=incCol;
+                curRow+=incRow;
             }
             return connectedPositions;
         }

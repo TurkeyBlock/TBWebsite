@@ -54,7 +54,7 @@ const TicTacToe = () => {
               }
               //TicTacToe JSON contains board and token
               setGame(game);
-              calculateWinner(game.board);
+              calculateWinner(game);
           };
           initGameState();
           setInLobby(true);
@@ -94,7 +94,7 @@ const TicTacToe = () => {
 
 
 
-  function calculateWinner(board){
+  function calculateWinner(gamestate){
     const lines = [
       [0, 1, 2],
       [3, 4, 5],
@@ -105,7 +105,7 @@ const TicTacToe = () => {
       [0, 4, 8],
       [2, 4, 6],
     ];
-
+    let board = gamestate.board;
     for (let i = 0; i < lines.length; i++) {
       const [a, b, c] = lines[i];
       if (board[a] && board[a] === board[b] && board[a] === board[c]) {

@@ -150,7 +150,7 @@ Deno.serve(async (req)=>{
           } 
           else if (reqBody.table == "ConnectFour") {
             let newToken = game.nextToken == "X" ? "O" : "X";
-            let col = instructions[1];
+            let col = Number(instructions[1]);
             let rowResult = -1;
             let newBoard = game.board.map((innerArray)=>[
               ...innerArray
