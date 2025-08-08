@@ -21,6 +21,7 @@ const TicTacToe = () => {
   const [playerIds, setPlayerIds] = useState([]);
   const [playerNames, setPlayerNames] = useState([]);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(null);
+  const [maxPlayers, setMaxPlayers] = useState(null);
 
   const [errorMessage, setErrorMessage] = useState("");
   const [winnerArray, setWinnerArray] = useState([]);
@@ -33,66 +34,74 @@ const TicTacToe = () => {
   const [game, setGame] = useState(newGame);
   
   useEffect(() => {
-        async function getUserId(){
-            const {data:supabaseSession} = await createClient().auth.getSession();
-            if(supabaseSession.session){
-                setUserId(supabaseSession.session.user.id);
-            }
-        }
-        getUserId();
-        //Induce singleplayer
-        if(gameId!=null){
-          //Boot the client-side-render of the game, fetched from database
-          async function initGameState() {
-              const payload = await getSupabaseGame(tableName, gameId);
-              const game = payload.game;
-              if(game==undefined){
-                  setErrorMessage("Lobby not found")
-                  setInLobby(false);
-                  setGameId(null);
-                  return;
-              }
-              //TicTacToe JSON contains board and token
-              setGame(game);
-              calculateWinner(game);
-          };
-          initGameState();
-          setInLobby(true);
-
-          //Subscribe the game's channel, inform client of table updates (and joins/leaves)
-          const channel = createClient().channel(`${gameId}`);
-          async function orderOfUpdate(){
-            await channel.on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
-            (payload) => {
-                const returnedGame = payload.new.game;
-                setGame(returnedGame);
-                calculateWinner(returnedGame);
-                setErrorMessage("");
-            })
-            .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'GamePlayers', filter: `id=eq.${gameId}`},
-            (payload) => {
-                setPlayerIds(payload.new.playerIds);
-                setPlayerNames(payload.new.playerNames);
-                setCurrentPlayerIndex(payload.new.currentPlayerIndex);
-            })
-            .subscribe();
-
-            //Submit self to edge function after subscribing. (Updates player table)
-            //If the player table were updated too soon, then local user wouldn't recieve the information,
-            //necessitating a get/fetch edge function
-            upsertSupabaseGamePlayers(gameId, gameKey,"JOIN");
+    setInLobby(false);
+    async function getUserId(){
+      const {data:supabaseSession} = await createClient().auth.getSession();
+      if(supabaseSession.session){
+          setUserId(supabaseSession.session.user.id);
+      }
+    }
+    getUserId();
+    //Induce singleplayer
+    if(gameId!=null){
+      //Boot the client-side-render of the game, fetched from database
+      async function initGameState() {
+          const payload = await getSupabaseGame(tableName, gameId);
+          const game = payload.game;
+          if(game==undefined){
+              setErrorMessage("Lobby not found")
+              setInLobby(false);
+              setGameId(null);
+              return;
           }
-          orderOfUpdate();
+          //TicTacToe JSON contains board and token
+          setGame(game);
+          calculateWinner(game);
+      };
+      initGameState();
+      setInLobby(true);
 
-          return () => {
-              upsertSupabaseGamePlayers(gameId, gameKey,"LEAVE");
-              createClient().removeChannel(channel)
-          }
-        }
-        else{
-            resetGame();
-        }
-    }, [gameId]);
+      //Subscribe the game's channel, inform client of table updates (and joins/leaves)
+      const channel = createClient().channel(`${gameId}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
+      (payload) => {
+        const returnedGame = payload.new.game;
+        setGame(returnedGame);
+        calculateWinner(returnedGame);
+        setErrorMessage("");
+      })
+      .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'GamePlayers', filter: `id=eq.${gameId}`},
+      (payload) => {
+        setPlayerIds(payload.new.playerIds);
+        setPlayerNames(payload.new.playerNames);
+        setCurrentPlayerIndex(payload.new.currentPlayerIndex);
+        setMaxPlayers(payload.new.maxPlayers);
+      })
+      //Monitoring connection & posting to the player list after confirming a connection was made
+      .subscribe((status) => {
+        console.log('subscribe_status, '+status);
+      });
+
+      async function initPlayerState() {
+        //Payload is recieved to avoid race conditions between sending this update and recieving it 
+        // on the *possibly active* channel.
+        const payload = await upsertSupabaseGamePlayers(gameId, gameKey,"JOIN")
+        setPlayerIds(payload.playerIds);
+        setPlayerNames(payload.playerNames);
+        setCurrentPlayerIndex(payload.currentPlayerIndex);
+        setMaxPlayers(payload.maxPlayers);
+      }
+      initPlayerState();
+
+      return () => {
+        upsertSupabaseGamePlayers(gameId, gameKey,"LEAVE");
+        createClient().removeChannel(channel)
+      }
+    }
+    else{
+      resetGame();
+    }
+  }, [gameId]);
 
 
 
@@ -186,7 +195,7 @@ const TicTacToe = () => {
         {/*game page flex box*/}
 
         <div className={styles.appContainer}>
-          <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey} thisPlayerIndex={playerIds.indexOf(userId)} currentPlayerIndex={currentPlayerIndex} hide={!inLobby}/>
+          <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey} thisPlayerIndex={playerIds.indexOf(userId)} currentPlayerIndex={currentPlayerIndex} maxPlayers = {maxPlayers} hide={!inLobby}/>
           <h1 className = {styles.gameMode}>{
             !inLobby
             ? 'Singleplayer':

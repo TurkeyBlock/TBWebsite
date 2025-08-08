@@ -1,29 +1,37 @@
+"use client"
+
 import React from 'react';
 import styles from "./page.module.css";
 
 import {upsertSupabaseGamePlayers} from '@/app/_components/games/_supabaseEdgeCaller';
 
 interface Props {
-    playerNames:string[],
+    playerNames:(string|null)[],
     thisPlayerIndex:number,
 
     gameId:number,
     gameKey:string,
     currentPlayerIndex:number,
+    maxPlayers:number,
+    
     hide:boolean
 }
 
 
-export const PlayerDisplay = ({playerNames=["Error - improper leave/rejoin"], thisPlayerIndex=0, gameId, gameKey, currentPlayerIndex, hide=false}:Props) => {
+export const PlayerDisplay = ({playerNames=["Error"], thisPlayerIndex=0, gameId, gameKey, currentPlayerIndex, maxPlayers = 2, hide=false}:Props) => {
     const kickPlayer = async (index:number) => {
         console.log("Calling...")
         await upsertSupabaseGamePlayers(gameId, gameKey, ("KICK "+index));
         console.log("Calling completed.")
     }
+    while(playerNames.length < maxPlayers){
+        playerNames.push(null);
+    }
     return(
         <div className={`color3 ${styles.card}`} style={{display:hide?"none":""}}>
             <p>playerNames length = {playerNames.length}</p>
             <p>current index = {currentPlayerIndex}</p>
+            
             <div className={`color3`}>
                 {playerNames.map((cell, index) => (
                     <div
@@ -35,7 +43,15 @@ export const PlayerDisplay = ({playerNames=["Error - improper leave/rejoin"], th
                     }}
                     >
                     <button className={styles.button} onClick={() => kickPlayer(index)}>Kick</button>
-                    <div className={styles.text} style={{backgroundColor:currentPlayerIndex==index?"green":""}}>{cell==null?"Waiting for player...":cell}{thisPlayerIndex==index?"*":""}</div>
+                    <div className={styles.text} style={{
+                        backgroundColor: 
+                            currentPlayerIndex==index?"green":
+                            currentPlayerIndex==-1?"#5b8517ff":
+                            "",
+                        fontWeight:thisPlayerIndex==index?"bold":""
+                        
+                    }}>
+                        {cell==null?"Waiting for player...":cell}</div>
                     </div>
                 ))}
             </div>
