@@ -75,7 +75,6 @@ export async function upsertSupabaseGame(functionMethod:"PATCH"|"POST", tableNam
     },
     body,
   });
-  console.log(returnBody);
   if(returnBody){
     funcReturn.id = returnBody.id;
     funcReturn.key = returnBody.key;

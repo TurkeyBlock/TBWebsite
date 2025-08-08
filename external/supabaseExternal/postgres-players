@@ -24,6 +24,8 @@ Deno.serve(async (req)=>{
     // Get the session or user object
     const token = req.headers.get('Authorization')?.replace('Bearer ', '');
     const { data: { user }, error } = await supabaseClient.auth.getUser(token);
+    console.log(user.user_metadata);
+    console.log(user.user_metadata.displayName);
     if (error || !user) {
       return new Response(JSON.stringify({
         error: 'Unauthorized'
@@ -87,14 +89,14 @@ Deno.serve(async (req)=>{
             if(openSpace == -1){ //No explicitly open spot
               if(playerIds.length < maxPlayers){ //The storage array isn't appropriately sized. (Increase it)
                 playerIds.push(user.id);
-                playerNames.push(("User "+openSpace));
+                playerNames.push(user.user_metadata.displayName);
               }
               else{
                 throw new Error("Game is full");
               }
             }else{
               playerIds[openSpace] = user.id;
-              playerNames[openSpace] = ("User "+openSpace) //Change to username when implimented
+              playerNames[openSpace] = user.user_metadata.displayName //Change to username when implimented
             }
 
 

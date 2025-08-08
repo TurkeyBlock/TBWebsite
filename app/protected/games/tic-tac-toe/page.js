@@ -60,28 +60,30 @@ const TicTacToe = () => {
           setInLobby(true);
 
           //Subscribe the game's channel, inform client of table updates (and joins/leaves)
-          const channel = createClient()
-          .channel(`${gameId}`)
-          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
-          (payload) => {
-              const returnedGame = payload.new.game;
-              setGame(returnedGame);
-              calculateWinner(returnedGame);
-              setErrorMessage("");
-          }
-          )
-          .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'GamePlayers', filter: `id=eq.${gameId}`},
-          (payload) => {
-              setPlayerIds(payload.new.playerIds);
-              setPlayerNames(payload.new.playerNames);
-              setCurrentPlayerIndex(payload.new.currentPlayerIndex);
-          }
-          )
-          .subscribe();
+          const channel = createClient().channel(`${gameId}`);
+          async function orderOfUpdate(){
+            await channel.on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
+            (payload) => {
+                const returnedGame = payload.new.game;
+                setGame(returnedGame);
+                calculateWinner(returnedGame);
+                setErrorMessage("");
+            })
+            .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'GamePlayers', filter: `id=eq.${gameId}`},
+            (payload) => {
+                setPlayerIds(payload.new.playerIds);
+                setPlayerNames(payload.new.playerNames);
+                setCurrentPlayerIndex(payload.new.currentPlayerIndex);
+            })
+            .subscribe();
 
-          //Insert self after subscribing so it updates the GUI appropriately
-          upsertSupabaseGamePlayers(gameId, gameKey,"JOIN");
-          
+            //Submit self to edge function after subscribing. (Updates player table)
+            //If the player table were updated too soon, then local user wouldn't recieve the information,
+            //necessitating a get/fetch edge function
+            upsertSupabaseGamePlayers(gameId, gameKey,"JOIN");
+          }
+          orderOfUpdate();
+
           return () => {
               upsertSupabaseGamePlayers(gameId, gameKey,"LEAVE");
               createClient().removeChannel(channel)

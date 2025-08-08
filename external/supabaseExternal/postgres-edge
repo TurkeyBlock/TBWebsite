@@ -120,9 +120,11 @@ Deno.serve(async (req)=>{
         //Reset action
         if (instructions[0] == "RESET"){
           newGamestate = getNewGame(reqBody.table);
-          console.log(newGamestate);
           const { error:resetError } = await supabaseServicer.from(reqBody.table).update({
             game:newGamestate
+          }).eq('id', reqBody.id);
+          const { error:resetPlayerError } = await supabaseServicer.from(playerTable).update({
+            currentPlayerIndex:-1
           }).eq('id', reqBody.id);
         }
         //Move actions

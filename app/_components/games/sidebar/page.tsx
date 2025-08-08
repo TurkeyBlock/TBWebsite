@@ -48,7 +48,7 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
     function handleJoin(event:any){
         event.preventDefault(); //Do not refresh the page
         if(inLobby){ //Leave lobby
-            console.log("leaving lobby");
+            console.log("Sidebar: leaving lobby");
             setGameId(null);
             setGameKey("");
             setChosenGameKey('');

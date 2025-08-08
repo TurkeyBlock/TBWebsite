@@ -1,5 +1,11 @@
 "use client";
 
+/*
+const { data, error } = await supabase.auth.getUser()
+const displayName = data.user.user_metadata.display_name
+*/
+
+
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -20,11 +26,17 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  //const [displayName, setDisplayName] = useState("");
+  const [displayNameGuest, setDisplayNameGuest] = useState("");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [error, setError] = useState<string | null>(null);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingGuest, setIsLoadingGuest] = useState(false);
+
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -48,11 +60,12 @@ export function LoginForm({
     }
   };
 
-  async function anonyLogin(){
+  const handleGuestLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     const supabase = createClient();
     setIsLoadingGuest(true);
     setError(null);
-    try {
+  try {
       const {data, error} = await supabase.auth.getSession()
       if (error) throw error;
       if(data.session){
@@ -60,7 +73,13 @@ export function LoginForm({
       }else{
         console.log("Making an Anonymous user");
         const { error } = await supabase.auth.signInAnonymously();
+        const { data: updateDisplayName, error: updateDisplayNameError } = await supabase.auth.updateUser({
+          data:{
+            displayName: `${displayNameGuest}`,
+          }
+        })
         if (error) throw error;
+        console.log("Guest account created w/ "+`${updateDisplayName}`);
       }
       router.push("/");
     }catch (error: unknown) {
@@ -68,7 +87,7 @@ export function LoginForm({
     } finally {
       setIsLoadingGuest(false);
     }
-  }
+  };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -83,6 +102,17 @@ export function LoginForm({
           <form onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
+                {/*
+                <Label htmlFor="email">Display Name</Label>
+                <Input
+                  id="displayName"
+                  type="displayName"
+                  placeholder="Guest"
+                  required
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                />
+                */}
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
@@ -124,14 +154,35 @@ export function LoginForm({
               >
                 Sign up
               </Link>
-              {" "}or...{" "}
             </div>
           </form>
-          <div className="mt-4 text-center text-sm">
-            <Button style={{backgroundColor:"red"}} onClick={anonyLogin}>
-            {isLoadingGuest ? "Loading..." : "Continue as Guest"}
-            </Button>
-          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Anonymous Login</CardTitle>
+          <CardDescription>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleGuestLogin}>
+            <div className="flex flex-col gap-6">
+              <div className="grid gap-2">
+                <Label htmlFor="email">Display Name</Label>
+                <Input
+                  id="displayNameGuest"
+                  type="displayNameGuest"
+                  placeholder="Guest"
+                  required
+                  value={displayNameGuest}
+                  onChange={(e) => setDisplayNameGuest(e.target.value)}
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoadingGuest}>
+                {isLoadingGuest ? "Logging in..." : "Login"}
+              </Button>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>
