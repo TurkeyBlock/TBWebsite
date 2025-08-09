@@ -78,7 +78,7 @@ export function LoginForm({
             displayName: `${displayNameGuest}`,
           }
         })
-        if (error) throw error;
+        if (updateDisplayNameError) throw error;
         console.log("Guest account created w/ "+`${updateDisplayName}`);
       }
       router.push("/");
