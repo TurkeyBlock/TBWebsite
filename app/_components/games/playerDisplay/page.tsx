@@ -6,6 +6,8 @@ import styles from "./page.module.css";
 import {upsertSupabaseGamePlayers} from '@/app/_components/games/_supabaseEdgeCaller';
 
 interface Props {
+    tableName:string,
+    
     playerNames:(string|null)[],
     thisPlayerIndex:number,
 
@@ -18,10 +20,10 @@ interface Props {
 }
 
 
-export const PlayerDisplay = ({playerNames=["Error"], thisPlayerIndex=0, gameId, gameKey, currentPlayerIndex, maxPlayers = 2, hide=false}:Props) => {
+export const PlayerDisplay = ({tableName, playerNames=["Error"], thisPlayerIndex=0, gameId, gameKey, currentPlayerIndex, maxPlayers = 2, hide=false}:Props) => {
     const kickPlayer = async (index:number) => {
         console.log("Calling...")
-        await upsertSupabaseGamePlayers(gameId, gameKey, ("KICK "+index));
+        await upsertSupabaseGamePlayers(tableName, gameId, gameKey, ("KICK "+index));
         console.log("Calling completed.")
     }
     while(playerNames.length < maxPlayers){

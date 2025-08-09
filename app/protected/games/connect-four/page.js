@@ -95,7 +95,7 @@ const ConnectFour = () => {
                 async function initPlayerState() {
                     //Payload is recieved to avoid race conditions between sending this update and recieving it 
                     // on the *possibly active* channel.
-                    const payload = await upsertSupabaseGamePlayers(gameId, gameKey,"JOIN")
+                    const payload = await upsertSupabaseGamePlayers(tableName, gameId, gameKey,"JOIN")
                     setPlayerIds(payload.playerIds);
                     setPlayerNames(payload.playerNames);
                     setCurrentPlayerIndex(payload.currentPlayerIndex);
@@ -104,8 +104,8 @@ const ConnectFour = () => {
                 initPlayerState();
 
                     return () => {
-                        upsertSupabaseGamePlayers(gameId, gameKey,"LEAVE");
-                        createClient().removeChannel(channel)
+                        createClient().removeChannel(channel);
+                        upsertSupabaseGamePlayers(tableName, gameId, gameKey,"LEAVE");
                     }
             }
         else{

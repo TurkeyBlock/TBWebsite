@@ -192,7 +192,7 @@ Deno.serve(async (req)=>{
     }
     //Creation of a game request
     else{
-      if (user.is_anonymous) {
+      if (false/*user.is_anonymous*/) {
         throw new Error("Invalid method; game creation is unavailable to guest accounts");
       }
       else {
@@ -218,7 +218,7 @@ Deno.serve(async (req)=>{
         }).select('*');
 
         if (keyTableError) {
-          console.error('Error inserting data:', error);
+          console.error('Error inserting data:', keyTableError);
           throw new Error("Failed to create Game keys");
         }
         let newKeyVal = newKey[0].editKey;

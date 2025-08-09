@@ -24,8 +24,6 @@ Deno.serve(async (req)=>{
     // Get the session or user object
     const token = req.headers.get('Authorization')?.replace('Bearer ', '');
     const { data: { user }, error } = await supabaseClient.auth.getUser(token);
-    console.log(user.user_metadata);
-    console.log(user.user_metadata.displayName);
     if (error || !user) {
       return new Response(JSON.stringify({
         error: 'Unauthorized'
@@ -46,7 +44,12 @@ Deno.serve(async (req)=>{
     let returnBody = null;
     const supabaseServicer = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
     const reqBody = await req.json();
-
+    const {data:gameExistsBool, error:gameExistsError } = await supabaseServicer.from(reqBody.table).select('id').eq('id', reqBody.id).limit(1);
+    if (gameExistsError) {
+      throw new Error("Issue confirming game's existance in table "+reqBody.table);
+    } else if (gameExistsBool.length == 0) {
+      throw new Error("Game id does not exist in requested table "+reqBody.table);
+    }
     const { data:editKeyArray, error:editKeyArrayError } = await supabaseServicer.from(keyTable).select('editKey, creatorId').eq('id', reqBody.id).limit(1);
     if (editKeyArrayError) {throw new Error("Issue confirming edit key");}
     const creatorId = editKeyArray[0].creatorId;

@@ -47,8 +47,8 @@ const TicTacToe = () => {
       //Boot the client-side-render of the game, fetched from database
       async function initGameState() {
           const payload = await getSupabaseGame(tableName, gameId);
-          const game = payload.game;
-          if(game==undefined){
+          if(payload.error){
+            console.log("Lobby Not Found")
               setErrorMessage("Lobby not found")
               setInLobby(false);
               setGameId(null);
@@ -85,7 +85,7 @@ const TicTacToe = () => {
       async function initPlayerState() {
         //Payload is recieved to avoid race conditions between sending this update and recieving it 
         // on the *possibly active* channel.
-        const payload = await upsertSupabaseGamePlayers(gameId, gameKey,"JOIN")
+        const payload = await upsertSupabaseGamePlayers(tableName, gameId, gameKey,"JOIN")
         setPlayerIds(payload.playerIds);
         setPlayerNames(payload.playerNames);
         setCurrentPlayerIndex(payload.currentPlayerIndex);
@@ -94,8 +94,8 @@ const TicTacToe = () => {
       initPlayerState();
 
       return () => {
-        upsertSupabaseGamePlayers(gameId, gameKey,"LEAVE");
         createClient().removeChannel(channel)
+        upsertSupabaseGamePlayers(tableName, gameId, gameKey,"LEAVE");
       }
     }
     else{
@@ -189,7 +189,7 @@ const TicTacToe = () => {
       {/*main holds the sidebar and main-page flex boxes*/}
 
       {/*Game-create and game-join caller. Does not hold the subscriber TO the game, only the create and join logic.*/}
-      <Sidebar setGameId={setGameId} setGameKey={setGameKey} setInLobby={setInLobby} inLobby={inLobby}/>
+      <Sidebar tableName={tableName} setGameId={setGameId} setGameKey={setGameKey} setInLobby={setInLobby} inLobby={inLobby}/>
       
       <div className={`color1 ${styles.appContainer}`} style={{padding: "0px", flexGrow:"1"}}>
         {/*game page flex box*/}
