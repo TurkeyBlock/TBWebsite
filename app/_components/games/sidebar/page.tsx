@@ -8,7 +8,6 @@ interface Props {
     tableName:string
     setGameId:Dispatch<SetStateAction<string|null>>
     setGameKey:Dispatch<SetStateAction<string>>
-    setInLobby:Dispatch<SetStateAction<boolean>>
     inLobby:boolean,
 }
 const publicLobbies: {[key: string]: string } ={
@@ -16,7 +15,7 @@ const publicLobbies: {[key: string]: string } ={
     ConnectFour:'[6->10]'
 };
 
-export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:Props) => {
+export const Sidebar = ({tableName, setGameId, setGameKey, inLobby}:Props) => {
 
     const [inputGameId, setInputGameId] = useState("");  //Form input for lobby id.
     const [inputGameKey, setInputGameKey] = useState("");  //Form input for lobby key.
@@ -55,7 +54,6 @@ export const Sidebar = ({tableName, setGameId, setGameKey, setInLobby, inLobby}:
             setInputGameId('');
             setInputGameKey('');
 
-            setInLobby(false);
             return;
         }
         setGameId(inputGameId);

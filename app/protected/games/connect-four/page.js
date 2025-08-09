@@ -43,75 +43,97 @@ const ConnectFour = () => {
         col:newGame.col
     });
 
-    useEffect(() => {
-        setInLobby(false);
-        async function getUserId(){
-            const {data:supabaseSession} = await createClient().auth.getSession();
-                if(supabaseSession.session){
-                    setUserId(supabaseSession.session.user.id);
-                }
-            }
-            getUserId();
-            //Induce singleplayer
-            if(gameId!=null){
-                //Boot the client-side-render of the game, fetched from database
-                async function initGameState() {
-                    const payload = await getSupabaseGame(tableName, gameId);
-                    const game = payload.game;
-                    if(game==undefined){
-                        setErrorMessage("Lobby not found")
-                        setInLobby(false);
-                        setGameId(null);
-                        return;
-                    }
-                    //TicTacToe JSON contains board and token
-                    setGame(game);
-                    calculateWinner(game);
-                };
-                initGameState();
-                setInLobby(true);
+  useEffect(() => {
+    let channel;
 
-                //Subscribe the game's channel, inform client of table updates (and joins/leaves)
-                const channel = createClient().channel(`${gameId}`)
-                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
-                (payload) => {
-                    const returnedGame = payload.new.game;
-                    setGame(returnedGame);
-                    calculateWinner(returnedGame);
-                    setErrorMessage("");
-                })
-                .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'GamePlayers', filter: `id=eq.${gameId}`},
-                (payload) => {
-                    setPlayerIds(payload.new.playerIds);
-                    setPlayerNames(payload.new.playerNames);
-                    setCurrentPlayerIndex(payload.new.currentPlayerIndex);
-                    setMaxPlayers(payload.new.maxPlayers);
-                })
-                //Monitoring connection & posting to the player list after confirming a connection was made
-                .subscribe((status) => {
-                    console.log('subscribe_status, '+status);
-                });
+    async function getUserId(){
+      const {data:supabaseSession} = await createClient().auth.getSession();
+      if(supabaseSession.session){
+        setUserId(supabaseSession.session.user.id);
+      }
+    }
+    getUserId();
+    let inLobbyScoped = inLobby;
+    
+    //By changing the game Id, user attempts to join channel.
+    //They are considered 'in lobby' while that channel is SUBSCRIBED.
+    if(gameId!=null){
 
-                async function initPlayerState() {
-                    //Payload is recieved to avoid race conditions between sending this update and recieving it 
-                    // on the *possibly active* channel.
-                    const payload = await upsertSupabaseGamePlayers(tableName, gameId, gameKey,"JOIN")
-                    setPlayerIds(payload.playerIds);
-                    setPlayerNames(payload.playerNames);
-                    setCurrentPlayerIndex(payload.currentPlayerIndex);
-                    setMaxPlayers(payload.maxPlayers);
-                }
-                initPlayerState();
+      //Boot the client-side-render of the game, fetched from database
+      async function initGameState() {
+          const payload = await getSupabaseGame(tableName, gameId);
+          if(payload.error){
+            setGameId(null);
+            return;
+          }
+          //JSON contains board and token
+          setGame(game);
+          calculateWinner(game);
+      };
 
-                    return () => {
-                        createClient().removeChannel(channel);
-                        upsertSupabaseGamePlayers(tableName, gameId, gameKey,"LEAVE");
-                    }
-            }
-        else{
-            resetGame();
+      async function initPlayerState() {
+        //Payload is recieved to avoid race conditions between sending this update and recieving it 
+        // on the *possibly active* channel.
+        const payload = await upsertSupabaseGamePlayers(tableName, gameId, gameKey,"JOIN")
+        setPlayerIds(payload.playerIds);
+        setPlayerNames(payload.playerNames);
+        setCurrentPlayerIndex(payload.currentPlayerIndex);
+        setMaxPlayers(payload.maxPlayers);
+      }
+      
+      async function initSubscription() {
+        try{
+          const { data } = await createClient().from(tableName).select('id').eq('id', gameId).limit(1);
+          if(data.length == 0){
+            console.log("Lobby does not exist in the database");
+            return;
+          }
+        } catch {
+          console.log("Lobby-in-database checker exploded into a billion tiny pieces.");
+          return;
         }
-    }, [gameId]);
+        //Subscribe the game's channel, inform client of table updates (and joins/leaves)
+        channel = createClient().channel(`${gameId}`)
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
+        (payload) => {
+          const returnedGame = payload.new.game;
+          setGame(returnedGame);
+          calculateWinner(returnedGame);
+          setErrorMessage("");
+        })
+        .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'GamePlayers', filter: `id=eq.${gameId}`},
+        (payload) => {
+          setPlayerIds(payload.new.playerIds);
+          setPlayerNames(payload.new.playerNames);
+          setCurrentPlayerIndex(payload.new.currentPlayerIndex);
+          setMaxPlayers(payload.new.maxPlayers);
+        })
+        //Monitoring connection & posting to the player list after confirming a connection was made
+        .subscribe((status) => {
+          console.log('subscribe_status, '+status);
+          if(status == 'SUBSCRIBED'){
+            console.log('pip');
+            initPlayerState();
+            initGameState();
+            setInLobby(true);
+            inLobbyScoped = true;
+          }
+        });
+      }
+      initSubscription();
+
+      return () => {
+        if(channel){
+          createClient().removeChannel(channel)
+        }
+        if(inLobbyScoped){
+          upsertSupabaseGamePlayers(tableName, gameId, gameKey,"LEAVE");
+          setInLobby(false);
+        }
+        resetGame();
+      }
+    }
+  }, [gameId]);
 
     const resetGame = async () => {
         setErrorMessage("");

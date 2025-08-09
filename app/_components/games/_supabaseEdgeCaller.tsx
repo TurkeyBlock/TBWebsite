@@ -56,6 +56,7 @@ export async function getSupabaseGame(tableName:string, gameId:number):Promise<G
       body,
     });
     funcReturn.error = error;
+    
     funcReturn.game = data.returnBody.game;
   } catch {
 
@@ -78,18 +79,23 @@ export async function upsertSupabaseGame(functionMethod:"PATCH"|"POST", tableNam
     key:"",
     error:null
   };
-  const { data:{returnBody}, error} = await createClient().functions.invoke(gameEdge, {
-    method: `${functionMethod}`,
-    headers: {
-      'Authorization': `Bearer ${jwt}`,
-    },
-    body,
-  });
-  if(returnBody){
-    funcReturn.id = returnBody.id;
-    funcReturn.key = returnBody.key;
+  try{
+    const { data:{returnBody}, error} = await createClient().functions.invoke(gameEdge, {
+      method: `${functionMethod}`,
+      headers: {
+        'Authorization': `Bearer ${jwt}`,
+      },
+      body,
+    });
+    funcReturn.error = error;
+
+    if(returnBody){
+      funcReturn.id = returnBody.id;
+      funcReturn.key = returnBody.key;
+    }
+  } catch {
+
   }
-  funcReturn.error = error;
   return funcReturn;
 }
 
@@ -120,6 +126,7 @@ export async function upsertSupabaseGamePlayers(gameTable:string, gameId:number,
       body,
     });
     funcReturn.error = error;
+
     funcReturn.playerNames = returnBody.playerNames;
     funcReturn.playerIds = returnBody.playerIds;
     funcReturn.currentPlayerIndex = returnBody.currentPlayerIndex;
