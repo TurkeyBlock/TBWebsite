@@ -102,7 +102,6 @@ const TicTacToe = () => {
         .subscribe((status) => {
           console.log('subscribe_status, '+status);
           if(status == 'SUBSCRIBED'){
-            console.log('pip');
             initPlayerState();
             initGameState();
             setInLobby(true);

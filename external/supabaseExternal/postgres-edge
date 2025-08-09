@@ -91,11 +91,11 @@ Deno.serve(async (req)=>{
     let newGamestate;
 
     if (req.method == 'GET' || req.method == 'PATCH') {
-      const { data: gameArray, error:gameArrayError } = await supabaseServicer.from(reqBody.table).select('*').eq('id', reqBody.id).limit(1);
+      const { data: tableRow, error:tableError } = await supabaseServicer.from(reqBody.table).select('*').eq('id', reqBody.id).single();
 
-      if (gameArrayError || gameArray.length == 0) { throw new Error("Issue retrieving row using GET/PATCH");}
-      const gameName = gameArray[0].name;
-      const game = gameArray[0].game; 
+      if (tableError || tableRow == null) { throw new Error("Issue retrieving row using GET/PATCH");}
+      const gameName = tableRow.name;
+      const game = tableRow.game; 
 
 
       if (req.method == 'GET' || reqBody.action == null) {
@@ -107,13 +107,13 @@ Deno.serve(async (req)=>{
         const instructions = reqBody.action.split(" ");
         
         //grab relevant player turn/owner data
-        const { data:playerValidatorsArray, error:playerValidatorsArrayError } = await supabaseServicer.from(playerTable).select('playerIds, currentPlayerIndex, maxPlayers').eq('id', reqBody.id).limit(1);
+        const { data:playerValidator, error:playerValidatorError } = await supabaseServicer.from(playerTable).select('playerIds, currentPlayerIndex, maxPlayers').eq('id', reqBody.id).single();
         if(playerValidatorsArrayError){throw new Error("Issue retrieving list of game's players; unable to validate action");}
 
-        const playerIds = playerValidatorsArray[0].playerIds;
-        const currentPlayerIndex = playerValidatorsArray[0].currentPlayerIndex;
+        const playerIds = playerValidator.playerIds;
+        const currentPlayerIndex = playerValidator.currentPlayerIndex;
         const thisUserIndex = playerIds.indexOf(user.id);
-        const maxPlayers = playerValidatorsArray[0].maxPlayers;
+        const maxPlayers = playerValidator.maxPlayers;
 
         if(thisUserIndex==-1){throw new Error("User is not in the game's player list");}
 

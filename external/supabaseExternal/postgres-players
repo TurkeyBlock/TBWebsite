@@ -44,16 +44,16 @@ Deno.serve(async (req)=>{
     let returnBody = null;
     const supabaseServicer = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
     const reqBody = await req.json();
-    const {data:gameExistsBool, error:gameExistsError } = await supabaseServicer.from(reqBody.table).select('id').eq('id', reqBody.id).limit(1);
+    const {data:gameExistsSingle, error:gameExistsError } = await supabaseServicer.from(reqBody.table).select('id').eq('id', reqBody.id).single();
     if (gameExistsError) {
       throw new Error("Issue confirming game's existance in table "+reqBody.table);
-    } else if (gameExistsBool.length == 0) {
+    } else if (gameExistsSingle ==null) {
       throw new Error("Game id does not exist in requested table "+reqBody.table);
     }
-    const { data:editKeyArray, error:editKeyArrayError } = await supabaseServicer.from(keyTable).select('editKey, creatorId').eq('id', reqBody.id).limit(1);
-    if (editKeyArrayError) {throw new Error("Issue confirming edit key");}
-    const creatorId = editKeyArray[0].creatorId;
-    const editKey = editKeyArray[0].editKey;
+    const { data:editKeyRow, error:editKeyRowError } = await supabaseServicer.from(keyTable).select('editKey, creatorId').eq('id', reqBody.id).single();
+    if (editKeyRowError) {throw new Error("Issue confirming edit key");}
+    const creatorId = editKeyRow.creatorId;
+    const editKey = editKeyRow.editKey;
     if (editKey != null && editKey != "" && editKey != reqBody.key) {throw new Error("Invalid edit key provided");}
     
     //confirm that some action was actually requested.
@@ -61,14 +61,14 @@ Deno.serve(async (req)=>{
     const instructions = reqBody.action.split(" ");
     
     //grab relevant player turn/owner data
-    const { data:playerValidatorsArray, error:playerValidatorsArrayError } = await supabaseServicer.from(playerTable).select('playerIds, playerNames, currentPlayerIndex, maxPlayers').eq('id', reqBody.id).limit(1);
-    if(playerValidatorsArrayError){
+    const { data:playerValidator, error:playerValidatorError } = await supabaseServicer.from(playerTable).select('playerIds, playerNames, currentPlayerIndex, maxPlayers').eq('id', reqBody.id).single();
+    if(playerValidatorError){
       throw new Error("Issue retrieving list of game's players; unable to validate action");
     }
-    const playerIds = playerValidatorsArray[0].playerIds;
-    const playerNames = playerValidatorsArray[0].playerNames;
-    const currentPlayerIndex = playerValidatorsArray[0].currentPlayerIndex;
-    const maxPlayers = playerValidatorsArray[0].maxPlayers;
+    const playerIds = playerValidator.playerIds;
+    const playerNames = playerValidator.playerNames;
+    const currentPlayerIndex = playerValidator.currentPlayerIndex;
+    const maxPlayers = playerValidator.maxPlayers;
 
     //If the game-owner wants to kick a player...
     if(instructions[0]=="KICK" && (user.id == creatorId || user.id == Deno.env.get('ADMIN_UID')) && playerIds.length > instructions[1]){
@@ -84,7 +84,7 @@ Deno.serve(async (req)=>{
     //If a player wants to join the game...
     else if(instructions[0]=="JOIN"){
       if(playerIds.indexOf(user.id)!=-1){
-        returnBody = playerValidatorsArray[0];
+        returnBody = playerValidator;
       }
       else{
         let insertingPlayer = false;
@@ -97,7 +97,7 @@ Deno.serve(async (req)=>{
             insertingPlayer = true;
           }
           else{//Game is full
-            returnBody = playerValidatorsArray[0];
+            returnBody = playerValidator;
           }
         }else{
           playerIds[openSpace] = user.id;
@@ -108,9 +108,9 @@ Deno.serve(async (req)=>{
           const { data:updatedPlayerRow, error:joinError } = await supabaseServicer.from(playerTable).update({
             'playerIds': playerIds,
             'playerNames': playerNames
-          }).eq('id', reqBody.id).select();
+          }).eq('id', reqBody.id).select().single();
           if(joinError){throw new Error("Error attempting to join game", joinError );}
-          returnBody = updatedPlayerRow[0];
+          returnBody = updatedPlayerRow;
         }
       }
     }
