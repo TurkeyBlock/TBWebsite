@@ -10,10 +10,6 @@ interface Props {
     setGameKey:Dispatch<SetStateAction<string>>
     inLobby:boolean,
 }
-const publicLobbies: {[key: string]: string } ={
-    TicTacToe:'[1->5]',
-    ConnectFour:'[6->10]'
-};
 
 export const Sidebar = ({tableName, setGameId, setGameKey, inLobby}:Props) => {
 
@@ -166,12 +162,10 @@ export const Sidebar = ({tableName, setGameId, setGameKey, inLobby}:Props) => {
                 {/* Width = 0, minWidth = 100%  (or contain:"size") ensures that this box does not contribute to the size of the sidebar, and instead matches what is forced by the other children. */}
                 <div className='secondBox' style={{display:'flex', flexDirection:'column', padding:"5%", width:"0", minWidth:"100%",overflow:'hidden'}}>
                     <div style={{fontWeight:'bold'}}>Joining a game:</div>
-                    <span>Enter the Game ID, and the Game Key if it requires one, then click [Join Game]. If you do not have a required Game Key, you will join in spectate-only. </span>
+                    <span>Enter the Game ID, and the Game Key if it requires one, then click [Join Game].</span>
+                    <span style={{'paddingTop':'10px'}}>If you do not have a required Game Key, or if the lobby is full, you will join in spectate-only. </span>
                     <div  style={{marginTop:'15px', fontWeight:'bold'}}>Creating a game:</div>
                     <span>Enter a Game Key of your choosing, which you will share with others, then click [Create Game]. If no Game Key is entered, the game will be open to all.</span>
-                    <div  style={{marginTop:'15px', fontWeight:'bold'}}>Additionally:</div>
-                    <span style={{marginTop:'5px'}}>Game IDs {publicLobbies[tableName]} are public lobbies. </span>
-                    <div style={{marginTop:'20px'}}>You will need to be logged into a non-anonymous account to create a game. </div>
                     
                 </div>
 

@@ -31,8 +31,7 @@ export const PlayerDisplay = ({tableName, playerNames=["Error"], thisPlayerIndex
     }
     return(
         <div className={`color3 ${styles.card}`} style={{display:hide?"none":""}}>
-            <p>playerNames length = {playerNames.length}</p>
-            <p>current index = {currentPlayerIndex}</p>
+            <p>Player Cap = {playerNames.length}</p>
             
             <div className={`color3`}>
                 {playerNames.map((cell, index) => (
@@ -44,16 +43,17 @@ export const PlayerDisplay = ({tableName, playerNames=["Error"], thisPlayerIndex
                         backgroundColor:index%2==0?"var(--clr-surface-tonal-a20)":"var(--clr-surface-tonal-a40)",
                     }}
                     >
-                    <button className={styles.button} onClick={() => kickPlayer(index)}>Kick</button>
-                    <div className={styles.text} style={{
-                        backgroundColor: 
-                            currentPlayerIndex==index?"green":
-                            currentPlayerIndex==-1?"#5b8517ff":
-                            "",
-                        fontWeight:thisPlayerIndex==index?"bold":""
-                        
-                    }}>
-                        {cell==null?"Waiting for player...":cell}</div>
+                        <button className={styles.button} onClick={() => kickPlayer(index)}>Kick</button>
+                        <div className={styles.text} style={{
+                            backgroundColor: 
+                                currentPlayerIndex==index?"green":
+                                currentPlayerIndex==-1?"#5b8517ff":
+                                "",
+                            fontWeight:thisPlayerIndex==index?"bold":"",
+                            
+                        }}>
+                            {cell==null?"Waiting for player...":cell}
+                        </div>
                     </div>
                 ))}
             </div>

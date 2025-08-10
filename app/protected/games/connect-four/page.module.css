@@ -1,18 +1,45 @@
 /*index.css*/
 
-.appContainer {
+.primaryContainer {
   font-family: 'Arial', sans-serif;
   margin: 0;
   padding: 0;
   display: flex;
-  flex-direction: column;
+  flex-grow:1;
+
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  flex:1 100 0;
 }
 
-.h1 {
-  margin-bottom: 20px;
+.subAppContainer {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  height:100%;
+  width:100%;
+
+  display: flex;
+  flex: 1 1;
+
+  flex-direction: column;
+  align-items: center;
+  justify-content:center;
+}
+
+.appContainer {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+
+  flex-direction: column;
+  align-items: center;
+}
+
+.gameMode{
+  font-size:8vmin;
+  margin-bottom:1.5vmin;
 }
 
 .board {

@@ -3,7 +3,7 @@ import styles from "./page.module.css";
 
 import {useState, useEffect} from "react";
 import { createClient } from '@/lib/supabase/client';
-import {getSupabaseGame, upsertSupabaseGame, upsertSupabaseGamePlayers} from '@/app/_components/games/_supabaseEdgeCaller';
+import {upsertSupabaseGame, upsertSupabaseGamePlayers} from '@/app/_components/games/_supabaseEdgeCaller';
 
 import {Sidebar} from '@/app/_components/games/sidebar/page';
 import {PlayerDisplay} from '@/app/_components/games/playerDisplay/page';
@@ -51,19 +51,25 @@ const TicTacToe = () => {
 
       //Boot the client-side-render of the game, fetched from database
       async function initGameState() {
-          const payload = await getSupabaseGame(tableName, gameId);
-          if(payload.error){
-            setGameId(null);
-            return;
+          //const payload = await getSupabaseGame(tableName, gameId);
+          try{
+            const { data } = await createClient().from(tableName).select('name, game, public').eq('id', gameId).single();
+            if(data == null){
+              return false;
+            }
+            //JSON contains board and token
+            setGame(data.game);
+            calculateWinner(data.game);
+          } catch {
+            console.log("InitGameState function exploded into at least six tiny pieces.");
+            return false;
           }
-          //TicTacToe JSON contains board and token
-          setGame(game);
-          calculateWinner(game);
+          return true;
       };
 
       async function initPlayerState() {
-        //Payload is recieved to avoid race conditions between sending this update and recieving it 
-        // on the *possibly active* channel.
+        //Payload is recieved to avoid race conditions between sending this update and recieving it... 
+        // ...on the *possibly active* channel.
         const payload = await upsertSupabaseGamePlayers(tableName, gameId, gameKey,"JOIN")
         setPlayerIds(payload.playerIds);
         setPlayerNames(payload.playerNames);
@@ -72,14 +78,9 @@ const TicTacToe = () => {
       }
       
       async function initSubscription() {
-        try{
-          const { data } = await createClient().from(tableName).select('id').eq('id', gameId).limit(1);
-          if(data.length == 0){
-            console.log("Lobby does not exist in the database");
-            return;
-          }
-        } catch {
-          console.log("Lobby-in-database checker exploded into a billion tiny pieces.");
+        //Checks if the game exists and initializes it if so.
+        if (await initGameState() == false){
+          setGameId(null);
           return;
         }
         //Subscribe the game's channel, inform client of table updates (and joins/leaves)
@@ -103,7 +104,6 @@ const TicTacToe = () => {
           console.log('subscribe_status, '+status);
           if(status == 'SUBSCRIBED'){
             initPlayerState();
-            initGameState();
             setInLobby(true);
             inLobbyScoped = true;
           }
@@ -212,11 +212,13 @@ const TicTacToe = () => {
       {/*Game-create and game-join caller. Does not hold the subscriber TO the game, only the create and join logic.*/}
       <Sidebar tableName={tableName} setGameId={setGameId} setGameKey={setGameKey} inLobby={inLobby}/>
       
-      <div className={`color1 ${styles.appContainer}`} style={{padding: "0px", flexGrow:"1"}}>
-        {/*game page flex box*/}
-
+      <div className={`color1 ${styles.primaryContainer}`}>
+        <div className={styles.subAppContainer}>
+          {errorMessage && (
+            <p className={styles.errorMessage}>{errorMessage}</p>
+          )}
+        </div>
         <div className={styles.appContainer}>
-          <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey} thisPlayerIndex={playerIds.indexOf(userId)} currentPlayerIndex={currentPlayerIndex} maxPlayers = {maxPlayers} hide={!inLobby}/>
           <h1 className = {styles.gameMode}>{
             !inLobby
             ? 'Singleplayer':
@@ -238,19 +240,19 @@ const TicTacToe = () => {
             ))}
           </div>
           <div style={{display:'flex', flex:'0 0 auto', flexDirection:'column'}}>
-            <p className={styles.nextToken}>
+            <p className={styles.token}>
               {winnerArray.length > 0
-                ? `Player ${game.board[winnerArray[0]]} wins!`:
-                isOngoing ? `Current Player: ${game.nextToken}`:
+                ? `Token ${game.board[winnerArray[0]]} wins!`:
+                isOngoing ? `Current Token: ${game.nextToken}`:
                 'Tie game!'}
             </p>
             <button className={styles.resetButton} onClick={resetGame}>
               Reset Game
             </button>
           </div>
-          {errorMessage && (
-            <p className={styles.errorMessage}>{errorMessage}</p>
-          )}
+        </div>
+        <div className={styles.subAppContainer}>
+          <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey} thisPlayerIndex={playerIds.indexOf(userId)} currentPlayerIndex={currentPlayerIndex} maxPlayers = {maxPlayers} hide={!inLobby}/>
         </div>
       </div>
     </main>

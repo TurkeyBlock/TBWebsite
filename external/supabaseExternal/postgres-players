@@ -40,25 +40,36 @@ Deno.serve(async (req)=>{
     const playerTable = 'GamePlayers';
     const keyTable = 'GameKeys';
     //-----------------------------------------------------------------------------------------------------------------
-    //Begin undertaking requests
-    let returnBody = null;
-    const supabaseServicer = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
-    const reqBody = await req.json();
-    const {data:gameExistsSingle, error:gameExistsError } = await supabaseServicer.from(reqBody.table).select('id').eq('id', reqBody.id).single();
-    if (gameExistsError) {
-      throw new Error("Issue confirming game's existance in table "+reqBody.table);
-    } else if (gameExistsSingle ==null) {
-      throw new Error("Game id does not exist in requested table "+reqBody.table);
-    }
-    const { data:editKeyRow, error:editKeyRowError } = await supabaseServicer.from(keyTable).select('editKey, creatorId').eq('id', reqBody.id).single();
-    if (editKeyRowError) {throw new Error("Issue confirming edit key");}
-    const creatorId = editKeyRow.creatorId;
-    const editKey = editKeyRow.editKey;
-    if (editKey != null && editKey != "" && editKey != reqBody.key) {throw new Error("Invalid edit key provided");}
     
-    //confirm that some action was actually requested.
+    //Process input, prep output var
+    let returnBody = null;
+    const reqBody = await req.json();
+
+    //Before anything else, confirm that some action was requested. It take practically no effort.
     if (reqBody.action == null) { throw new Error("No action provided");}
     const instructions = reqBody.action.split(" ");
+
+    //Begin undertaking requests
+    const supabaseServicer = createClient(Deno.env.get('SUPABASE_URL'), Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
+
+    const {data:gameIsPublicSingle, error:gameIsPublicError } = await supabaseServicer.from(reqBody.table).select('public').eq('id', reqBody.id).single();
+    if (gameIsPublicError) {
+      throw new Error("Issue confirming game's existance in table "+reqBody.table);
+    } else if (gameIsPublicSingle == null) {
+      throw new Error("Game id does not exist in requested table "+reqBody.table);
+    }
+
+    let creatorId = "";
+    let editKey = "";
+    //Don't make an unneccessary querry if we can avoid it. 
+    // (Only kicks & keyed lobbies require the key table)
+    if(gameIsPublicSingle.public == false || instructions[0]=="KICK"){
+      const { data:editKeyRow, error:editKeyRowError } = await supabaseServicer.from(keyTable).select('editKey, creatorId').eq('id', reqBody.id).single();
+      if (editKeyRowError) {throw new Error("Issue confirming edit key");}
+      creatorId = editKeyRow.creatorId;
+      editKey = editKeyRow.editKey;
+      if (editKey != null && editKey != "" && editKey != reqBody.key) {throw new Error("Invalid edit key provided");}
+    }
     
     //grab relevant player turn/owner data
     const { data:playerValidator, error:playerValidatorError } = await supabaseServicer.from(playerTable).select('playerIds, playerNames, currentPlayerIndex, maxPlayers').eq('id', reqBody.id).single();
@@ -72,23 +83,24 @@ Deno.serve(async (req)=>{
 
     //If the game-owner wants to kick a player...
     if(instructions[0]=="KICK" && (user.id == creatorId || user.id == Deno.env.get('ADMIN_UID')) && playerIds.length > instructions[1]){
-        playerIds[instructions[1]] = null;
-        playerNames[instructions[1]] = null;
-        const { error:kickError } = await supabaseServicer.from(playerTable).update({
+      playerIds[instructions[1]] = null;
+      playerNames[instructions[1]] = null;
+      const { error:kickError } = await supabaseServicer.from(playerTable).update({
         'playerIds': playerIds,
         'playerNames': playerNames
-        }).eq('id', reqBody.id);
-        if(kickError){throw new Error("Error attempting to kick a player");}
+      }).eq('id', reqBody.id);
+      if(kickError){throw new Error("Error attempting to kick a player");}
     }
 
     //If a player wants to join the game...
     else if(instructions[0]=="JOIN"){
       if(playerIds.indexOf(user.id)!=-1){
+        //The player disconnected inappropriately and is still registered in the Lobby
         returnBody = playerValidator;
       }
       else{
         let insertingPlayer = false;
-        //Check for an open slot, or make one if the current array isn't @ maxPlayers.
+        //Check for an open slot, or make a new slot if the current array isn't @ maxPlayers.
         var openSpace = playerIds.indexOf(null);
         if(openSpace == -1){ //No explicitly open spot
           if(playerIds.length < maxPlayers){ //The storage array isn't appropriately sized. (Increase it)
@@ -101,7 +113,7 @@ Deno.serve(async (req)=>{
           }
         }else{
           playerIds[openSpace] = user.id;
-          playerNames[openSpace] = user.user_metadata.displayName //Change to username when implimented
+          playerNames[openSpace] = user.user_metadata.displayName;
           insertingPlayer = true;
         }
         if(insertingPlayer){

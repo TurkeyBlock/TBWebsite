@@ -4,7 +4,7 @@ import styles from "./page.module.css";
 
 import {useState, useEffect} from "react";
 import { createClient } from '@/lib/supabase/client';
-import {getSupabaseGame, upsertSupabaseGame, upsertSupabaseGamePlayers} from '@/app/_components/games/_supabaseEdgeCaller';
+import {upsertSupabaseGame, upsertSupabaseGamePlayers} from '@/app/_components/games/_supabaseEdgeCaller';
 
 import {Sidebar} from '@/app/_components/games/sidebar/page';
 import {PlayerDisplay} from '@/app/_components/games/playerDisplay/page';
@@ -61,19 +61,25 @@ const ConnectFour = () => {
 
       //Boot the client-side-render of the game, fetched from database
       async function initGameState() {
-          const payload = await getSupabaseGame(tableName, gameId);
-          if(payload.error){
-            setGameId(null);
-            return;
+          //const payload = await getSupabaseGame(tableName, gameId);
+          try{
+            const { data } = await createClient().from(tableName).select('name, game, public').eq('id', gameId).single();
+            if(data == null){
+              return false;
+            }
+            //JSON contains board and token
+            setGame(data.game);
+            calculateWinner(data.game);
+          } catch {
+            console.log("InitGameState function exploded into at least six tiny pieces.");
+            return false;
           }
-          //JSON contains board and token
-          setGame(game);
-          calculateWinner(game);
+          return true;
       };
 
       async function initPlayerState() {
-        //Payload is recieved to avoid race conditions between sending this update and recieving it 
-        // on the *possibly active* channel.
+        //Payload is recieved to avoid race conditions between sending this update and recieving it... 
+        // ...on the *possibly active* channel.
         const payload = await upsertSupabaseGamePlayers(tableName, gameId, gameKey,"JOIN")
         setPlayerIds(payload.playerIds);
         setPlayerNames(payload.playerNames);
@@ -82,14 +88,9 @@ const ConnectFour = () => {
       }
       
       async function initSubscription() {
-        try{
-          const { data } = await createClient().from(tableName).select('id').eq('id', gameId).limit(1);
-          if(data.length == 0){
-            console.log("Lobby does not exist in the database");
-            return;
-          }
-        } catch {
-          console.log("Lobby-in-database checker exploded into a billion tiny pieces.");
+        //Checks if the game exists and refuses to proceed if it does not.
+        if (await initGameState() == false){
+          setGameId(null);
           return;
         }
         //Subscribe the game's channel, inform client of table updates (and joins/leaves)
@@ -112,9 +113,7 @@ const ConnectFour = () => {
         .subscribe((status) => {
           console.log('subscribe_status, '+status);
           if(status == 'SUBSCRIBED'){
-            console.log('pip');
             initPlayerState();
-            initGameState();
             setInLobby(true);
             inLobbyScoped = true;
           }
@@ -258,18 +257,20 @@ const ConnectFour = () => {
             {/*-------------------------------------------------------------------*/}
 
 
-            <div className={`color1 ${styles.appContainer}`}>
-                <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey} thisPlayerIndex={playerIds.indexOf(userId)} currentPlayerIndex={currentPlayerIndex} maxPlayers = {maxPlayers} hide={!inLobby}/>
-
-                {/*main page flex box*/}
-                <div className={styles.appContainer}>
-                    <h1 style={{fontSize:"8vmin", marginBottom:'2vmin'}}>{
-                        !inLobby
-                        ? 'Singleplayer':
-                        false
-                        ? `[X] Game ID: ${gameId}`
-                        : `[*] Game ID: ${gameId}`
-                    }</h1>
+            <div className={`color1 ${styles.primaryContainer}`}>
+                    <div className={styles.subAppContainer}>
+                        {errorMessage && (
+                        <p className={styles.errorMessage}>{errorMessage}</p>
+                        )}
+                    </div>
+                    <div className={styles.appContainer}>
+                    <div style={{display:"flex", width:"100%", alignContent:"center", justifyContent:"center"}}>
+                        <h1 className = {styles.gameMode}>{
+                            !inLobby
+                            ? 'Singleplayer':
+                            `Game ID: ${gameId}`
+                        }</h1>
+                    </div>
                     <div className = {styles.board}>
                         {/*--------------------*/}
                         {game.board.map((col, colIndex) => (
@@ -300,16 +301,16 @@ const ConnectFour = () => {
                     </div>
                     <p className={styles.token}>
                         {winner
-                        ? `Player ${winner} wins!`:
-                        isOngoing ? `Current Player: ${game.nextToken}`:
+                        ? `Token ${winner} wins!`:
+                        isOngoing ? `Current Token: ${game.nextToken}`:
                         'Tie game!'}
                     </p>
                     <button className={styles.resetButton} onClick={resetGame}>
                         Reset Game
                     </button>
-                    {errorMessage && (
-                        <p className={styles.errorMessage}>{errorMessage}</p>
-                    )}
+                </div>
+                <div className={styles.subAppContainer}>
+                    <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey} thisPlayerIndex={playerIds.indexOf(userId)} currentPlayerIndex={currentPlayerIndex} maxPlayers = {maxPlayers} hide={!inLobby}/>
                 </div>
             </div>
         </main>

@@ -7,19 +7,23 @@
     background-color:red;
 }
 .text {
-    display:inline;
-    padding: 4px;
+    margin: 5px;
+    padding: 2px;
     border-radius: 5px;
-
+    overflow:hidden;
 }
 .cell {
-  width: 20vmin;
-  flex-direction: row;
+
+  width:100%;
+  display:inline-flex;
+  white-space: nowrap;
   border-bottom:.5px solid var(--clr-primary-a40);
+  overflow:hidden;
 }
 
 .card {
-
+    width: 75%;
+    height: 60vmin;
     border:2px solid var(--clr-primary-a0);
     font-family: 'Arial', sans-serif;
     margin: 2.5%;
