@@ -30,6 +30,26 @@ const TicTacToe = () => {
     board: Array(9).fill(null),
     nextToken: "X",
   };
+
+  const [isHeightGreater, setIsHeightGreater] = useState(false);
+  useEffect(() => {
+    const checkDimensions = () => {
+        setIsHeightGreater(window.innerHeight > window.innerWidth);
+    };
+
+    // Initial check
+    checkDimensions();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', checkDimensions);
+
+    // Cleanup event listener on component unmount
+    return () => {
+        window.removeEventListener('resize', checkDimensions);
+    };
+  }, []);
+
+
   //Handle: if id =  null, you're doing singleplayer
   const [game, setGame] = useState(newGame);
   
@@ -212,7 +232,7 @@ const TicTacToe = () => {
       {/*Game-create and game-join caller. Does not hold the subscriber TO the game, only the create and join logic.*/}
       <Sidebar tableName={tableName} setGameId={setGameId} setGameKey={setGameKey} inLobby={inLobby}/>
       
-      <div className={`color1 ${styles.primaryContainer}`}>
+      <div className={`color1 ${styles.primaryContainer}`} style={{flexDirection:isHeightGreater?'column':'row'}}>
         <div className={styles.subAppContainer}>
           {errorMessage && (
             <p className={styles.errorMessage}>{errorMessage}</p>

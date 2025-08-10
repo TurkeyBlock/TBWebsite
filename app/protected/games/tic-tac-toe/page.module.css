@@ -36,10 +36,10 @@
   flex-direction: column;
   align-items: center;
 }
-
 .gameMode{
+  display:flex;
   font-size:8vmin;
-  margin-bottom:1.5vmin;
+  align-items:flex-end;
 }
 
 .board {
@@ -80,7 +80,6 @@
 }
 
 .token {
-  margin-top: 1vmin;
   font-size: 3vmin;
 }
 
