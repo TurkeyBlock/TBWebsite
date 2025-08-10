@@ -6,7 +6,10 @@ export default function Page() {
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
         <LoginForm />
-        <LogoutButton/> - Testing logouts. Sorry for presentation.
+        <br></br>
+        <div style={{display:'flex', justifyContent:'center'}}>
+          <LogoutButton/>
+        </div>
       </div>
     </div>
   );

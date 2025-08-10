@@ -258,12 +258,12 @@ const ConnectFour = () => {
 
 
             <div className={`color1 ${styles.primaryContainer}`}>
-                    <div className={styles.subAppContainer}>
-                        {errorMessage && (
-                        <p className={styles.errorMessage}>{errorMessage}</p>
-                        )}
-                    </div>
-                    <div className={styles.appContainer}>
+                <div className={styles.subAppContainer}>
+                    {errorMessage && (
+                    <p className={styles.errorMessage}>{errorMessage}</p>
+                    )}
+                </div>
+                <div className={styles.appContainer}>
                     <div style={{display:"flex", width:"100%", alignContent:"center", justifyContent:"center"}}>
                         <h1 className = {styles.gameMode}>{
                             !inLobby

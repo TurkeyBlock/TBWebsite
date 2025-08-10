@@ -9,29 +9,9 @@ const Games = () => {
     const TicTacToe = [null,null,'O',null,'X','O','X',null,null];
     //new Array(9).fill(null);
     const ConnectFour = new Array(7).fill(null).map(() => Array(6).fill(null));
-
-    const [isHeightGreater, setIsHeightGreater] = useState(false);
-
-    useEffect(() => {
-        const checkDimensions = () => {
-            setIsHeightGreater(window.innerHeight > window.innerWidth);
-        };
-
-        // Initial check
-        checkDimensions();
-
-        // Add event listener for window resize
-        window.addEventListener('resize', checkDimensions);
-
-        // Cleanup event listener on component unmount
-        return () => {
-            window.removeEventListener('resize', checkDimensions);
-        };
-    }, []);
-
     return(
         <main className = "main">
-            <div className={`color3 ${styles.container}`}  style={{flexDirection: isHeightGreater?'column':'row'}}>
+            <div className={`color3 ${styles.container}`}>
                 <Link href="./games/tic-tac-toe" className={`${styles.link} ${styles.subContainer}`}>
                     <div className={styles.subContainer} >
                         <div className = {styles.TicTacToe}>

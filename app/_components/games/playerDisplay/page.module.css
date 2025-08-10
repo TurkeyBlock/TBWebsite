@@ -14,7 +14,7 @@
 }
 .cell {
 
-  width:100%;
+  width:100%; 
   display:inline-flex;
   white-space: nowrap;
   border-bottom:.5px solid var(--clr-primary-a40);
@@ -23,7 +23,7 @@
 
 .card {
     width: 75%;
-    height: 60vmin;
+    min-height: 0;
     border:2px solid var(--clr-primary-a0);
     font-family: 'Arial', sans-serif;
     margin: 2.5%;
@@ -33,6 +33,12 @@
     
     flex-direction: column;
     border-radius: 15px;
+}
+@media (min-aspect-ratio: 1/1) {
+    /*width > height*/
+    .card{
+        min-height: 60vmin;
+    }
 }
 
 .button{

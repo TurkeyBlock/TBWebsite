@@ -9,8 +9,14 @@
   text-align: center;
   margin-bottom:auto;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: center;
+}
+@media (min-aspect-ratio: 1/1) {
+  /*width > height*/
+    .container{
+        flex-direction:row;
+    }
 }
 
 .subContainer {
