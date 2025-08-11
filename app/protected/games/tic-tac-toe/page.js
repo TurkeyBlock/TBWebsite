@@ -114,7 +114,12 @@ const TicTacToe = () => {
 
       return () => {
         if(channel){
-          createClient().removeChannel(channel)
+          let allChannels = createClient().getChannels()
+          console.log(allChannels);
+          createClient().removeChannel(channel).then(() =>{
+            allChannels = createClient().getChannels()
+            console.log(allChannels);
+          });
         }
         if(inLobbyScoped){
           upsertSupabaseGamePlayers(tableName, gameId, gameKey,"LEAVE");
