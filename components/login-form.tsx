@@ -52,7 +52,8 @@ export function LoginForm({
       });
       if (error) throw error;
       // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push("/");
+      router.refresh();
+      router.push('/');
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -81,7 +82,8 @@ export function LoginForm({
         if (updateDisplayNameError) throw error;
         console.log("Guest account created w/ "+`${updateDisplayName}`);
       }
-      router.push("/");
+      router.refresh();
+      router.push('/');
     }catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -118,6 +120,7 @@ export function LoginForm({
                   id="email"
                   type="email"
                   placeholder="m@example.com"
+                  autoComplete="username"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -136,6 +139,7 @@ export function LoginForm({
                 <Input
                   id="password"
                   type="password"
+                  autoComplete="current-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
