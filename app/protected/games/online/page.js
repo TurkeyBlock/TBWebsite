@@ -4,7 +4,7 @@ import styles from "./page.module.css";
 
 import dynamic from 'next/dynamic';
 import { useSearchParams } from "next/navigation";
-import {useState, useEffect, useRef} from "react";
+import {useState, useEffect, useRef, Suspense} from "react";
 import { createClient } from '@/lib/supabase/client';
 import {upsertSupabaseGame, upsertSupabaseGamePlayers} from '@/app/_components/games/_supabaseEdgeCaller';
 
@@ -186,8 +186,10 @@ export default function OnlineGames() {
             <p className={styles.errorMessage}>{errorMessage}</p>
           )}
         </div>
-        {tableName === "TicTacToe" && (<TicTacToe ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame} setErrorMessage = {setErrorMessage} />)}
-        {tableName === "ConnectFour" && (<ConnectFour ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame} setErrorMessage = {setErrorMessage} />)}
+        <Suspense>
+          {tableName === "TicTacToe" && (<TicTacToe ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame} setErrorMessage = {setErrorMessage} />)}
+          {tableName === "ConnectFour" && (<ConnectFour ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame} setErrorMessage = {setErrorMessage} />)}
+        </Suspense>
         <div className={styles.subAppContainer}>
           <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey} thisPlayerIndex={playerIds.indexOf(userId)} currentPlayerIndex={currentPlayerIndex} maxPlayers = {maxPlayers} hide={!inLobby}/>
         </div>
