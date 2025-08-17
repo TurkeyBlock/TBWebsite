@@ -21,12 +21,16 @@ loading: () => <p>Loading ConnectFour</p>,
   ssr: false,
 });
 
-export default function OnlineGames() {
+const QueriedGame = ({setTableName}) =>{
   const searchParams = useSearchParams();
-  const tableName = searchParams.get("game");
+  setTableName(searchParams.get("game"));
+}
 
+
+export default function OnlineGames() {
   const childRef = useRef();
-
+  const [tableName, setTableName] = useState(null);
+  
   const [gameId, setGameId] = useState(null);
   const [gameKey, setGameKey] = useState(null);
 
@@ -187,6 +191,7 @@ export default function OnlineGames() {
           )}
         </div>
         <Suspense>
+          <QueriedGame setTableName = {setTableName}/>
           {tableName === "TicTacToe" && (<TicTacToe ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame} setErrorMessage = {setErrorMessage} />)}
           {tableName === "ConnectFour" && (<ConnectFour ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame} setErrorMessage = {setErrorMessage} />)}
         </Suspense>
