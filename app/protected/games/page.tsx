@@ -27,7 +27,7 @@ const Games = () => {
                     </div>
                     Play TicTacToe
                 </Link>
-                <Link href={{pathname: "./games/online", query:{data: "ConnectFour"}}} className={`${styles.link} ${styles.subContainer}`}>
+                <Link href={{pathname: "./games/online", query:{game: "ConnectFour"}}} className={`${styles.link} ${styles.subContainer}`}>
                     <div className = {styles.subContainer}>
                         <div className = {styles.ConnectFour}>
                             {ConnectFour.map((col, colIndex) => (

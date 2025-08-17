@@ -66,25 +66,29 @@ const TicTacToe = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, o
   };
 
   const resetGame = async () => {
-    setErrorMessage("");
     if(inLobby===true){
+      setErrorMessage("");
       onlineResetGame();
     }
     else{
-      setGame(newGame);
-      setWinnerArray([]);
+      localResetGame();
     }
   };
 
+  function localResetGame(){
+    setErrorMessage("");
+    setGame(newGame);
+    setWinnerArray([]);
+  }
+
   const loadGame = async (game) => {
-    console.log('pop')
     setGame(game);
     calculateWinner(game);
   }
   
   useImperativeHandle(ref, () => ({
     loadGame:loadGame,
-    resetGame:resetGame
+    localResetGame:localResetGame
   }));
   
   return (

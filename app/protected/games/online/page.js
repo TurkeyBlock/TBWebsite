@@ -16,10 +16,14 @@ loading: () => <p>Loading TicTacToe</p>,
   ssr: false,
 });
 
+const ConnectFour= dynamic(() => import('./connect-four/page'), {
+loading: () => <p>Loading ConnectFour</p>,
+  ssr: false,
+});
+
 export default function OnlineGames() {
   const searchParams = useSearchParams();
   const tableName = searchParams.get("game");
-  console.log(tableName);
 
   const childRef = useRef();
 
@@ -41,8 +45,8 @@ export default function OnlineGames() {
       if(type==="load" && childRef.current.loadGame){
         childRef.current.loadGame(game); //Calls the exposed child function (should be dynamic, game specific)
       }
-      if(type==="reset" && childRef.current.resetGame){
-        childRef.current.resetGame(); //Calls the exposed child function (should be dynamic, game specific)
+      if(type==="reset" && childRef.current.localResetGame){
+        childRef.current.localResetGame(); //Calls the exposed child function (should be dynamic, game specific)
       }
     }
   }
@@ -183,6 +187,7 @@ export default function OnlineGames() {
           )}
         </div>
         {tableName === "TicTacToe" && (<TicTacToe ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame} setErrorMessage = {setErrorMessage} />)}
+        {tableName === "ConnectFour" && (<ConnectFour ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame} setErrorMessage = {setErrorMessage} />)}
         <div className={styles.subAppContainer}>
           <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey} thisPlayerIndex={playerIds.indexOf(userId)} currentPlayerIndex={currentPlayerIndex} maxPlayers = {maxPlayers} hide={!inLobby}/>
         </div>
