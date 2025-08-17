@@ -1,23 +1,5 @@
 /*index.css*/
 
-.primaryContainer {
-  font-family: 'Arial', sans-serif;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-grow:1;
-
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-@media (min-aspect-ratio: 1/1) {
-  /*width > height*/
-    .primaryContainer{
-        flex-direction:row;
-    }
-}
-
 .subAppContainer {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -122,32 +104,9 @@
   transition: background-color 0.3s;
 }
 
-.errorMessage {
-  color: #ff0000;
-  margin-top: 10px;
-  font-size: 1.2em;
-}
-
 .winner {
   background-color: #4caf50;
   color: #fff;
-}
-
-.inactiveAlert{
-  display:none
-}
-
-.authAlert {
-  margin-bottom: 15px;
-  padding: 20px;
-  background-color: #f44336; /* Red */
-  color: white;
-  
-}
-.exitButton {
-  color:white;
-  font-weight:bold;
-  margin-right:15px;
 }
 
 @media (hover: hover) {
@@ -159,8 +118,5 @@
   }
   .resetButton:hover {
     background-color: #45a049;
-  }
-  .exitButton:hover{
-    color:black;
   }
 }

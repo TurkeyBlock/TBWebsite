@@ -103,7 +103,7 @@ const ConnectFour = forwardRef(({inLobby = false, gameId = null, onlineMakeMove,
             calculateWinner(calcGame);
         }
     };
-    
+
     const resetGame = async () => {
         if(inLobby===true){
             setErrorMessage("");
@@ -189,4 +189,5 @@ const ConnectFour = forwardRef(({inLobby = false, gameId = null, onlineMakeMove,
 
 });
 
+ConnectFour.displayName = 'Offline Connect Four';
 export default ConnectFour

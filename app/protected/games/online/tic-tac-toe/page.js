@@ -127,5 +127,5 @@ const TicTacToe = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, o
     </div>
   );
 });
-
+TicTacToe.displayName = 'Offline TicTacToe';
 export default TicTacToe;
