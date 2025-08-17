@@ -178,15 +178,6 @@ const ConnectFour = forwardRef(({inLobby = false, gameId = null, onlineMakeMove,
             </button>
         </div>
     );
-
-
-
-
-
-
-
-
-
 });
 
 ConnectFour.displayName = 'Offline Connect Four';
