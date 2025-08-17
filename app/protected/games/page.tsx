@@ -11,7 +11,7 @@ const Games = () => {
     return(
         <main className = "main">
             <div className={`color3 ${styles.container}`}>
-                <Link href="./games/tic-tac-toe" className={`${styles.link} ${styles.subContainer}`}>
+                <Link href={{pathname: "./games/online", query:{game: "TicTacToe"}}} className={`${styles.link} ${styles.subContainer}`}>
                     <div className={styles.subContainer} >
                         <div className = {styles.TicTacToe}>
                             {/*--------------------*/}
@@ -27,7 +27,7 @@ const Games = () => {
                     </div>
                     Play TicTacToe
                 </Link>
-                <Link href="./games/connect-four" className={`${styles.link} ${styles.subContainer}`}>
+                <Link href={{pathname: "./games/online", query:{data: "ConnectFour"}}} className={`${styles.link} ${styles.subContainer}`}>
                     <div className = {styles.subContainer}>
                         <div className = {styles.ConnectFour}>
                             {ConnectFour.map((col, colIndex) => (

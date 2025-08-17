@@ -1,15 +1,27 @@
 "use client"
+
 import styles from "./page.module.css";
 
-import {useState, useEffect} from "react";
+import dynamic from 'next/dynamic';
+import { useSearchParams } from "next/navigation";
+import {useState, useEffect, useRef} from "react";
 import { createClient } from '@/lib/supabase/client';
 import {upsertSupabaseGame, upsertSupabaseGamePlayers} from '@/app/_components/games/_supabaseEdgeCaller';
 
 import {Sidebar} from '@/app/_components/games/sidebar/page';
 import {PlayerDisplay} from '@/app/_components/games/playerDisplay/page';
 
-const TicTacToe = () => {
-  const tableName = "TicTacToe";
+const TicTacToe = dynamic(() => import('./tic-tac-toe/page'), {
+loading: () => <p>Loading TicTacToe</p>,
+  ssr: false,
+});
+
+export default function OnlineGames() {
+  const searchParams = useSearchParams();
+  const tableName = searchParams.get("game");
+  console.log(tableName);
+
+  const childRef = useRef();
 
   const [gameId, setGameId] = useState(null);
   const [gameKey, setGameKey] = useState(null);
@@ -23,16 +35,19 @@ const TicTacToe = () => {
   const [maxPlayers, setMaxPlayers] = useState(null);
 
   const [errorMessage, setErrorMessage] = useState("");
-  const [winnerArray, setWinnerArray] = useState([]);
 
-  const newGame = {
-    board: Array(9).fill(null),
-    nextToken: "X",
-  };
+  function handleSubscriptionAction(type, game = null){
+    if(childRef.current){
+      if(type==="load" && childRef.current.loadGame){
+        childRef.current.loadGame(game); //Calls the exposed child function (should be dynamic, game specific)
+      }
+      if(type==="reset" && childRef.current.resetGame){
+        childRef.current.resetGame(); //Calls the exposed child function (should be dynamic, game specific)
+      }
+    }
+  }
 
-  //Handle: if id =  null, you're doing singleplayer
-  const [game, setGame] = useState(newGame);
-  
+
   useEffect(() => {
     let channel;
 
@@ -51,20 +66,19 @@ const TicTacToe = () => {
 
       //Boot the client-side-render of the game, fetched from database
       async function initGameState() {
-          //const payload = await getSupabaseGame(tableName, gameId);
-          try{
-            const { data } = await createClient().from(tableName).select('name, game, public').eq('id', gameId).single();
-            if(data == null){
-              return false;
-            }
-            //JSON contains board and token
-            setGame(data.game);
-            calculateWinner(data.game);
-          } catch {
-            console.log("InitGameState function exploded into at least six tiny pieces.");
+        //const payload = await getSupabaseGame(tableName, gameId);
+        try{
+          const { data } = await createClient().from(tableName).select('name, game, public').eq('id', gameId).single();
+          if(data == null){
             return false;
           }
-          return true;
+          //JSON contains board and token
+          handleSubscriptionAction("load", data.game)
+        } catch {
+          console.log("InitGameState function exploded into at least six tiny pieces.");
+          return false;
+        }
+        return true;
       };
 
       async function initPlayerState() {
@@ -88,8 +102,7 @@ const TicTacToe = () => {
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: tableName, filter:`id=eq.${gameId}`}, 
         (payload) => {
           const returnedGame = payload.new.game;
-          setGame(returnedGame);
-          calculateWinner(returnedGame);
+          handleSubscriptionAction("load", returnedGame)
           setErrorMessage("");
         })
         .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'GamePlayers', filter: `id=eq.${gameId}`},
@@ -124,90 +137,39 @@ const TicTacToe = () => {
           upsertSupabaseGamePlayers(tableName, gameId, gameKey,"LEAVE");
           setInLobby(false);
         }
-        resetGame();
+        handleSubscriptionAction("reset", null)
       }
     }
   }, [gameId]);
 
-  function calculateWinner(gamestate){
-    const lines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-    ];
-    let board = gamestate.board;
-    for (let i = 0; i < lines.length; i++) {
-      const [a, b, c] = lines[i];
-      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-        setWinnerArray([a,b,c]);
-        return;
-      }
-    }
-    setWinnerArray([]);
-  };
-
-  const makeMove = async (index) => {
-    setErrorMessage("");
-
-    if (!isOngoing || winnerArray.length > 0 || game.board[index]) {
-      setErrorMessage("Invalid move. Please try again.");
-      return;
-    }
-
-    //Multiplayer
-    if(inLobby===true){
-      if(userId!=playerIds[currentPlayerIndex] && JSON.stringify(game.board)!=JSON.stringify(newGame.board)){
+  //Accepts the CLIENT override on if this is a new game and so if turn order is undecided.
+  function onlineMakeMove(isNewGame, moveString){
+    if(userId!=playerIds[currentPlayerIndex] && !isNewGame){
         setErrorMessage("It's not your turn! There are "+playerIds.length+" players in this game."); //Non accurate
         return;
       }
       //await api response & set login warning based on result
       try{
         console.log("Sending supabase patch call");
-        upsertSupabaseGame("PATCH", tableName, gameId, gameKey, ("MOVE "+index));
+        upsertSupabaseGame("PATCH", tableName, gameId, gameKey, moveString);
       }
       catch{
         console.log("Client unable to send event. Try refreshing your page.")
       }
-    }
-    //Singleplayer
-    else{
-      const updatedBoard = [...game.board]
-      updatedBoard[index] = game.nextToken;
+  }
 
-      const updatedGame = {
-        board: updatedBoard,
-        nextToken: game.nextToken === "X" ? "O" : "X",
-      };
-      setGame(updatedGame);
-      calculateWinner(updatedGame);
+  function onlineResetGame(){
+    try{
+      console.log("Sending supabase reset call");
+      upsertSupabaseGame("PATCH", tableName, gameId, gameKey, "RESET");
     }
-  };
+    catch{
+      setErrorMessage("Client unable to send event. Try refreshing your page.");
+    }
+  }
 
-  const resetGame = async () => {
-    setErrorMessage("");
-    if(inLobby===true){
-      //await api response & set login warning based on result
-      try{
-        console.log("Sending supabase reset call");
-        upsertSupabaseGame("PATCH", tableName, gameId, gameKey, "RESET");
-      }
-      catch{
-        console.log("Client unable to send event. Try refreshing your page.")
-      }
-    }
-    else{
-      setGame(newGame);
-      setWinnerArray([]);
-    }
-  };
-
-  const isOngoing = game.board.includes(null)
-  return (
+    
+  return(
     <main style={{display:"flex", flexDirection:"row"}}>
       {/*main holds the sidebar and main-page flex boxes*/}
 
@@ -220,45 +182,11 @@ const TicTacToe = () => {
             <p className={styles.errorMessage}>{errorMessage}</p>
           )}
         </div>
-        <div className={styles.appContainer}>
-          <h1 className = {styles.gameMode}>{
-            !inLobby
-            ? 'Singleplayer':
-            `Game ID: ${gameId}`
-          }</h1>
-
-          <div className = {styles.board}>
-          {/*--------------------*/}
-            {game.board.map((cell, index) => (
-              <div
-                key={index}
-                className={`color0 ${(winnerArray).includes(index)!==false ? `${styles.cell} ${styles.cellHighlight}`
-                : (!isOngoing && !winnerArray.includes(null)) ? `${styles.cell} ${styles.cellFailure}` 
-                : styles.cell}`}
-                onClick={() => makeMove(index)}
-              >
-                {cell}
-              </div>
-            ))}
-          </div>
-          <div style={{display:'flex', flex:'0 0 auto', flexDirection:'column'}}>
-            <p className={styles.token}>
-              {winnerArray.length > 0
-                ? `Token ${game.board[winnerArray[0]]} wins!`:
-                isOngoing ? `Current Token: ${game.nextToken}`:
-                'Tie game!'}
-            </p>
-            <button className={styles.resetButton} onClick={resetGame}>
-              Reset Game
-            </button>
-          </div>
-        </div>
+        {tableName === "TicTacToe" && (<TicTacToe ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame} setErrorMessage = {setErrorMessage} />)}
         <div className={styles.subAppContainer}>
           <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey} thisPlayerIndex={playerIds.indexOf(userId)} currentPlayerIndex={currentPlayerIndex} maxPlayers = {maxPlayers} hide={!inLobby}/>
         </div>
       </div>
     </main>
-  );
-};
-
-export default TicTacToe;
+  )
+}

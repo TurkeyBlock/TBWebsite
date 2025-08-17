@@ -34,7 +34,7 @@ const ConnectFour = () => {
         row:-1,
         col:-1
     };
-    //Handle: if id =  null, you're doing singleplayer
+    
     const [game, setGame] = useState({
         board:newGame.board,
         nextToken:newGame.nextToken,
