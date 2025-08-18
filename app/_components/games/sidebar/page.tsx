@@ -1,7 +1,9 @@
 "use client"
 
 import {useState, useEffect, Dispatch, SetStateAction } from "react";
+import { createClient } from '@/lib/supabase/client';
 import {upsertSupabaseGame} from '@/app/_components/games/_supabaseEdgeCaller';
+
 import styles from "./page.module.css";
 
 interface Props {
@@ -10,6 +12,54 @@ interface Props {
     setGameKey:Dispatch<SetStateAction<string>>
     inLobby:boolean,
 }
+interface pbProp{
+    tableName:string
+}
+function PublicGames({tableName}:pbProp){
+
+    console.log("tb=" +tableName);
+    const offsetMult = 10;
+    const [offsetCount, setOffsetCount] = useState(0);
+    const [publicGames, setPublicGames] = useState([]);
+
+    async function getPublicGames(tableName:string){
+        console.log("pip"+tableName);
+        const { data } = await createClient().from(tableName).select('name, game, public');
+        console.log("public games = "+data);
+        return data;
+    }
+
+    useEffect(() => {
+        getPublicGames(tableName);
+    },[])
+    
+    return(
+        <div>
+            {publicGames.map((cell, index) => (
+                <div
+                    key = {index}
+                >
+                    hi
+                </div>
+            ))}
+            <button
+                type="button"
+                className={styles.submitButton}
+                >
+                {"<<"}
+            </button>
+             &nbsp;{offsetCount}&nbsp;
+            <button
+                type="button"
+                className={styles.submitButton}
+                >
+                {">>"}
+            </button>
+        </div>
+    )
+}
+
+
 
 export const Sidebar = ({tableName, setGameId, setGameKey, inLobby}:Props) => {
 
@@ -90,7 +140,7 @@ export const Sidebar = ({tableName, setGameId, setGameKey, inLobby}:Props) => {
                         </label>
                         <input
                             type="text"
-                            id="textInput"
+                            id="gameIdInput"
                             placeholder="Required"
                             value={inputGameId}
                             onChange={!inLobby?((event) => {setInputGameId(event.target.value)}):()=>{}}
@@ -108,7 +158,7 @@ export const Sidebar = ({tableName, setGameId, setGameKey, inLobby}:Props) => {
                         </label>
                         <input
                             type="text"
-                            id="textInput"
+                            id="gameKeyInput"
                             placeholder="Optional"
                             value={inputGameKey}
                             onChange={!inLobby?((event) => {setInputGameKey(event.target.value)}):()=>{}}
@@ -138,7 +188,7 @@ export const Sidebar = ({tableName, setGameId, setGameKey, inLobby}:Props) => {
                         <input
                             type="text"
                             placeholder="Optional"
-                            id="textInput"
+                            id="gameKeyInput"
                             value={chosenGameKey}
                             onChange={(event) => { setChosenGameKey(event.target.value) }}
                             style={{
@@ -166,9 +216,10 @@ export const Sidebar = ({tableName, setGameId, setGameKey, inLobby}:Props) => {
                     <span style={{'paddingTop':'10px'}}>If you do not have a required Game Key, or if the lobby is full, you will join in spectate-only. </span>
                     <div  style={{marginTop:'15px', fontWeight:'bold'}}>Creating a game:</div>
                     <span>Enter a Game Key of your choosing, which you will share with others, then click [Create Game]. If no Game Key is entered, the game will be open to all.</span>
-                    
                 </div>
-
+                <span className={`color2 ${styles.line}`}></span>
+                {tableName}
+                <PublicGames tableName = {tableName}/>
             </div>
             <span className='color5'>
             <button className={styles.sidebarButton} onClick={toggleSidebar}>{sidebar==true?"<<":">>"}</button>

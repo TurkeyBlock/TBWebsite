@@ -12,16 +12,16 @@ import {Sidebar} from '@/app/_components/games/sidebar/page';
 import {PlayerDisplay} from '@/app/_components/games/playerDisplay/page';
 
 const TicTacToe = dynamic(() => import('./_tic-tac-toe/page'), {
-loading: () => <p>Loading TicTacToe</p>,
-  ssr: false,
+  loading: () => <p>Loading TicTacToe</p>,
+    ssr: false,
 });
 
 const ConnectFour= dynamic(() => import('./_connect-four/page'), {
-loading: () => <p>Loading ConnectFour</p>,
-  ssr: false,
+  loading: () => <p>Loading ConnectFour</p>,
+    ssr: false,
 });
 
-const QueriedGame = ({setTableName}) =>{
+function QueriedGame({setTableName}){
   const searchParams = useSearchParams();
   setTableName(searchParams.get("game"));
 }
