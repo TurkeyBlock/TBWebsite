@@ -59,3 +59,26 @@
     overflow: hidden;
     text-overflow:clip;
 }
+.publicGames{
+    display:flex;
+    flex-direction:column;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    overflow:hidden;
+}
+.cell {
+  width:100%; 
+  display:inline-flex;
+  white-space: nowrap;
+  background-color:var(--clr-surface-tonal-a20);
+  border-bottom:.5px solid var(--clr-primary-a40);
+  overflow:hidden;
+  padding-left:5px;
+}
+.cellBlock {
+  width:100%; 
+  display:inline-flex;
+  white-space: nowrap;
+  overflow:hidden;
+  border:.5px solid var(--clr-primary-a40);
+}
