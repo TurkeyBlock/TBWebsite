@@ -1,8 +1,8 @@
 "use client"
 
 import {useState, useEffect, Dispatch, SetStateAction} from 'react';
-import { createClient } from '@/lib/supabase/client';
 import {upsertSupabaseGame} from '@/app/_components/games/_supabaseEdgeCaller';
+import PublicGamesDisplay from '@/app/_components/games/publicGamesDisplay/page';
 
 import styles from "./page.module.css";
 
@@ -12,90 +12,6 @@ interface Props {
     setGameKey:Dispatch<SetStateAction<string>>
     inLobby:boolean,
 }
-interface pbProp{
-    tableName:string
-}
-interface publicGame{
-    name:string,
-    id:string
-}
-function PublicGames({tableName}:pbProp){
-
-    const offsetMult = 10;
-    const [offsetCount, setOffsetCount] = useState(0);
-    const [publicGames, setPublicGames] = useState<Array<publicGame>>([]);
-
-    //Increase/Decrease what 'page' of public lobbies the client is querrying
-    function incOffset(){
-        if(publicGames.length >= 10){
-            setOffsetCount(offsetCount+1);
-        }
-    }
-    function decOffset(){
-        if(offsetCount > 0 ){
-            setOffsetCount(offsetCount-1);
-        }
-    }
-
-    
-    useEffect(() => {
-        async function getPublicGames(){
-            const { data } = await createClient().from(tableName).select('name, id').range(offsetCount*offsetMult,(offsetCount+1)*offsetMult).eq('public', true);
-            if(data!=null)
-                setPublicGames(data);
-            return data;
-        }
-        if (tableName==null) {
-            return;
-        }
-        getPublicGames();
-    },[tableName,offsetCount])
-    
-    return(
-        <div style={{flexDirection:'row', alignContent:'center'}}>
-            <div style={{paddingBottom:'5px', alignContent:'center'}}>
-                Public Lobbies
-            </div>
-            <div className={styles.cellBlock}>
-                
-                {publicGames.length > 0 ? publicGames.map((cell, index) => (
-                    <div
-                        key = {index}
-                        className = {styles.cell}
-                        style={{
-                            borderBottom:index+1==publicGames.length?"none":"",
-                            backgroundColor:index%2==0?"var(--clr-surface-tonal-a20)":"var(--clr-surface-tonal-a40)",
-                        }}
-                    >
-                        {cell.name} | ID: {cell.id}
-                    </div>
-                )):
-                <div className = {styles.cell}>
-                    Empty
-                </div>
-                
-                }
-            </div>
-            <button
-                type="button"
-                className={styles.submitButton}
-                onClick = {decOffset}
-                >
-                {"<<"}
-            </button>
-             &nbsp;Page {offsetCount+1}&nbsp;
-            <button
-                type="button"
-                className={styles.submitButton}
-                onClick = {incOffset}
-                >
-                {">>"}
-            </button>
-        </div>
-    )
-}
-
-
 
 export const Sidebar = ({tableName, setGameId, setGameKey, inLobby}:Props) => {
 
@@ -254,9 +170,7 @@ export const Sidebar = ({tableName, setGameId, setGameKey, inLobby}:Props) => {
                     <span>Enter a Game Key of your choosing, which you will share with others, then click [Create Game]. If no Game Key is entered, the game will be open to all.</span>
                 </div>
                 <span className={`color2 ${styles.line}`}></span>
-                <div className={styles.publicGames}>
-                    <PublicGames tableName = {tableName}/>
-                </div>
+                <PublicGamesDisplay tableName = {tableName}/>
             </div>
             <span className='color5'>
             <button className={styles.sidebarButton} onClick={toggleSidebar}>{sidebar==true?"<<":">>"}</button>
