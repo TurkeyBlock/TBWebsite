@@ -3,7 +3,7 @@ import styles from "./page.module.css";
 
 import {useState, forwardRef, useImperativeHandle} from "react";
 
-const TicTacToe = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, onlineResetGame, setErrorMessage}, ref) => {
+const TicTacToe = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, onlineResetGame, sendingAction = false, setErrorMessage}, ref) => {
   
   const newGame = {
     board: Array(9).fill(null),
@@ -104,9 +104,14 @@ const TicTacToe = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, o
         {game.board.map((cell, index) => (
           <div
             key={index}
-            className={`color0 ${(winnerArray).includes(index)!==false ? `${styles.cell} ${styles.cellHighlight}`
-            : (!isOngoing && !winnerArray.includes(null)) ? `${styles.cell} ${styles.cellFailure}` 
-            : styles.cell}`}
+            className={`color0 
+              ${(winnerArray).includes(index)!==false ? `${styles.cell} ${styles.cellHighlight}`
+              : (!isOngoing && !winnerArray.includes(null)) ? `${styles.cell} ${styles.cellFailure}` 
+              : styles.cell}
+              
+              ${sendingAction ? styles.loadingCursor
+              : ''}`
+            }
             onClick={() => makeMove(index)}
           >
             {cell}
@@ -120,7 +125,12 @@ const TicTacToe = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, o
             isOngoing ? `Current Token: ${game.nextToken}`:
             'Tie game!'}
         </p>
-        <button className={styles.resetButton} onClick={resetGame}>
+        <button className={`${styles.resetButton}
+          ${sendingAction ? styles.loadingCursor
+          : ''}`
+          } 
+          onClick={resetGame}
+        >
           Reset Game
         </button>
       </div>

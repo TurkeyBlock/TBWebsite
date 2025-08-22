@@ -109,6 +109,9 @@
   margin-right:15px;
 }
 
+.loadingCursor {
+  cursor:wait;
+}
 
 @media (hover: hover) {
   .cell:hover {

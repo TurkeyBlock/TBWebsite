@@ -25,6 +25,7 @@ function PublicGames({tableName}:pbProp){
     const [offsetCount, setOffsetCount] = useState(0);
     const [publicGames, setPublicGames] = useState<Array<publicGame>>([]);
 
+    //Increase/Decrease what 'page' of public lobbies the client is querrying
     function incOffset(){
         if(publicGames.length >= 10){
             setOffsetCount(offsetCount+1);

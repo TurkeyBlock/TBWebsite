@@ -42,6 +42,7 @@ export default function OnlineGames() {
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(null);
   const [maxPlayers, setMaxPlayers] = useState(null);
 
+  const [sendingAction, setSendingAction] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   function handleSubscriptionAction(type, game = null){
@@ -151,29 +152,40 @@ export default function OnlineGames() {
   }, [gameId]);
 
   //Accepts the CLIENT override on if this is a new game and so if turn order is undecided.
-  function onlineMakeMove(isNewGame, moveString){
+  async function onlineMakeMove(isNewGame, moveString){
+    if(sendingAction){
+      setErrorMessage("Awaiting server response");
+      return;
+    }
     if(userId!=playerIds[currentPlayerIndex] && !isNewGame){
-        setErrorMessage("It's not your turn! There are "+playerIds.length+" players in this game."); //Non accurate
-        return;
-      }
-      //await api response & set login warning based on result
-      try{
-        console.log("Sending supabase patch call");
-        upsertSupabaseGame("PATCH", tableName, gameId, gameKey, moveString);
-      }
-      catch{
-        console.log("Client unable to send event. Try refreshing your page.")
-      }
+      setErrorMessage("It's not your turn! There are "+playerIds.length+" players in this game."); //Non accurate
+      return;
+    }
+    //await api response & set login warning based on result
+    try{
+      setSendingAction(true);
+      await upsertSupabaseGame("PATCH", tableName, gameId, gameKey, moveString);
+      
+    }
+    catch{
+      console.log("Client unable to send event. Try refreshing your page.")
+    }
+    setSendingAction(false);
   }
 
-  function onlineResetGame(){
+  async function onlineResetGame(){
+    if(sendingAction){
+      setErrorMessage("Awaiting server response");
+      return;
+    }
     try{
-      console.log("Sending supabase reset call");
-      upsertSupabaseGame("PATCH", tableName, gameId, gameKey, "RESET");
+      setSendingAction(true);
+      await upsertSupabaseGame("PATCH", tableName, gameId, gameKey, "RESET");
     }
     catch{
       setErrorMessage("Client unable to send event. Try refreshing your page.");
     }
+    setSendingAction(false);
   }
 
     
@@ -192,8 +204,8 @@ export default function OnlineGames() {
         </div>
         <Suspense>
           <QueriedGame setTableName = {setTableName}/>
-          {tableName === "TicTacToe" && (<TicTacToe ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame} setErrorMessage = {setErrorMessage} />)}
-          {tableName === "ConnectFour" && (<ConnectFour ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame} setErrorMessage = {setErrorMessage} />)}
+          {tableName === "TicTacToe" && (<TicTacToe ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame} sendingAction={sendingAction} setErrorMessage = {setErrorMessage} />)}
+          {tableName === "ConnectFour" && (<ConnectFour ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame}sendingAction={sendingAction} setErrorMessage = {setErrorMessage} />)}
         </Suspense>
         <div className={styles.subAppContainer}>
           <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey} thisPlayerIndex={playerIds.indexOf(userId)} currentPlayerIndex={currentPlayerIndex} maxPlayers = {maxPlayers} hide={!inLobby}/>

@@ -109,6 +109,10 @@
   color: #fff;
 }
 
+.loadingCursor {
+  cursor:wait;
+}
+
 @media (hover: hover) {
   .column:hover{
     background-color: var(--clr-surface-a20);

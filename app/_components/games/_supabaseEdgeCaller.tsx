@@ -61,6 +61,7 @@ export async function getSupabaseGame(tableName:string, gameId:number):Promise<G
   } catch {
 
   }
+  console.log("Successful game get");
   return funcReturn;
 }
 
@@ -96,6 +97,7 @@ export async function upsertSupabaseGame(functionMethod:"PATCH"|"POST", tableNam
   } catch {
 
   }
+  console.log("Successful game upsert");
   return funcReturn;
 }
 
@@ -134,7 +136,7 @@ export async function upsertSupabaseGamePlayers(gameTable:string, gameId:number,
   } catch {
 
   }
-  console.log(funcReturn);
+  console.log("Successful Player upsert");
   return funcReturn;
   
 }

@@ -4,7 +4,7 @@ import styles from "./page.module.css";
 
 import {useState, forwardRef, useImperativeHandle} from "react";
 
-const ConnectFour = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, onlineResetGame, setErrorMessage}, ref) => {
+const ConnectFour = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, onlineResetGame, sendingAction = false, setErrorMessage}, ref) => {
     const newGame = { //7 collumns by 6 rows
         board: Array(7).fill(null).map(() => Array(6).fill(null)),
         nextToken: "X",
@@ -157,6 +157,9 @@ const ConnectFour = forwardRef(({inLobby = false, gameId = null, onlineMakeMove,
                             
                                 ${winnerArray.some((arr) => JSON.stringify(arr) == JSON.stringify([colIndex,cellIndex])) ? `${styles.cellHighlight}`
                                 : (!isOngoing && winnerArray.length == 0) ? `${styles.cellFailure}`
+                                : ''}
+
+                                ${sendingAction ? styles.loadingCursor
                                 : ''}`
                             }
                             onClick={() => makeMove(colIndex)}
@@ -173,7 +176,12 @@ const ConnectFour = forwardRef(({inLobby = false, gameId = null, onlineMakeMove,
                 isOngoing ? `Current Token: ${game.nextToken}`:
                 'Tie game!'}
             </p>
-            <button className={styles.resetButton} onClick={resetGame}>
+            <button className={`${styles.resetButton}
+                ${sendingAction ? styles.loadingCursor
+                : ''}`
+                } 
+                onClick={resetGame}
+            >
                 Reset Game
             </button>
         </div>
