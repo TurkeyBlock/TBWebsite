@@ -15,6 +15,7 @@ interface publicGame{
 
 export default function PublicGamesDisplay({tableName}:pbProp){
 
+    const [loadingPublicGames, setLoadingPublicGames] = useState(false);
     const offsetMult = 10;
     const [offsetCount, setOffsetCount] = useState(0);
     const [publicGames, setPublicGames] = useState<Array<publicGame>>([]);
@@ -23,54 +24,74 @@ export default function PublicGamesDisplay({tableName}:pbProp){
     function incOffset(){
         if(publicGames.length >= 10){
             setOffsetCount(offsetCount+1);
+            getPublicGames()
         }
     }
     function decOffset(){
         if(offsetCount > 0 ){
             setOffsetCount(offsetCount-1);
+            getPublicGames()
         }
     }
 
-    
-    useEffect(() => {
-        async function getPublicGames(){
-            const { data } = await createClient().from(tableName).select('name, id').range(offsetCount*offsetMult,(offsetCount+1)*offsetMult).eq('public', true);
-            if(data!=null)
-                setPublicGames(data);
-            return data;
+    async function getPublicGames(){
+        if(loadingPublicGames){
+            return null;
         }
+        setLoadingPublicGames(true);
+        const { data } = await createClient().from(tableName).select('name, id').range(offsetCount*offsetMult,(offsetCount+1)*offsetMult).eq('public', true);
+        setLoadingPublicGames(false);
+        if(data!=null)
+            setPublicGames(data);
+        return data;
+    }
+
+    useEffect(() => {
         if (tableName==null) {
             return;
         }
         getPublicGames();
-    },[tableName,offsetCount])
+    },[tableName])
     
     return(
         <div className = {styles.publicGames}>
-            <div className={styles.publicName}style={{flexDirection:'row', alignContent:'center'}}>
-                <div style={{paddingBottom:'5px', alignContent:'center'}}>
+            <div style={{paddingBottom:'5px'}}>
+                <button 
+                    type='button'
+                    className = {`${styles.submitButton} 
+                        ${loadingPublicGames ? styles.loadingCursor
+                        : '' }`
+                    }
+                    onClick = {getPublicGames}
+                >
+                    🗘
+                </button>
+                <div style = {{display:'inline-block', marginLeft:'10px'}}>
                     Public Lobbies
                 </div>
-                <div className={styles.cellBlock}>
-                    
-                    {publicGames.length > 0 ? publicGames.map((cell, index) => (
-                        <div
-                            key = {index}
-                            className = {styles.cell}
-                            style={{
-                                borderBottom:index+1==publicGames.length?"none":"",
-                                backgroundColor:index%2==0?"var(--clr-surface-tonal-a20)":"var(--clr-surface-tonal-a40)",
-                            }}
-                        >
-                            {cell.name} | ID: {cell.id}
-                        </div>
-                    )):
-                    <div className = {styles.cell}>
-                        Empty
+            </div>
+            
+            <div className={styles.cellBlock}>
+                
+                {publicGames.length > 0 ? publicGames.map((cell, index) => (
+                    <div
+                        key = {index}
+                        className = {styles.cell}
+                        style={{
+                            borderBottom:index+1==publicGames.length?"none":"",
+                            backgroundColor:index%2==0?"var(--clr-surface-tonal-a20)":"var(--clr-surface-tonal-a40)",
+                        }}
+                    >
+                        {cell.name} | ID: {cell.id}
                     </div>
-                    
-                    }
+                )):
+                <div className = {styles.cell}>
+                    Empty
                 </div>
+                
+                }
+            </div>
+            <div>
                 <button
                     type="button"
                     className={styles.submitButton}
