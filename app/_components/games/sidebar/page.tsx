@@ -169,8 +169,8 @@ export const Sidebar = ({tableName, setGameId, setGameKey, inLobby}:Props) => {
                     <div  style={{marginTop:'15px', fontWeight:'bold'}}>Creating a game:</div>
                     <span>Enter a Game Key of your choosing, which you will share with others, then click [Create Game]. If no Game Key is entered, the game will be open to all.</span>
                 </div>
-                <span className={`color2 ${styles.line}`}></span>
-                <PublicGamesDisplay tableName = {tableName}/>
+                {!inLobby?<span className={`color2 ${styles.line}`}></span>:<></>}
+                {!inLobby?<PublicGamesDisplay tableName = {tableName}/>:<></>}
             </div>
             <span className='color5'>
             <button className={styles.sidebarButton} onClick={toggleSidebar}>{sidebar==true?"<<":">>"}</button>

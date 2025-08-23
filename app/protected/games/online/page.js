@@ -23,11 +23,14 @@ const ConnectFour= dynamic(() => import('./_connect-four/page'), {
 
 function QueriedGame({setTableName}){
   const searchParams = useSearchParams();
-  setTableName(searchParams.get("game"));
+  useEffect(() => {
+    setTableName(searchParams.get("game"));
+  },[]);
 }
 
 
 export default function OnlineGames() {
+
   const childRef = useRef();
   const [tableName, setTableName] = useState(null);
   
@@ -55,7 +58,6 @@ export default function OnlineGames() {
       }
     }
   }
-
 
   useEffect(() => {
     let channel;

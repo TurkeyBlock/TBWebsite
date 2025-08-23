@@ -56,19 +56,7 @@ export default function PublicGamesDisplay({tableName}:pbProp){
     return(
         <div className = {styles.publicGames}>
             <div style={{paddingBottom:'5px'}}>
-                <button 
-                    type='button'
-                    className = {`${styles.submitButton} 
-                        ${loadingPublicGames ? styles.loadingCursor
-                        : '' }`
-                    }
-                    onClick = {getPublicGames}
-                >
-                    🗘
-                </button>
-                <div style = {{display:'inline-block', marginLeft:'10px'}}>
-                    Public Lobbies
-                </div>
+                Public Lobbies
             </div>
             
             <div className={styles.cellBlock}>
@@ -92,9 +80,23 @@ export default function PublicGamesDisplay({tableName}:pbProp){
                 }
             </div>
             <div>
+                <button 
+                    type='button'
+                    className = {`${styles.submitButton} 
+                        ${loadingPublicGames ? styles.loadingCursor
+                        : '' }`
+                    }
+                    onClick = {getPublicGames}
+                    style = {{marginRight:'10px'}}
+                >
+                    🗘
+                </button>
                 <button
                     type="button"
-                    className={styles.submitButton}
+                    className={`${styles.submitButton}
+                        ${loadingPublicGames ? styles.loadingCursor
+                        : '' }`
+                    }
                     onClick = {decOffset}
                     >
                     {"<<"}
@@ -102,7 +104,10 @@ export default function PublicGamesDisplay({tableName}:pbProp){
                 &nbsp;Page {offsetCount+1}&nbsp;
                 <button
                     type="button"
-                    className={styles.submitButton}
+                    className={`${styles.submitButton}
+                        ${loadingPublicGames ? styles.loadingCursor
+                        : '' }`
+                    }
                     onClick = {incOffset}
                     >
                     {">>"}
