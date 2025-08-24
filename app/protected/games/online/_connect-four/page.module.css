@@ -35,12 +35,12 @@
   display: grid;
   grid-template-columns: repeat(7, 11vmin);
   
-  gap: 3px;
+  gap: 0px;
 }
 
 .cell {
-  width: 10vmin;
-  height: 10vmin;
+  width: 9vmin;
+  height: 9vmin;
   border-radius: 50%; /* Makes it a circle */
   
   font-size: 5vmin;
@@ -94,13 +94,15 @@
 
 .resetButton {
   margin-top: 1vmin;
+  margin-bottom:2vmin;
   padding: 1vmin 2vmin;
   font-size: 2vmin;
   cursor: pointer;
-  background-color: #4caf50;
-  color: #fff;
   border: none;
   border-radius: 5px;
+
+  background-color: #4caf50;
+  color: #fff;
   transition: background-color 0.3s;
 }
 
