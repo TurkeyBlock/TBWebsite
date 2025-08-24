@@ -44,7 +44,7 @@ const ConnectFour = forwardRef(({inLobby = false, gameId = null, onlineMakeMove,
         
         let start = [col,row];
         let lines = new Array(4);
-        let localWinnerArray = winnerArray;
+        let localWinnerArray = [];
         lines[0] = [start].concat(flood(col,row, 1, 0)).concat(flood(col,row,-1,0));
         lines[1] = [start].concat(flood(col,row, 0, 1)).concat(flood(col,row,0,-1));
         lines[2] = [start].concat(flood(col,row, 1, 1)).concat(flood(col,row, -1, -1));
@@ -120,9 +120,10 @@ const ConnectFour = forwardRef(({inLobby = false, gameId = null, onlineMakeMove,
         setWinnerArray([]);
     }
 
-    const loadGame = async (game) => {
-        setGame(game);
-        calculateWinner(game);
+    const loadGame = async (inputGame) => {
+        setGame(inputGame);
+        setWinnerArray([]);
+        calculateWinner(inputGame);
     }
   
     useImperativeHandle(ref, () => ({
