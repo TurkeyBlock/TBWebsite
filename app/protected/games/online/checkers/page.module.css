@@ -1,0 +1,54 @@
+
+.board {
+  justify-content:center;
+  display: flex;
+  flex-direction:column;
+}
+
+.row {
+  justify-content:center;
+  display: flex;
+  flex-direction:row;
+}
+
+.cell {
+  width: 6vmin;
+  height: 6vmin;
+  
+  font-size: 2vmin;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  transition: background-color 0.3s;
+  border: 2px solid;
+  @media (prefers-color-scheme: dark) {
+    border: 1px solid;
+  }
+}
+
+.token{
+  width: 5vmin;
+  height: 5vmin;
+  border-radius: 50%; /* Makes it a circle */
+
+  font-size: 2vmin;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  transition: background-color 0.3s;
+  border: 2px solid;
+  @media (prefers-color-scheme: dark) {
+    border: 1px solid;
+  }
+}
+
+.tokenX {
+  background-color: #FFC20A
+}
+.tokenO {
+  background-color: #0C7BDC
+}
