@@ -78,17 +78,19 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
 
     //Checks a diagonal direction.
     function subComponent(rowDir, colDir){ // +/-1  for each
+        console.log('hitting'+ (sRow+rowDir) +' '+(sCol+colDir));
         if(!isInBounds(sRow+rowDir, sCol+colDir)){
             console.log('oob');
-            return [];
+            return;
         }
-        if(canMove && gameState.board[sRow + defaultDirection][sCol + 1] == null){
+        if(canMove && gameState.board[sRow+rowDir][sCol+colDir] == null){
+            
             targetArray.push((sRow+rowDir)*8 + (sCol + colDir));
         }
         else if (canJump && gameState.board[sRow + rowDir][sCol + colDir]?.toUpperCase() == oppToken
             && isInBounds(sRow + rowDir*2, sCol + colDir*2)
             && gameState.board[sRow + rowDir*2][sCol + colDir*2]
-            ){
+        ){
             targetArray.push((sRow + rowDir*2)*8 + (sCol + colDir*2))
         }
     }
@@ -110,12 +112,6 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
 
   const prepMove = async (index) => {
 
-    const updatedMovingGame = {
-        board: movingGame.board.map(innerArray => [...innerArray]),
-        nextToken: movingGame.nextToken,
-        moveStack: movingGame.moveStack,
-    };
-
     const col = index % 8;
     const row = parseInt(index / 8);
     console.log(movingGame.moveStack);
@@ -128,8 +124,7 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
             movingGame.moveStack.push(index);
             const Hltemp = getTargets(movingGame, movingGame.moveStack[movingGame.moveStack.length - 1]);
             console.log("setting HL locations: "+Hltemp);
-            setHighlightLocations(Hltemp)
-            console.log(highlightLocations);
+            setHighlightLocations(Hltemp);
             //setMovingGame(movingGame)
         }
         else{
@@ -142,7 +137,20 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
     //The following selection(s) are moves, or jumps.
     console.log("HL Locations:"+ highlightLocations);
     if(highlightLocations.includes(index)){
+        //The location is valid, record the action.
         movingGame.moveStack.push(index);
+
+        //kill previous location of token
+        const lastLoc = movingGame.moveStack[movingGame.moveStack.length-2];
+        const lastRow = parseInt(lastLoc/8);
+        const lastCol = lastLoc%8;
+        const lastLocToken = movingGame.board[lastRow][lastCol];
+
+        //Visibly move the token, deleting last location
+        movingGame.board[row][col] = lastLocToken;
+        movingGame.board[lastRow][lastCol] = null;
+
+        //Highlight/prep the new locations the token could travel
         setHighlightLocations(getTargets(movingGame, movingGame.moveStack[movingGame.moveStack.length - 1]));
     }
     else{
@@ -161,7 +169,7 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
     //Commits the movingGame.moveStack to game
     const updatedGame = {
         board: movingGame.board.map(innerArray => [...innerArray]),
-        nextToken: movingGame.nextToken,
+        nextToken: movingGame.nextToken == 'X' ? 'O':'X',
         moveStack: []
     };
     console.log(updatedGame)
@@ -170,13 +178,7 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
         console.log(index);
         const col = index % 8;
         const row = parseInt(index / 8);
-        if(i == movingGame.moveStack.length-1){
-            updatedGame.board[row][col] = updatedGame.nextToken;
-            updatedGame.nextToken = updatedGame.nextToken == 'X' ? 'O':'X';
-        } else{
-
-            updatedGame.board[row][col] = null;
-        }
+        updatedGame.board[row][col] = movingGame.board[row][col];
     } 
     
     console.log(updatedGame);
@@ -220,10 +222,10 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
                     `Game ID: ${gameId}`
                 }</h1>
             </div>
-            {game.moveStack}
+            {movingGame.moveStack}
             <div className = {styles.board}>
                 {/*--------------------*/}
-                {game.board.map((row, rowIndex) => (
+                {movingGame.board.map((row, rowIndex) => (
                     <div
                         key={rowIndex}
                         className = {styles.row}
@@ -240,15 +242,15 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
                             `}
                             onClick={() => prepMove(rowIndex*8+colIndex)}
                         >
-                        {game.board[rowIndex][colIndex]==null ? (rowIndex*8+colIndex)
+                        {movingGame.board[rowIndex][colIndex]==null ? (rowIndex*8+colIndex)
                         :   <div
                                 className = {`${styles.token}
-                                    ${game.board[rowIndex][colIndex].toUpperCase()=='X' ? styles.tokenX
+                                    ${movingGame.board[rowIndex][colIndex].toUpperCase()=='X' ? styles.tokenX
                                     : styles.tokenO
                                     }
                                 `}
                             >
-                                {game.board[rowIndex][colIndex]}
+                                {movingGame.board[rowIndex][colIndex]}
                             </div>
                         }
                         </div>
@@ -269,7 +271,11 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
             >
                 Reset Game
             </button>
-            <button onClick = {makeMove}>
+            <button 
+            onClick = {makeMove}
+            className={`${styles.resetButton}`}
+            style={{backgroundColor:'blue'}}
+            >
                 Commit Move
             </button>
         </div>

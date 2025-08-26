@@ -46,6 +46,20 @@
   }
 }
 
+.resetButton {
+  margin-top: 1vmin;
+  margin-bottom:2vmin;
+  padding: 1vmin 2vmin;
+  font-size: 2vmin;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+
+  background-color: #4caf50;
+  color: #fff;
+  transition: background-color 0.3s;
+}
+
 .tokenX {
   background-color: #FFC20A
 }
