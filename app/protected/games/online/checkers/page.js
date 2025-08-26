@@ -54,7 +54,7 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
 
     //You can not move after moving or jumping
     //First on the stack is the selected piece's starting location
-    if(game.moveStack.length != 1){
+    if(gameState.moveStack.length != 1){
         canMove = false;
     }
     //const startingIndex = moveStack[moveStack.length-1];
@@ -79,7 +79,8 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
     //Checks a diagonal direction.
     function subComponent(rowDir, colDir){ // +/-1  for each
         if(!isInBounds(sRow+rowDir, sCol+colDir)){
-            return;
+            console.log('oob');
+            return [];
         }
         if(canMove && gameState.board[sRow + defaultDirection][sCol + 1] == null){
             targetArray.push((sRow+rowDir)*8 + (sCol + colDir));
@@ -98,27 +99,38 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
 
     //If kinged piece, it can go 'backwards'
     console.log(gameState.board);
-    console.log(sRow + " " + sCol);
+    console.log('targeting: '+sRow + " " + sCol);
     if(gameState.board[sRow][sCol] === gameState.board[sRow][sCol]?.toUpperCase()){
         subComponent(-defaultDirection, 1); 
         subComponent(-defaultDirection, -1);
     }
+    console.log(targetArray);
     return targetArray;
   }
 
   const prepMove = async (index) => {
 
+    const updatedMovingGame = {
+        board: movingGame.board.map(innerArray => [...innerArray]),
+        nextToken: movingGame.nextToken,
+        moveStack: movingGame.moveStack,
+    };
+
     const col = index % 8;
     const row = parseInt(index / 8);
-    console.log(game.moveStack);
+    console.log(movingGame.moveStack);
     //setErrorMessage("");
     //If there are no prior selections this turn, then we're selecting a token of this player's type to move.
-    if(game.moveStack.length == 0){
-        if(game.board[row][col]?.toUpperCase() == game.nextToken){
+    if(movingGame.moveStack.length == 0){
+        if(movingGame.board[row][col]?.toUpperCase() == movingGame.nextToken){
             //init an editable game with current game-state.
             console.log('recording move: '+index);
-            game.moveStack.push(index);
-            setMovingGame(game)
+            movingGame.moveStack.push(index);
+            const Hltemp = getTargets(movingGame, movingGame.moveStack[movingGame.moveStack.length - 1]);
+            console.log("setting HL locations: "+Hltemp);
+            setHighlightLocations(Hltemp)
+            console.log(highlightLocations);
+            //setMovingGame(movingGame)
         }
         else{
             console.log('invalid intial select');
@@ -128,8 +140,10 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
         return;
     }
     //The following selection(s) are moves, or jumps.
-    if(getTargets(movingGame, game.moveStack[game.moveStack.length - 1]).includes(index)){
-        game.moveStack.push(index);
+    console.log("HL Locations:"+ highlightLocations);
+    if(highlightLocations.includes(index)){
+        movingGame.moveStack.push(index);
+        setHighlightLocations(getTargets(movingGame, movingGame.moveStack[movingGame.moveStack.length - 1]));
     }
     else{
         console.log('invalid post-selection move');
@@ -137,26 +151,26 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
   }
 
   function makeMove(override = true){
-    if(game.moveStack.length <= 0){
+    if(movingGame.moveStack.length <= 0){
         if(override == true)
             console.log('no moves logged - but hey, you the boss.')
         else{
             console.log('Future implimentation may prevent this submission')
         }
     }
-    //Commits the game.moveStack
+    //Commits the movingGame.moveStack to game
     const updatedGame = {
-        board: game.board.map(innerArray => [...innerArray]),
-        nextToken: game.nextToken,
+        board: movingGame.board.map(innerArray => [...innerArray]),
+        nextToken: movingGame.nextToken,
         moveStack: []
     };
     console.log(updatedGame)
-    for(let i = 0; i <= game.moveStack.length-1; i++){
-        const index = game.moveStack[i];
+    for(let i = 0; i <= movingGame.moveStack.length-1; i++){
+        const index = movingGame.moveStack[i];
         console.log(index);
         const col = index % 8;
         const row = parseInt(index / 8);
-        if(i == game.moveStack.length-1){
+        if(i == movingGame.moveStack.length-1){
             updatedGame.board[row][col] = updatedGame.nextToken;
             updatedGame.nextToken = updatedGame.nextToken == 'X' ? 'O':'X';
         } else{
@@ -167,6 +181,7 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
     
     console.log(updatedGame);
     setGame(updatedGame);
+    setMovingGame(updatedGame); //Clears the moveStack, keeps current state
   }
 
   const resetGame = async () => {
@@ -182,10 +197,12 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
   function localResetGame(){
     //setErrorMessage("");
     setGame(newGame);
+    setMovingGame(newGame);
   }
 
   const loadGame = async (game) => {
     setGame(game);
+    setMovingGame(game);
     calculateWinner(game);
   }
   
@@ -217,8 +234,10 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
                             //className = {styles.cell}
                             className = {`${(rowIndex%2 == colIndex%2 )?'color0':'color5'}
                                 ${styles.cell}
-                                ${sendingAction ? styles.loadingCursor : ''}`
-                            }
+                                ${sendingAction ? styles.loadingCursor : ''}
+
+                                ${highlightLocations.includes(rowIndex*8+colIndex) ? 'color1' : 'color0'}
+                            `}
                             onClick={() => prepMove(rowIndex*8+colIndex)}
                         >
                         {game.board[rowIndex][colIndex]==null ? (rowIndex*8+colIndex)
