@@ -35,7 +35,7 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
         for(let col in gamestate.board[row]){
             //Next Token is the token that will be playing, 
             // so it's the token that may have had pieces taken in the turn we're checking.
-            if (gamestate.board[row][col] == gamestate.nextToken){
+            if (gamestate.board[row][col]?.toUpperCase() == gamestate.nextToken){
                 tokenExists = true;
                 break;
             }
@@ -45,11 +45,11 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
         return;
     }
     //Else
-    setWinner(gamestate.token == 'X'?'O':'X');
+    setWinner(gamestate.nextToken == 'X'?'O':'X');
   }
 
   //look for diagonal squares containing [type]. (null would be empty, movable-to squares)
-  function getTargets(gameState, startingIndex){
+  function getTargets(gameState, startingIndex, localCanJump){
     let canMove = true;
 
     //You can not move after moving or jumping
@@ -78,18 +78,15 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
 
     //Checks a diagonal direction.
     function subComponent(rowDir, colDir){ // +/-1  for each
-        console.log('hitting'+ (sRow+rowDir) +' '+(sCol+colDir));
         if(!isInBounds(sRow+rowDir, sCol+colDir)){
-            console.log('oob');
             return;
         }
         if(canMove && gameState.board[sRow+rowDir][sCol+colDir] == null){
-            
             targetArray.push((sRow+rowDir)*8 + (sCol + colDir));
         }
-        else if (canJump && gameState.board[sRow + rowDir][sCol + colDir]?.toUpperCase() == oppToken
+        else if (localCanJump && gameState.board[sRow + rowDir][sCol + colDir]?.toUpperCase() == oppToken
             && isInBounds(sRow + rowDir*2, sCol + colDir*2)
-            && gameState.board[sRow + rowDir*2][sCol + colDir*2]
+            && gameState.board[sRow + rowDir*2][sCol + colDir*2] == null
         ){
             targetArray.push((sRow + rowDir*2)*8 + (sCol + colDir*2))
         }
@@ -100,8 +97,6 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
     subComponent(defaultDirection, -1);
 
     //If kinged piece, it can go 'backwards'
-    console.log(gameState.board);
-    console.log('targeting: '+sRow + " " + sCol);
     if(gameState.board[sRow][sCol] === gameState.board[sRow][sCol]?.toUpperCase()){
         subComponent(-defaultDirection, 1); 
         subComponent(-defaultDirection, -1);
@@ -111,6 +106,7 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
   }
 
   const prepMove = async (index) => {
+    let localCanJump = canJump;
 
     const col = index % 8;
     const row = parseInt(index / 8);
@@ -120,42 +116,62 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
     if(movingGame.moveStack.length == 0){
         if(movingGame.board[row][col]?.toUpperCase() == movingGame.nextToken){
             //init an editable game with current game-state.
-            console.log('recording move: '+index);
             movingGame.moveStack.push(index);
-            const Hltemp = getTargets(movingGame, movingGame.moveStack[movingGame.moveStack.length - 1]);
-            console.log("setting HL locations: "+Hltemp);
-            setHighlightLocations(Hltemp);
-            //setMovingGame(movingGame)
+            setCanJump(true);
+            localCanJump = true;
         }
         else{
-            console.log('invalid intial select');
             //User selected an empty (or unowned) space
+            console.log('invalid intial select');
+            return
         }
-
-        return;
     }
-    //The following selection(s) are moves, or jumps.
-    console.log("HL Locations:"+ highlightLocations);
-    if(highlightLocations.includes(index)){
-        //The location is valid, record the action.
-        movingGame.moveStack.push(index);
+    else {
+        //We've already selected a piece for this turn, so...
+        //The following selection(s) are moves, or jumps.
 
-        //kill previous location of token
-        const lastLoc = movingGame.moveStack[movingGame.moveStack.length-2];
-        const lastRow = parseInt(lastLoc/8);
-        const lastCol = lastLoc%8;
-        const lastLocToken = movingGame.board[lastRow][lastCol];
+        //Remember: verification is handled by getTargets; this just does the request.
+        if(highlightLocations.includes(index)){
+            //The location is valid, record the action.
+            movingGame.moveStack.push(index);
 
-        //Visibly move the token, deleting last location
-        movingGame.board[row][col] = lastLocToken;
-        movingGame.board[lastRow][lastCol] = null;
+            //get previous location of token
+            const lastLoc = movingGame.moveStack[movingGame.moveStack.length-2];
+            const lastRow = parseInt(lastLoc/8);
+            const lastCol = lastLoc%8;
 
-        //Highlight/prep the new locations the token could travel
-        setHighlightLocations(getTargets(movingGame, movingGame.moveStack[movingGame.moveStack.length - 1]));
+            //Check if token jumped or moved (2 || 1)
+            const colDif = lastCol - col;
+            if(Math.abs(colDif) >=2){
+                //delete the token that was jumped
+                const rowDif = lastRow - row;
+                movingGame.board[row+Math.sign(rowDif)][col+Math.sign(colDif)] = null;
+            }
+            else{
+                //This token moved, so it can no longer jump (or move, but that's pre-handled))
+                setCanJump(false);
+                localCanJump = false;
+            }
+
+
+            //Getting the token that moved
+            let lastLocToken = movingGame.board[lastRow][lastCol];
+            
+            //If a token has reached the opposite end of the board (and is unKinged), King it.
+            if((lastLocToken == 'x' && index < movingGame.board[0].length ) || (lastLocToken == 'o' && index >= (movingGame.board[0].length*movingGame.board.length - movingGame.board[0].length))){
+                lastLocToken = lastLocToken.toUpperCase();
+            }
+
+            //Visibly move the token, deleting last location
+            movingGame.board[row][col] = lastLocToken;
+            movingGame.board[lastRow][lastCol] = null;
+        }
+        else{
+            console.log('invalid post-selection move');
+            return;
+        }
     }
-    else{
-        console.log('invalid post-selection move');
-    }
+    setHighlightLocations(getTargets(movingGame, movingGame.moveStack[movingGame.moveStack.length - 1], localCanJump));
   }
 
   function makeMove(override = true){
@@ -172,18 +188,17 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
         nextToken: movingGame.nextToken == 'X' ? 'O':'X',
         moveStack: []
     };
-    console.log(updatedGame)
-    for(let i = 0; i <= movingGame.moveStack.length-1; i++){
-        const index = movingGame.moveStack[i];
-        console.log(index);
-        const col = index % 8;
-        const row = parseInt(index / 8);
-        updatedGame.board[row][col] = movingGame.board[row][col];
-    } 
     
-    console.log(updatedGame);
-    setGame(updatedGame);
+    setGame(JSON.parse(JSON.stringify(updatedGame)));
     setMovingGame(updatedGame); //Clears the moveStack, keeps current state
+    calculateWinner(updatedGame);
+    setHighlightLocations([]);
+  }
+
+  //I'm not currently storing enough information to do incremental undos- this is an all/nothing
+  function undoMove(){
+    setMovingGame(JSON.parse(JSON.stringify(game)));
+    setHighlightLocations([]);
   }
 
   const resetGame = async () => {
@@ -200,6 +215,7 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
     //setErrorMessage("");
     setGame(newGame);
     setMovingGame(newGame);
+    setWinner(null);
   }
 
   const loadGame = async (game) => {
@@ -237,9 +253,8 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
                             className = {`${(rowIndex%2 == colIndex%2 )?'color0':'color5'}
                                 ${styles.cell}
                                 ${sendingAction ? styles.loadingCursor : ''}
-
-                                ${highlightLocations.includes(rowIndex*8+colIndex) ? 'color1' : 'color0'}
                             `}
+                            style={{border: `${highlightLocations.includes(rowIndex*8+colIndex) ? 'gold 3px solid': ''}`}}
                             onClick={() => prepMove(rowIndex*8+colIndex)}
                         >
                         {movingGame.board[rowIndex][colIndex]==null ? (rowIndex*8+colIndex)
@@ -274,9 +289,17 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
             <button 
             onClick = {makeMove}
             className={`${styles.resetButton}`}
-            style={{backgroundColor:'blue'}}
+            style={{
+                backgroundColor: `${(movingGame.moveStack.length > 1) ? 'blue' : 'red'}`,
+                outline: `${movingGame.moveStack.length > 1 && highlightLocations.length == 0 ? 'gold 5px solid': ''}`
+            }}
             >
                 Commit Move
+            </button>
+                <button className={`${styles.resetButton}`}
+                onClick={undoMove}
+            >
+                Undo Move
             </button>
         </div>
     );
