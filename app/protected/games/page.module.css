@@ -82,8 +82,10 @@
   width: 5vmin;
   height: 5vmin;
   border-radius: 50%; /* Makes it a circle */
+  margin-top:1px;
+
   border: 2px solid;
-  font-size: 5vmin;
+  font-size: 3vmin;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -93,4 +95,11 @@
   @media (prefers-color-scheme: dark) {
     border:1px solid;
   }
+}
+
+.tokenA {
+  background-color: #FFC20A
+}
+.tokenB {
+  background-color: #0C7BDC
 }

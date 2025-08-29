@@ -9,6 +9,8 @@ const Games = () => {
     const TicTacToe = [null,null,'O',null,'X','O','X',null,null];
     //new Array(9).fill(null);
     const ConnectFour = new Array(7).fill(null).map(() => Array(6).fill(null));
+    ConnectFour[3][5]='X'; ConnectFour[4][4]='X'; ConnectFour[4][3]='X'; ConnectFour[3][3]='X'; ConnectFour[2][4]='X'; 
+    ConnectFour[4][5]='O'; ConnectFour[3][4]='O'; ConnectFour[2][5]='O'; ConnectFour[5][5]='O'; ConnectFour[4][2]='O'; 
     return(
         <main className = "main">
             <div className={`color3 ${styles.container}`}>
@@ -43,7 +45,7 @@ const Games = () => {
                                         : (ConnectFour[colIndex][slotIndex] == 'X') ? [styles.slot, styles.tokenA].join(" ")
                                         : [styles.slot, styles.tokenB].join(" ")}`}
                                     >
-                                    {slot}
+                                        
                                     </div>
                                 ))}
                                 </div>
