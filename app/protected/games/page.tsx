@@ -36,12 +36,16 @@ const Games = () => {
                             {ConnectFour.map((col, colIndex) => (
                                 <div
                                     key={colIndex}
-                                    className = {styles.column}
+                                    className = {`${styles.column} color0`}
+                                    style = {{
+                                        borderLeft:`${colIndex == 0 ? '2px solid':''}`,
+                                        borderRight:`${colIndex == ConnectFour.length-1 ? '2px solid':''}`
+                                    }}
                                 >
                                 {col.map((slot, slotIndex) => (
                                     <div
                                         key={slotIndex}
-                                        className = {`color0 ${ConnectFour[colIndex][slotIndex] == null ? styles.slot
+                                        className = {` ${ConnectFour[colIndex][slotIndex] == null ? styles.slot
                                         : (ConnectFour[colIndex][slotIndex] == 'X') ? [styles.slot, styles.tokenA].join(" ")
                                         : [styles.slot, styles.tokenB].join(" ")}`}
                                     >

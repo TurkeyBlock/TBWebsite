@@ -145,13 +145,17 @@ const ConnectFour = forwardRef(({inLobby = false, gameId = null, onlineMakeMove,
                 {game.board.map((col, colIndex) => (
                     <div
                         key={colIndex}
-                        className = {styles.column}
+                        className = {`${styles.column} color5`}
+                        style = {{
+                            borderLeft:`${colIndex == 0 ? '2px solid':''}`,
+                            borderRight:`${colIndex == game.board.length-1 ? '2px solid':''}`
+                        }}
                     >
                     {col.map((cell, cellIndex) => (
                         <div
                             key={cellIndex}
                             //className = {styles.cell}
-                            className = {`color0
+                            className = {`color1
                                 ${game.board[colIndex][cellIndex] == null ? styles.cell
                                 : (game.board[colIndex][cellIndex] == 'X') ? `${styles.cell} ${styles.tokenA}`
                                 : `${styles.cell} ${styles.tokenB}`}
