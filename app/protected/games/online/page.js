@@ -21,6 +21,11 @@ const ConnectFour= dynamic(() => import('./_connect-four/page'), {
     ssr: false,
 });
 
+const Checkers= dynamic(() => import('./_checkers/page'), {
+  loading: () => <p>Loading ConnectFour</p>,
+    ssr: false,
+});
+
 function QueriedGame({setTableName}){
   const searchParams = useSearchParams();
   useEffect(() => {
@@ -208,6 +213,7 @@ export default function OnlineGames() {
           <QueriedGame setTableName = {setTableName}/>
           {tableName === "TicTacToe" && (<TicTacToe ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame} sendingAction={sendingAction} setErrorMessage = {setErrorMessage} />)}
           {tableName === "ConnectFour" && (<ConnectFour ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame}sendingAction={sendingAction} setErrorMessage = {setErrorMessage} />)}
+          {tableName === "Checkers" && (<Checkers ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame}sendingAction={sendingAction} setErrorMessage = {setErrorMessage} />)}
         </Suspense>
         <div className={styles.subAppContainer}>
           <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey} thisPlayerIndex={playerIds.indexOf(userId)} currentPlayerIndex={currentPlayerIndex} maxPlayers = {maxPlayers} hide={!inLobby}/>

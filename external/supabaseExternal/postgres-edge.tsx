@@ -8,7 +8,18 @@ function getNewBoard(gameName:string){
   else if(gameName == "TicTacToe"){
     newBoard = Array(9).fill(null);
   }
+  else if(gameName == "Checkers"){
+    newBoard = Array(8).fill().map(()=>Array(8).fill(null));
+    newBoard[0] = ['o',null,'o',null,'o',null,'o',null]
+    newBoard[1] = [null,'o',null,'o',null,'o',null,'o']
+    newBoard[6] = ['x',null,'x',null,'x',null,'x',null]
+    newBoard[7] = [null,'x',null,'x',null,'x',null,'x']
+  }
   return newBoard;
+}
+
+function isInbounds(val:number, maxVal:number, minVal:number = 0){
+  return val < maxVal && val >= minVal;
 }
 
 function getNewGame(gameName:string){
@@ -25,6 +36,13 @@ function getNewGame(gameName:string){
     newGame = {
       'board':getNewBoard(gameName),
       'nextToken':"X"
+    }
+  }
+  else if(gameName == "Checkers"){
+    newGame = {
+      'board':getNewBoard(gameName),
+      'nextToken':"X",
+      'moveStack':[]
     }
   }
   return newGame;
@@ -83,7 +101,7 @@ Deno.serve(async (req)=>{
     //There is no GET method atm. All GETs are processed as an actionless PATCH.
     //This is because the GET methods don't appear to allow the clients to pass data for their request.
     const reqBody = await req.json();
-    if(reqBody.table!=="TicTacToe" && reqBody.table!=="ConnectFour"){
+    if(reqBody.table!=="TicTacToe" && reqBody.table!=="ConnectFour" && reqBody.table!=="Checkers"){
       throw new Error("Unavailable table requested");
     }
 
@@ -137,6 +155,9 @@ Deno.serve(async (req)=>{
           //Second, validate the action at hand
           if(reqBody.table == "TicTacToe"){
             let position = instructions[1];
+            if(!isInbounds(position,9)){
+              throw new Error("Invalid Move; invalid index");
+            }
             if (game.board[position] == null) {
               let newBoard = game.board;
               newBoard[position] = game.nextToken;
@@ -153,6 +174,9 @@ Deno.serve(async (req)=>{
           else if (reqBody.table == "ConnectFour") {
             let newToken = game.nextToken == "X" ? "O" : "X";
             let col = Number(instructions[1]);
+            if(!isInbounds(col,7)){
+              throw new Error("Invalid Move; invalid column");
+            }
             let rowResult = -1;
             let newBoard = game.board.map((innerArray)=>[
               ...innerArray
@@ -176,6 +200,86 @@ Deno.serve(async (req)=>{
               }
             }
           }
+          /*----*/
+          else if(reqBody.table == "Checkers"){
+            console.log('pip');
+            
+            //"MOVE" @ [0], select index @ [1], & etc. @ [2]+
+            if(instructions.length < 3) {
+              throw new Error("Invalid move requested");
+            }
+
+            let newBoard = game.board.map((innerArray)=>[
+              ...innerArray
+            ]);
+            let newToken = game.nextToken == "X" ? "O" : "X";
+            let newMoveStack = []
+            for(let i = 1; i < instructions.length; i++){ //Skip "MOVE" action
+              newMoveStack.push(parseInt(instructions[i]));
+            }
+            console.log(newMoveStack);
+            newGamestate = {
+              board:newBoard,
+              nextToken:newToken,
+              moveStack: newMoveStack
+            }
+
+            const initialIndex = newGamestate.moveStack[0];
+            const prevRow = Math.floor(initialIndex/8);
+            const prevCol = initialIndex%8;
+            console.log(prevRow + " "+prevCol);
+            if(newGamestate.board[prevRow][prevCol]?.toUpperCase()!=game.nextToken){
+              throw new Error("Invalid move requested; Invalid initial Token");
+            }
+            if(!isInbounds(prevRow,8) || !isInbounds(prevCol,8)){
+              throw new Error("Invalid move requested; Invalid initial row or column");
+            }
+            //X goes up, O goes down.
+            const defaultDirection = game.nextToken == "X" ? 1:-1;
+
+            let isKing = newGamestate.board[prevRow][prevCol] == game.nextToken;
+            let canJump = true; //Moves can only occur once, immediately, so no need to track
+            for(let i = 1; i < newGamestate.moveStack.length; i++){
+              const curIndex = newGamestate.moveStack[i];
+              const row = Math.floor(curIndex/8);
+              const col = Math.floor(curIndex%8);
+              if(!isInbounds(row,8) || !isInbounds(col,8)){
+                throw new Error("Invalid move requested; Invalid row or column");
+              }
+              //First, check if we move or if we jump.
+              const colDif = prevCol - col;
+              const rowDif = prevRow - row;
+              if(Math.abs(colDif) >=2){
+                if(!canJump){
+                  throw new Error("Invalid move requested; Attempted a jump after moving");
+                }
+                //Location must be 2 away, you must be king if going 'backwards', and you must jump an enemy piece
+                if(!(rowDif==defaultDirection*2 || (isKing && rowDif==defaultDirection*-2)) || colDif!=2 || newGamestate.board[prevRow + rowDif/2][prevCol + colDif/2].toUpperCase() != newGamestate.nextToken){
+                  throw new Error("Invalid move requested; Invalid Jump");
+                }
+                //Kinging occurs @ end
+                newGamestate.board[row][col] = newGamestate.board[prevRow][prevCol];
+                newGamestate.board[prevRow + rowDif/2][prevCol + colDif/2] = null;
+                newGamestate.board[prevRow][prevCol] = null;
+              }
+              else{
+                canJump = false;
+                if(i != 1 ){
+                  throw new Error("Invalid move requested; Attempted a second move");
+                }
+                if(rowDif!=defaultDirection || (isKing && rowDif!=defaultDirection*-1) && colDif!=1){
+                  throw new Error("Invalid move requested; Invalid Movement");
+                }
+                newGamestate.board[row][col] = newGamestate.board[prevRow][prevCol];
+                newGamestate.board[prevRow][prevCol] = null;
+              }
+              if((newGamestate.board[row][col] == 'x' && curIndex < newGamestate.board[0].length ) || (newGamestate.board[row][col] == 'o' && curIndex >= newGamestate.board[0].length*newGamestate.board.length - newGamestate.board[0].length)){
+                newGamestate.board[row][col] = newGamestate.board[row][col].toUpperCase();
+                isKing = true;
+              }
+            }
+          }
+          /*----*/
           const { error:updateError } = await supabaseServicer.from(reqBody.table).update({
             game:newGamestate
           }).eq('id', reqBody.id);

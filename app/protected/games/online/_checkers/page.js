@@ -110,7 +110,14 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
 
     const col = index % 8;
     const row = parseInt(index / 8);
-    console.log(movingGame.moveStack);
+
+    //Select a new token to move (If no movements have occured)
+    //Ease of use feature - no need to hit undoMove if you select the wrong token.
+    if(movingGame.moveStack.length == 1 && movingGame.board[row][col]?.toUpperCase() == movingGame.nextToken){
+        movingGame.moveStack = [];
+        setHighlightLocations([]);
+    }
+
     //setErrorMessage("");
     //If there are no prior selections this turn, then we're selecting a token of this player's type to move.
     if(movingGame.moveStack.length == 0){
@@ -182,17 +189,36 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
             console.log('Future implimentation may prevent this submission')
         }
     }
-    //Commits the movingGame.moveStack to game
-    const updatedGame = {
-        board: movingGame.board.map(innerArray => [...innerArray]),
-        nextToken: movingGame.nextToken == 'X' ? 'O':'X',
-        moveStack: []
-    };
-    
-    setGame(JSON.parse(JSON.stringify(updatedGame)));
-    setMovingGame(updatedGame); //Clears the moveStack, keeps current state
-    calculateWinner(updatedGame);
-    setHighlightLocations([]);
+
+    //Multiplayer
+    if(inLobby===true){
+        let isNewGame = false;
+        if(JSON.stringify(game.board)==JSON.stringify(newGame().board)){
+            console.log('new');
+            isNewGame = true;
+        }
+        let moveString = "";
+        for(let i = 0; i<movingGame.moveStack.length; i++){
+            moveString+=movingGame.moveStack[i];
+            if(i!=movingGame.moveStack.length-1){
+                moveString+=" ";
+            }
+        }
+        console.log(moveString);
+        onlineMakeMove(isNewGame, ("MOVE "+moveString))
+    }
+    else{
+        //Commits the movingGame.moveStack to game
+        const updatedGame = {
+            board: movingGame.board.map(innerArray => [...innerArray]),
+            nextToken: movingGame.nextToken == 'X' ? 'O':'X',
+            moveStack: []
+        };
+        setGame(JSON.parse(JSON.stringify(updatedGame)));
+        setMovingGame(updatedGame); //Clears the moveStack, keeps current state
+        calculateWinner(updatedGame);
+        setHighlightLocations([]);
+    }
   }
 
   //I'm not currently storing enough information to do incremental undos- this is an all/nothing
@@ -212,16 +238,58 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
   };
 
   function localResetGame(){
+    console.log('localReset pip');
     //setErrorMessage("");
-    setGame(newGame);
-    setMovingGame(newGame);
+    setGame(newGame());
+    setMovingGame(newGame());
+    setHighlightLocations([]);
     setWinner(null);
   }
 
-  const loadGame = async (game) => {
-    setGame(game);
-    setMovingGame(game);
-    calculateWinner(game);
+  const loadGame = async (loadedGame) => {
+    //If a movestack exists, move through it for aesthetic purposes.
+    //If there's a desync, this could be wierd...
+    console.log("loaded: "+loadedGame.moveStack);
+    async function movements(){
+        if(loadedGame.moveStack != []){
+            for(let i = 0; i < loadedGame.moveStack.length; i++){
+                setTimeout(() => {
+                    console.log(`Iteration ${i}`);
+                }, 1000);
+            }
+        }
+    }
+    await movements();
+
+    /* let moveStack = loadedGame.moveStack;
+    if(moveStack != []){
+        let token = null;
+        let lastRow = null;
+        let lastCol = null;
+        for(let i = 0; i < moveStack.length; i++){
+            let row = parseInt(moveStack[i]/8);
+            let col = moveStack[i]%8;
+            //selecting the token
+            if(i==0){
+                token = loadedGame.board[row][col]
+            }
+            else{
+                if()
+            }
+            lastRow = row;
+            lastCol = col;
+        }
+    }*/
+    console.log('localLoad pip');
+    let prunedGame = {
+        board: loadedGame.board,
+        nextToken: loadedGame.nextToken,
+        moveStack: [],
+    }
+    //But in the end, desyncs don't matter because we 'manually' set the game to the end result.
+    setGame(JSON.parse(JSON.stringify(prunedGame)));
+    setMovingGame(prunedGame);
+    calculateWinner(prunedGame);
   }
   
   useImperativeHandle(ref, () => ({

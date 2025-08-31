@@ -148,8 +148,12 @@ const ConnectFour = forwardRef(({inLobby = false, gameId = null, onlineMakeMove,
                         className = {`${styles.column} color5`}
                         style = {{
                             borderLeft:`${colIndex == 0 ? '2px solid':''}`,
-                            borderRight:`${colIndex == game.board.length-1 ? '2px solid':''}`
-                        }}
+                            borderRight:`${colIndex == game.board.length-1 ? '2px solid':''}
+
+                            ${sendingAction ? styles.loadingCursor
+                            : ''}
+                        `}}
+                        onClick={() => makeMove(colIndex)}
                     >
                     {col.map((cell, cellIndex) => (
                         <div
@@ -163,11 +167,7 @@ const ConnectFour = forwardRef(({inLobby = false, gameId = null, onlineMakeMove,
                                 ${winnerArray.some((arr) => JSON.stringify(arr) == JSON.stringify([colIndex,cellIndex])) ? `${styles.cellHighlight}`
                                 : (!isOngoing && winnerArray.length == 0) ? `${styles.cellFailure}`
                                 : ''}
-
-                                ${sendingAction ? styles.loadingCursor
-                                : ''}`
-                            }
-                            onClick={() => makeMove(colIndex)}
+                            `}
                         >
                         {cell}
                         </div>

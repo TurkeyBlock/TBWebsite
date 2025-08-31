@@ -5,8 +5,9 @@ import { createClient } from '@/lib/supabase/client'
 //Increment "Who's turn" counter on null player ID or turn submitted.
 //Check all turn submitors against player ID in the [counter] array slot
 
-//TicTacToe Actions: RESET | MOVE <Pos>
-//ConnectFour Actions: RESET | MOVE <Col>
+//TicTacToe Actions: [RESET] | [MOVE, <Pos>]
+//ConnectFour Actions: [RESET] | [MOVE, <Col>]
+//Checkers Actions: [RESET] | [MOVE, <index>, <index2>?, <index3>?...]
 
 interface UpsertGameReturn {
   id:number|null

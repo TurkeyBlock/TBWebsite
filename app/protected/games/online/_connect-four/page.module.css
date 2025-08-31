@@ -45,7 +45,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
 
   transition: background-color 0.3s;
   border: 2px solid;
@@ -66,12 +65,17 @@
   flex-direction:column;
   align-items: center;
   justify-content: center;
+  
+  cursor: pointer;
 
   gap:5px;
   padding: 10px;
+
   border-top:2px solid;
   border-bottom:2px solid;
   border-radius: .5vmin;
+
+  border-left: 0px solid;
 }
 
 .cellHighlight{
@@ -118,9 +122,6 @@
 @media (hover: hover) {
   .column:hover{
     background-color: var(--clr-surface-a20);
-  }
-  .cell:hover {
-    background-color: var(--clr-surface-a10);
   }
   .resetButton:hover {
     background-color: #45a049;
