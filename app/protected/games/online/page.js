@@ -158,6 +158,13 @@ export default function OnlineGames() {
     }
   }, [gameId]);
 
+  function onlineVerifyTurn(){
+    if(userId!=playerIds[currentPlayerIndex]){
+      return false;
+    }
+    return true;
+  }
+
   //Accepts the CLIENT override on if this is a new game and so if turn order is undecided.
   async function onlineMakeMove(isNewGame, moveString){
     if(sendingAction){
@@ -212,8 +219,8 @@ export default function OnlineGames() {
         <Suspense>
           <QueriedGame setTableName = {setTableName}/>
           {tableName === "TicTacToe" && (<TicTacToe ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame} sendingAction={sendingAction} setErrorMessage = {setErrorMessage} />)}
-          {tableName === "ConnectFour" && (<ConnectFour ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame}sendingAction={sendingAction} setErrorMessage = {setErrorMessage} />)}
-          {tableName === "Checkers" && (<Checkers ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame}sendingAction={sendingAction} setErrorMessage = {setErrorMessage} />)}
+          {tableName === "ConnectFour" && (<ConnectFour ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame} sendingAction={sendingAction} setErrorMessage = {setErrorMessage} />)}
+          {tableName === "Checkers" && (<Checkers ref = {childRef} inLobby = {inLobby} gameId = {gameId} onlineMakeMove = {onlineMakeMove} onlineResetGame = {onlineResetGame} onlineVerifyTurn = {onlineVerifyTurn} sendingAction={sendingAction} setErrorMessage = {setErrorMessage} />)}
         </Suspense>
         <div className={styles.subAppContainer}>
           <PlayerDisplay tableName={tableName} gameId={gameId} playerNames={playerNames} gameKey={gameKey} thisPlayerIndex={playerIds.indexOf(userId)} currentPlayerIndex={currentPlayerIndex} maxPlayers = {maxPlayers} hide={!inLobby}/>

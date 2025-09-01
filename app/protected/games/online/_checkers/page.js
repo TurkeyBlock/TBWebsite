@@ -3,7 +3,7 @@ import styles from "./page.module.css";
 
 import {useState, forwardRef, useImperativeHandle} from "react";
 
-const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, onlineResetGame, sendingAction = false, setErrorMessage}, ref) => {
+const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, onlineResetGame, onlineVerifyTurn, sendingAction = false, setErrorMessage}, ref) => {
 
   function newGame() {
     let returnGame = {
@@ -101,11 +101,15 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
         subComponent(-defaultDirection, 1); 
         subComponent(-defaultDirection, -1);
     }
-    console.log(targetArray);
     return targetArray;
   }
 
-  const prepMove = async (index) => {
+  const prepMove = async (index, multiplayerReplay = false) => {
+    //If in lobby & it's not your turn & it's NOT a new game, don't prep moves
+    if(inLobby && !onlineVerifyTurn() && JSON.stringify(game.board) != JSON.stringify(newGame().board)){
+        console.log('blocked- not your turn');
+        return;
+    }
     let localCanJump = canJump;
 
     const col = index % 8;
@@ -181,20 +185,15 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
     setHighlightLocations(getTargets(movingGame, movingGame.moveStack[movingGame.moveStack.length - 1], localCanJump));
   }
 
-  function makeMove(override = true){
+  function makeMove(){
     if(movingGame.moveStack.length <= 0){
-        if(override == true)
-            console.log('no moves logged - but hey, you the boss.')
-        else{
-            console.log('Future implimentation may prevent this submission')
-        }
+        console.log('Future implimentation may prevent this submission')
     }
 
     //Multiplayer
     if(inLobby===true){
         let isNewGame = false;
         if(JSON.stringify(game.board)==JSON.stringify(newGame().board)){
-            console.log('new');
             isNewGame = true;
         }
         let moveString = "";
@@ -204,7 +203,6 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
                 moveString+=" ";
             }
         }
-        console.log(moveString);
         onlineMakeMove(isNewGame, ("MOVE "+moveString))
     }
     else{
@@ -238,7 +236,6 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
   };
 
   function localResetGame(){
-    console.log('localReset pip');
     //setErrorMessage("");
     setGame(newGame());
     setMovingGame(newGame());
@@ -249,47 +246,63 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
   const loadGame = async (loadedGame) => {
     //If a movestack exists, move through it for aesthetic purposes.
     //If there's a desync, this could be wierd...
-    console.log("loaded: "+loadedGame.moveStack);
-    async function movements(){
-        if(loadedGame.moveStack != []){
+
+    //But in the end, desyncs don't matter because we 'manually' set the game to the end result.
+    function syncLoadGame(){
+        let prunedGame = {
+            board: loadedGame.board,
+            nextToken: loadedGame.nextToken,
+            moveStack: [],
+        }
+        
+        setGame(JSON.parse(JSON.stringify(prunedGame)));
+        setMovingGame(prunedGame);
+        setHighlightLocations([]);
+        calculateWinner(prunedGame);
+    }
+    
+    //0 is empty, 1 is selection but no movement
+    if(loadedGame.moveStack.length>1){
+        //The player who submitted this move doesn't need to see the replay
+        if(JSON.stringify(loadedGame.board) != JSON.stringify(movingGame.board)){
+            let prevRow = null
+            let prevCol = null
+            let token = null;
+
             for(let i = 0; i < loadedGame.moveStack.length; i++){
                 setTimeout(() => {
-                    console.log(`Iteration ${i}`);
-                }, 1000);
-            }
-        }
-    }
-    await movements();
+                    const index = loadedGame.moveStack[i]
+                    
+                    const col = index % 8;
+                    const row = parseInt(index / 8);
 
-    /* let moveStack = loadedGame.moveStack;
-    if(moveStack != []){
-        let token = null;
-        let lastRow = null;
-        let lastCol = null;
-        for(let i = 0; i < moveStack.length; i++){
-            let row = parseInt(moveStack[i]/8);
-            let col = moveStack[i]%8;
-            //selecting the token
-            if(i==0){
-                token = loadedGame.board[row][col]
+                    if(i+1 < loadedGame.moveStack.length){
+                        setHighlightLocations([loadedGame.moveStack[i+1]]);
+                    }
+
+                    if(prevRow && prevCol){
+                        movingGame.board[prevRow][prevCol] = null;
+                        movingGame.board[row][col] = token;
+                    }
+                    else{
+                        token = movingGame.board[row][col];
+                    }
+
+                    prevRow = row;
+                    prevCol = col;
+                    if(i == loadedGame.moveStack.length-1){
+                        syncLoadGame()
+                    }
+                }, i*500);
             }
-            else{
-                if()
-            }
-            lastRow = row;
-            lastCol = col;
         }
-    }*/
-    console.log('localLoad pip');
-    let prunedGame = {
-        board: loadedGame.board,
-        nextToken: loadedGame.nextToken,
-        moveStack: [],
+        else{
+            syncLoadGame()
+        }
     }
-    //But in the end, desyncs don't matter because we 'manually' set the game to the end result.
-    setGame(JSON.parse(JSON.stringify(prunedGame)));
-    setMovingGame(prunedGame);
-    calculateWinner(prunedGame);
+    else{
+        localResetGame();
+    }
   }
   
   useImperativeHandle(ref, () => ({

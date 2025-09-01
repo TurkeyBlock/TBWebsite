@@ -225,8 +225,8 @@ Deno.serve(async (req)=>{
             }
 
             const initialIndex = newGamestate.moveStack[0];
-            const prevRow = Math.floor(initialIndex/8);
-            const prevCol = initialIndex%8;
+            let prevRow = Math.floor(initialIndex/8);
+            let prevCol = initialIndex%8;
             console.log(prevRow + " "+prevCol);
             if(newGamestate.board[prevRow][prevCol]?.toUpperCase()!=game.nextToken){
               throw new Error("Invalid move requested; Invalid initial Token");
@@ -254,12 +254,12 @@ Deno.serve(async (req)=>{
                   throw new Error("Invalid move requested; Attempted a jump after moving");
                 }
                 //Location must be 2 away, you must be king if going 'backwards', and you must jump an enemy piece
-                if(!(rowDif==defaultDirection*2 || (isKing && rowDif==defaultDirection*-2)) || colDif!=2 || newGamestate.board[prevRow + rowDif/2][prevCol + colDif/2].toUpperCase() != newGamestate.nextToken){
+                if(!(rowDif==defaultDirection*2 || (isKing && rowDif==defaultDirection*-2)) || Math.abs(colDif)!=2 || newGamestate.board[row + rowDif/2][col + colDif/2]?.toUpperCase() != newGamestate.nextToken){
                   throw new Error("Invalid move requested; Invalid Jump");
                 }
                 //Kinging occurs @ end
                 newGamestate.board[row][col] = newGamestate.board[prevRow][prevCol];
-                newGamestate.board[prevRow + rowDif/2][prevCol + colDif/2] = null;
+                newGamestate.board[row + rowDif/2][col + colDif/2] = null;
                 newGamestate.board[prevRow][prevCol] = null;
               }
               else{
@@ -267,7 +267,7 @@ Deno.serve(async (req)=>{
                 if(i != 1 ){
                   throw new Error("Invalid move requested; Attempted a second move");
                 }
-                if(rowDif!=defaultDirection || (isKing && rowDif!=defaultDirection*-1) && colDif!=1){
+                if((rowDif!=defaultDirection || (isKing && rowDif!=defaultDirection*-1)) && Math.abs(colDif)!=1){
                   throw new Error("Invalid move requested; Invalid Movement");
                 }
                 newGamestate.board[row][col] = newGamestate.board[prevRow][prevCol];
@@ -277,6 +277,8 @@ Deno.serve(async (req)=>{
                 newGamestate.board[row][col] = newGamestate.board[row][col].toUpperCase();
                 isKing = true;
               }
+              prevRow = row;
+              prevCol = col;
             }
           }
           /*----*/
