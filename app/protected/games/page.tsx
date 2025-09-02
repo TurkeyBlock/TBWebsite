@@ -58,6 +58,10 @@ const Games = () => {
                     </div>
                     Play Connect-Four
                 </Link>
+                <Link href={{pathname: "./games/online", query:{game: "Checkers"}}} className={`${styles.link} ${styles.subContainer}`}>
+                    Play Checkers
+                </Link>
+                <div>~~~~~~~~~~~~
             </div>
         </main>
     );
