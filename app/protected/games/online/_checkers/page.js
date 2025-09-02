@@ -104,7 +104,7 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
     return targetArray;
   }
 
-  const prepMove = async (index, multiplayerReplay = false) => {
+  const prepMove = async (index) => {
     //If in lobby & it's not your turn & it's NOT a new game, don't prep moves
     if(inLobby && !onlineVerifyTurn() && JSON.stringify(game.board) != JSON.stringify(newGame().board)){
         console.log('blocked- not your turn');
@@ -261,7 +261,7 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
         calculateWinner(prunedGame);
     }
     
-    //0 is empty, 1 is selection but no movement
+    //If 0, then it's empty, and 1 is selection but no movement
     if(loadedGame.moveStack.length>1){
         //The player who submitted this move doesn't need to see the replay
         if(JSON.stringify(loadedGame.board) != JSON.stringify(movingGame.board)){
