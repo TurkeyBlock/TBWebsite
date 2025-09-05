@@ -12,7 +12,7 @@ const Games = () => {
     ConnectFour[3][5]='X'; ConnectFour[4][4]='X'; ConnectFour[4][3]='X'; ConnectFour[3][3]='X'; ConnectFour[2][4]='X'; 
     ConnectFour[4][5]='O'; ConnectFour[3][4]='O'; ConnectFour[2][5]='O'; ConnectFour[5][5]='O'; ConnectFour[4][2]='O'; 
     return(
-        <main className={`color3 ${styles.container}`}>
+        <div className={`color3 ${styles.container}`}>
             <div className={`color3 ${styles.rowContainer}`}>
                 <Link href={{pathname: "./games/online", query:{game: "TicTacToe"}}} className={`${styles.link} ${styles.subContainer}`}>
                     <div className={styles.subContainer} >
@@ -64,7 +64,7 @@ const Games = () => {
                     Play Checkers [In Progress]
                 </Link>
             </div>
-        </main>
+        </div>
     );
 };
 
