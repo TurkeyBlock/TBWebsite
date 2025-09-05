@@ -2,41 +2,38 @@
 
 .container {
   margin:2.5%;
+  border-radius: 5px;
+  min-height:0px;
+}
+.rowContainer {
   padding:1%;
 
   border-radius: 5px;
+  min-width:0%;
 
-  text-align: center;
-  margin-bottom:auto;
+  margin-bottom:0px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: center;
-}
-@media (min-aspect-ratio: 1/1) {
-  /*width > height*/
-    .container{
-        flex-direction:row;
-    }
+  flex-wrap:wrap;
 }
 
+/*Holds a Links's contents*/
 .subContainer {
   text-align: center;
-
   display: flex;
   flex: 1 1;
   flex-direction: column;
-  justify-content: end;
+  justify-content:end;
 }
 .link {
   font-weight: bold;
   margin: 1%;
   padding: 25px;
-
   font-size:clamp(1rem, 0.5rem + 3vmin, 20rem);
   cursor: pointer;
   border: 2px solid;
   border-radius: 5px;
-  align-content:center;
 
   transition: background-color 0.3s;
   background-color: rgb(8, 120, 8);
