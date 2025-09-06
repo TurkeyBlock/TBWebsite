@@ -21,7 +21,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
 
   transition: background-color 0.3s;
   border: 1px solid;
@@ -39,10 +38,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
 
   transition: background-color 0.3s;
   border: 2px solid;
+  cursor:pointer;
   @media (prefers-color-scheme: dark) {
     border: 1px solid;
   }
@@ -67,4 +66,8 @@
 }
 .tokenO {
   background-color: #0C7BDC
+}
+
+.loadingCursor {
+  cursor:wait;
 }

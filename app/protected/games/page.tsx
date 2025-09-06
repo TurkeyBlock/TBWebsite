@@ -3,14 +3,20 @@
 
 import Link from "next/link";
 import styles from "./page.module.css";
+import {useState} from "react";
+
 
 //To-do: Timed make-moves w/ respective functions.
 const Games = () => {
+    
+    const [slotColor, setSlotColor] = useState('');
+
     const TicTacToe = [null,null,'O',null,'X','O','X',null,null];
     //new Array(9).fill(null);
     const ConnectFour = new Array(7).fill(null).map(() => Array(6).fill(null));
     ConnectFour[3][5]='X'; ConnectFour[4][4]='X'; ConnectFour[4][3]='X'; ConnectFour[3][3]='X'; ConnectFour[2][4]='X'; 
     ConnectFour[4][5]='O'; ConnectFour[3][4]='O'; ConnectFour[2][5]='O'; ConnectFour[5][5]='O'; ConnectFour[4][2]='O'; 
+    
     return(
         <>
             <div className = {`${styles.title}`}>
@@ -18,13 +24,18 @@ const Games = () => {
             </div>
             <div className={`${styles.container}`}>
                 <div className={`${styles.rowContainer}`}>
-                    <Link href={{pathname: "./games/online", query:{game: "TicTacToe"}}} className={`${styles.link} ${styles.subContainer}`}>
+                    <Link href={{pathname: "./games/online", query:{game: "TicTacToe"}}} className={`${styles.link} ${styles.subContainer} color5`}>
                         <div className={styles.subContainer} >
                             <div className = {styles.TicTacToe}>
                                 {/*--------------------*/}
                                 {TicTacToe.map((cell, index) => (
                                     <div
                                     key={index}
+                                    style = {{color:
+                                    `${TicTacToe[index] == 'X' ? "#FFC20A"
+                                    : TicTacToe[index] == 'O' ? "#0C7BDC"
+                                    : ''}`
+                                    }}
                                     className={`color0 ${styles.cell}`}
                                     >
                                     {cell}
@@ -34,7 +45,11 @@ const Games = () => {
                         </div>
                         Play TicTacToe
                     </Link>
-                    <Link href={{pathname: "./games/online", query:{game: "ConnectFour"}}} className={`${styles.link} ${styles.subContainer}`}>
+                    <Link href={{pathname: "./games/online", query:{game: "ConnectFour"}}} 
+                        className={`${styles.link} ${styles.subContainer} color5`}
+                        onMouseEnter={() => setSlotColor("rgb(14, 135, 14)")}
+                        onMouseLeave={() => setSlotColor("")}
+                    >
                         <div className = {styles.subContainer}>
                             <div className = {styles.ConnectFour}>
                                 {ConnectFour.map((col, colIndex) => (
@@ -48,10 +63,13 @@ const Games = () => {
                                     >
                                     {col.map((slot, slotIndex) => (
                                         <div
+                                            style = {{backgroundColor:`${ConnectFour[colIndex][slotIndex] == null ? slotColor : ""}`}}
                                             key={slotIndex}
-                                            className = {` ${ConnectFour[colIndex][slotIndex] == null ? styles.slot
-                                            : (ConnectFour[colIndex][slotIndex] == 'X') ? [styles.slot, styles.tokenA].join(" ")
-                                            : [styles.slot, styles.tokenB].join(" ")}`}
+                                            className = {`${styles.slot} 
+                                            ${ ConnectFour[colIndex][slotIndex] == 'X' ? styles.tokenA
+                                            : ConnectFour[colIndex][slotIndex] == 'O' ? styles.tokenB
+                                            : "" }
+                                            `}
                                         >
                                             
                                         </div>
@@ -64,7 +82,7 @@ const Games = () => {
                     </Link>
                 </div>
                 <div className={`${styles.rowContainer}`}>
-                    <Link href={{pathname: "./games/online", query:{game: "Checkers"}}} className={`${styles.link} ${styles.subContainer}`}>
+                    <Link href={{pathname: "./games/online", query:{game: "Checkers"}}} className={`${styles.link} ${styles.subContainer} color5`}>
                         Play Checkers [In Progress]
                     </Link>
                 </div>

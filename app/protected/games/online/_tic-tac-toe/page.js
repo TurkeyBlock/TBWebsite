@@ -104,10 +104,15 @@ const TicTacToe = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, o
         {game.board.map((cell, index) => (
           <div
             key={index}
-            className={`color0 
-              ${(winnerArray).includes(index)!==false ? `${styles.cell} ${styles.cellHighlight}`
-              : (!isOngoing && !winnerArray.includes(null)) ? `${styles.cell} ${styles.cellFailure}` 
-              : styles.cell}
+            style = {{color:
+            `${game.board[index] == 'X' ? "#FFC20A"
+            : game.board[index] == 'O' ? "#0C7BDC"
+            : ''}`
+            }}
+            className={`color0 ${styles.cell}
+              ${(winnerArray).includes(index)!==false ? `${styles.cellHighlight}`
+              : (!isOngoing && !winnerArray.includes(null)) ? `${styles.cellFailure}` 
+              : ''}
               
               ${sendingAction ? styles.loadingCursor
               : ''}`
