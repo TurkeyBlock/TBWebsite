@@ -1,9 +1,18 @@
 /*index.css*/
 
+.title {
+  font-size: 8vmin;
+  text-align: center;
+  margin-top:2vmin;
+}
+
+
 .container {
-  margin:2.5%;
+  margin:10%;
+  margin-top:1%;
   border-radius: 5px;
   min-height:0px;
+
 }
 .rowContainer {
   padding:1%;
@@ -28,6 +37,8 @@
 }
 .link {
   font-weight: bold;
+  white-space: nowrap; /* Prevents text from wrapping */
+
   margin: 1%;
   padding: 25px;
   font-size:clamp(1rem, 0.5rem + 3vmin, 20rem);
@@ -49,15 +60,15 @@
 .TicTacToe {
   justify-content:center;
   display: grid;
-  grid-template-columns: repeat(3, 10vmin);
+  grid-template-columns: repeat(3, 8vmin);
   grid-gap: 1vmin;
 }
 
 .cell {
-  width: 10vmin;
-  height: 10vmin;
+  width: 8vmin;
+  height: 8vmin;
   
-  font-size: 10vmin;
+  font-size: 8vmin;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -72,7 +83,7 @@
 .ConnectFour {
   justify-content:center;
   display: grid;
-  grid-template-columns: repeat(7, 7vmin);
+  grid-template-columns: repeat(7, 5vmin);
 }
 
 .column{
@@ -81,8 +92,8 @@
   align-items: center;
   justify-content: center;
 
-  gap:5px;
-  padding: 10px;
+  gap:.5vmin;
+  padding: 1vmin;
   
   border-top:2px solid;
   border-bottom:2px solid;
@@ -92,8 +103,8 @@
 }
 
 .slot {
-  width: 5vmin;
-  height: 5vmin;
+  width: 3.55vmin;
+  height: 3.55vmin;
   border-radius: 50%; /* Makes it a circle */
 
   border: 2px solid;

@@ -336,8 +336,10 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
                                 ${sendingAction ? styles.loadingCursor : ''}
                             `}
                             style={{
-                                border: `${highlightLocations.includes(rowIndex*8+colIndex) ? 'gold 3px solid': ''}`
-                            }}
+                                border: `${highlightLocations.includes(rowIndex*8+colIndex) ? 'gold 3px solid'
+                                /*: movingGame.nextToken == movingGame.board[rowIndex][colIndex]?.toUpperCase() ?  'green 3px solid'*/
+                                : ''}
+                            `}}
                             onClick={() => prepMove(rowIndex*8+colIndex)}
                         >
                         {movingGame.board[rowIndex][colIndex]==null ? null

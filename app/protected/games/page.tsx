@@ -12,59 +12,64 @@ const Games = () => {
     ConnectFour[3][5]='X'; ConnectFour[4][4]='X'; ConnectFour[4][3]='X'; ConnectFour[3][3]='X'; ConnectFour[2][4]='X'; 
     ConnectFour[4][5]='O'; ConnectFour[3][4]='O'; ConnectFour[2][5]='O'; ConnectFour[5][5]='O'; ConnectFour[4][2]='O'; 
     return(
-        <div className={`color3 ${styles.container}`}>
-            <div className={`color3 ${styles.rowContainer}`}>
-                <Link href={{pathname: "./games/online", query:{game: "TicTacToe"}}} className={`${styles.link} ${styles.subContainer}`}>
-                    <div className={styles.subContainer} >
-                        <div className = {styles.TicTacToe}>
-                            {/*--------------------*/}
-                            {TicTacToe.map((cell, index) => (
-                                <div
-                                key={index}
-                                className={`color0 ${styles.cell}`}
-                                >
-                                {cell}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    Play TicTacToe
-                </Link>
-                <Link href={{pathname: "./games/online", query:{game: "ConnectFour"}}} className={`${styles.link} ${styles.subContainer}`}>
-                    <div className = {styles.subContainer}>
-                        <div className = {styles.ConnectFour}>
-                            {ConnectFour.map((col, colIndex) => (
-                                <div
-                                    key={colIndex}
-                                    className = {`${styles.column} color0`}
-                                    style = {{
-                                        borderLeft:`${colIndex == 0 ? '2px solid':''}`,
-                                        borderRight:`${colIndex == ConnectFour.length-1 ? '2px solid':''}`
-                                    }}
-                                >
-                                {col.map((slot, slotIndex) => (
+        <>
+            <div className = {`${styles.title}`}>
+                Game Selection
+            </div>
+            <div className={`${styles.container}`}>
+                <div className={`${styles.rowContainer}`}>
+                    <Link href={{pathname: "./games/online", query:{game: "TicTacToe"}}} className={`${styles.link} ${styles.subContainer}`}>
+                        <div className={styles.subContainer} >
+                            <div className = {styles.TicTacToe}>
+                                {/*--------------------*/}
+                                {TicTacToe.map((cell, index) => (
                                     <div
-                                        key={slotIndex}
-                                        className = {` ${ConnectFour[colIndex][slotIndex] == null ? styles.slot
-                                        : (ConnectFour[colIndex][slotIndex] == 'X') ? [styles.slot, styles.tokenA].join(" ")
-                                        : [styles.slot, styles.tokenB].join(" ")}`}
+                                    key={index}
+                                    className={`color0 ${styles.cell}`}
                                     >
-                                        
+                                    {cell}
                                     </div>
                                 ))}
-                                </div>
-                            ))}
+                            </div>
                         </div>
-                    </div>
-                    Play Connect-Four
-                </Link>
+                        Play TicTacToe
+                    </Link>
+                    <Link href={{pathname: "./games/online", query:{game: "ConnectFour"}}} className={`${styles.link} ${styles.subContainer}`}>
+                        <div className = {styles.subContainer}>
+                            <div className = {styles.ConnectFour}>
+                                {ConnectFour.map((col, colIndex) => (
+                                    <div
+                                        key={colIndex}
+                                        className = {`${styles.column} color0`}
+                                        style = {{
+                                            borderLeft:`${colIndex == 0 ? '2px solid':''}`,
+                                            borderRight:`${colIndex == ConnectFour.length-1 ? '2px solid':''}`
+                                        }}
+                                    >
+                                    {col.map((slot, slotIndex) => (
+                                        <div
+                                            key={slotIndex}
+                                            className = {` ${ConnectFour[colIndex][slotIndex] == null ? styles.slot
+                                            : (ConnectFour[colIndex][slotIndex] == 'X') ? [styles.slot, styles.tokenA].join(" ")
+                                            : [styles.slot, styles.tokenB].join(" ")}`}
+                                        >
+                                            
+                                        </div>
+                                    ))}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        Play Connect-Four
+                    </Link>
+                </div>
+                <div className={`${styles.rowContainer}`}>
+                    <Link href={{pathname: "./games/online", query:{game: "Checkers"}}} className={`${styles.link} ${styles.subContainer}`}>
+                        Play Checkers [In Progress]
+                    </Link>
+                </div>
             </div>
-            <div className={`color3 ${styles.rowContainer}`}>
-                <Link href={{pathname: "./games/online", query:{game: "Checkers"}}} className={`${styles.link} ${styles.subContainer}`}>
-                    Play Checkers [In Progress]
-                </Link>
-            </div>
-        </div>
+        </>
     );
 };
 

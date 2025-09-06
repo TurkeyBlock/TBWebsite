@@ -6,7 +6,7 @@
 /** Root colors */
 :root {
   --clr: #000000;
-
+  
   /** Theme primary colors */
   --clr-primary-a0: #92e5d7;
   --clr-primary-a10: #91d9cd;
@@ -133,7 +133,8 @@
     padding-bottom:0px;
     font-family: Arial, sans-serif;
     
-    background-color: var(--clr-surface-a0);
+    background: linear-gradient(to top, var(--clr-surface-a0), var(--clr-surface-a20));
+    min-height:100dvh;
     color: var(--clr);
   }
   main {    
