@@ -9,7 +9,7 @@ import {useState} from "react";
 //To-do: Timed make-moves w/ respective functions.
 const Games = () => {
     
-    const [slotColor, setSlotColor] = useState('');
+    //const [slotColor, setSlotColor] = useState('');
 
     const TicTacToe = [null,null,'O',null,'X','O','X',null,null];
     //new Array(9).fill(null);
@@ -47,8 +47,8 @@ const Games = () => {
                     </Link>
                     <Link href={{pathname: "./games/online", query:{game: "ConnectFour"}}} 
                         className={`${styles.link} ${styles.subContainer} color5`}
-                        onMouseEnter={() => setSlotColor("rgb(14, 135, 14)")}
-                        onMouseLeave={() => setSlotColor("")}
+                        //onMouseEnter={() => setSlotColor("rgb(14, 135, 14)")}
+                        //onMouseLeave={() => setSlotColor("")}
                     >
                         <div className = {styles.subContainer}>
                             <div className = {styles.ConnectFour}>
@@ -63,7 +63,7 @@ const Games = () => {
                                     >
                                     {col.map((slot, slotIndex) => (
                                         <div
-                                            style = {{backgroundColor:`${ConnectFour[colIndex][slotIndex] == null ? slotColor : ""}`}}
+                                            //style = {{backgroundColor:`${ConnectFour[colIndex][slotIndex] == null ? slotColor : ""}`}}
                                             key={slotIndex}
                                             className = {`${styles.slot} 
                                             ${ ConnectFour[colIndex][slotIndex] == 'X' ? styles.tokenA

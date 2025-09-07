@@ -172,7 +172,8 @@ export default function OnlineGames() {
       return;
     }
     if(userId!=playerIds[currentPlayerIndex] && !isNewGame){
-      setErrorMessage("It's not your turn! There are "+playerIds.length+" players in this game."); //Non accurate
+      setErrorMessage("It's not your turn!");
+      //List Min/Current player count when that eventually becomes applicable.
       return;
     }
     //await api response & set login warning based on result
@@ -182,6 +183,7 @@ export default function OnlineGames() {
       
     }
     catch{
+      setErrorMessage("Client unable to send event. Try refreshing your page.");
       console.log("Client unable to send event. Try refreshing your page.")
     }
     setSendingAction(false);
@@ -198,6 +200,7 @@ export default function OnlineGames() {
     }
     catch{
       setErrorMessage("Client unable to send event. Try refreshing your page.");
+      console.log("Client unable to send event. Try refreshing your page.")
     }
     setSendingAction(false);
   }

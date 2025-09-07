@@ -111,7 +111,7 @@ const TicTacToe = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, o
             }}
             className={`color0 ${styles.cell}
               ${(winnerArray).includes(index)!==false ? `${styles.cellHighlight}`
-              : (!isOngoing && !winnerArray.includes(null)) ? `${styles.cellFailure}` 
+              : (!isOngoing && winnerArray.length==0) ? `${styles.cellFailure}` 
               : ''}
               
               ${sendingAction ? styles.loadingCursor

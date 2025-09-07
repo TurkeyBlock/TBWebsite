@@ -72,6 +72,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  text-shadow: 1px  1px black;
 
   border: 2px solid black;
   @media (prefers-color-scheme: dark) {
