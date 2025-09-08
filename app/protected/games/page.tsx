@@ -3,7 +3,6 @@
 
 import Link from "next/link";
 import styles from "./page.module.css";
-import {useState} from "react";
 
 
 //To-do: Timed make-moves w/ respective functions.
