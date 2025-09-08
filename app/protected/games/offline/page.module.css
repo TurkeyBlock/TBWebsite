@@ -1,0 +1,90 @@
+/* Orb heights */
+.front{
+    bottom: calc(40vh - 50px);
+}
+.middle{
+    bottom: calc(43vh - 50px);
+}
+.back{
+    bottom: calc(46vh - 50px);
+}
+
+/*water Colors*/
+.first{
+    background-color:rgb(0, 0, 255);
+}
+.second{
+    background-color: rgba(74, 74, 255, 1);
+}
+.third{
+    background-color:rgb(112, 112, 255, 1);
+}
+
+
+
+.restrictedBox {
+    background-color:white;
+
+    min-width:  100vw;
+    min-height: 100vh;
+
+    overflow: hidden; /* Ensures content doesn't overflow */
+}
+
+.waterContainer {
+    mix-blend-mode: darken;
+}
+
+.shape {
+    position: fixed;
+    z-index: 1;
+    left:0;
+
+    width: 100vw;
+    height: calc(60vh - 50px);
+    background-color: #ffffff;
+    border-radius: 50%;
+    mix-blend-mode: lighten;
+}
+
+@keyframes moveShape{
+    0% {
+        transform: translate(100vw, 0);
+    }
+    50% {
+        transform: translate(0vw, 0);
+    }
+    100% {
+        transform: translate(-100vw, 0);
+    }
+}
+.water {
+    position: absolute;
+    z-index: 0;
+    bottom:0px;
+    width: 100vw;
+    height: 50vh;
+    mix-blend-mode: darken;
+}
+
+@media (prefers-color-scheme: dark) {
+    .waterContainer {
+        mix-blend-mode: lighten;
+    }
+    .water {
+        mix-blend-mode: lighten;
+    }
+    .shape {
+        mix-blend-mode: darken;
+        background-color: #000000;
+    }
+    .restrictedBox {
+        background-color:rgb(0, 0, 0);
+    }
+    .third{
+        background-color:rgb(0, 0, 255);
+    }
+    .first{
+        background-color:rgb(112, 112, 255, 1);
+    }
+}
