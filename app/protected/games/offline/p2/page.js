@@ -1,6 +1,6 @@
 "use client"
 import styles from "./page.module.css"
-export default function Waves () {
+export default function CSSWaves () {
     return(
         <div className = {styles.restrictedBox}>
             <div className = {styles.waterContainer}>

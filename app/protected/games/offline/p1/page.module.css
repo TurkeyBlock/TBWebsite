@@ -1,0 +1,31 @@
+.waveContainer {
+  position: relative;
+  width: 100vw;
+  height:100vh;
+  overflow: hidden;
+}
+
+.wave1 {
+  position: absolute;
+  bottom:0;
+  left: 0;
+  width: 200%; /* Double the width for smooth looping */
+  animation: waveAnimation 4s linear infinite;
+}
+.wave2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%; /* Double the width for smooth looping */
+  animation: waveAnimation 20s linear infinite;
+  animation-delay: 10s;
+}
+
+@keyframes waveAnimation {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-40%);
+  }
+}
