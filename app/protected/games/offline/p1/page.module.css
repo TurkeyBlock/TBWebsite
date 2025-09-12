@@ -9,23 +9,42 @@
   position: absolute;
   bottom:0;
   left: 0;
-  width: 200%; /* Double the width for smooth looping */
-  animation: waveAnimation 4s linear infinite;
+  width: 100%; /* Double the width for smooth looping */
 }
 .wave2 {
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
-  width: 200%; /* Double the width for smooth looping */
-  animation: waveAnimation 20s linear infinite;
-  animation-delay: 10s;
+  width: 100%; /* Double the width for smooth looping */
+}
+.first {
+  .wave1{
+    animation: waveAnimation 8s linear infinite;
+  }
+  .wave2{
+    animation: waveAnimation 8s linear infinite;
+    animation-delay: 4s;
+  }
+  background-color:aqua;
+  bottom: 0px;
+}
+.second {
+  .wave1{
+    animation: waveAnimation 10s linear infinite;
+  }
+  .wave2{
+    animation: waveAnimation 10s linear infinite;
+    animation-delay: 5s;
+  }
+  background-color:blue;
+  bottom:400px;
 }
 
 @keyframes waveAnimation {
   0% {
-    transform: translateX(0%);
+    transform: translateX(100%);
   }
   100% {
-    transform: translateX(-40%);
+    transform: translateX(-100%);
   }
 }
