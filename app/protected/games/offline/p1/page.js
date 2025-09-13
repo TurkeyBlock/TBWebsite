@@ -1,9 +1,64 @@
+"use client"
+
 import styles from "./page.module.css";
 
 import Image from "next/image"
+import {useEffect, useState} from "react";
 import Sailboat from "@/public/images/Sailboat.svg"
 
 const WaveAnimation = () => {
+  let x = 7.5; // % distance from left
+  let y = 2; // vw distance from bottom
+
+  const [boatLocation, setBoatLocation] = useState({
+    position: 'absolute',
+    left: `${x}%`,
+    bottom: `${y}vw`
+  })
+
+  useEffect(() => {
+    const keyDownHandler = (e) => {
+      console.log(e);
+      console.log(x+" "+y);
+      console.log(boatLocation.bottom);
+      const step = 1; // Number of... percents? (of 100) to move
+      switch (e.key) {
+        case 'ArrowUp':
+          y += step;
+          break;
+        case 'ArrowDown':
+          y -= step;
+          break;
+        case 'ArrowLeft':
+          x -= step;
+          break;
+        case 'ArrowRight':
+          x += step;
+          break;
+        default:
+          return; // Ignore other keys
+      };
+      setBoatLocation({
+        position: 'absolute',
+        left: `${x}%`,
+        bottom: `${y}vw`
+      })
+    };
+    document.addEventListener("keydown", keyDownHandler);
+
+    // clean up
+    return () => {
+      document.removeEventListener("keydown", keyDownHandler);
+    };
+  }, []);
+
+
+
+
+
+
+
+
   return (
     <div className={styles.waveContainer}>
       <div className = {styles.third}>
@@ -14,6 +69,14 @@ const WaveAnimation = () => {
           <path d="M 0 50 Q 40 50 80 25 Q 160 -25 240 25 Q 280 50 320 50 Q 360 50 400 25 Q 480 -25 560 25 Q 600 50 640 50 Q 680 50 720 25 Q 800 -25 880 25 Q 920 50 960 50 Q 1000 50 1040 25 Q 1120 -25 1200 25 Q 1240 50 1280 50 Q 1320 50 1360 25 Q 1440 -25 1520 25 Q 1560 50 1600 50 L 1280 100 L 0 100 Z" fill="blue"></path>
         </svg>
       </div>
+      <Image
+        src={Sailboat}
+        priority={false}
+        alt="MOVING Image of a sailboat"
+        
+        style = {boatLocation}
+        className={`${styles.bigBoat}`}
+      />
       <Image
         src={Sailboat}
         priority={false}
