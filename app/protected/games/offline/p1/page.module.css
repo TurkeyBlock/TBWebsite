@@ -7,7 +7,7 @@
 
   position:absolute;
   left:7.5%;
-  bottom:50px;
+  bottom:2vw;
 
   animation: boatAnimation 2s linear infinite;
   animation-delay: 1.2s;
@@ -48,13 +48,13 @@
   .wave1{
     animation: waveAnimation 12s linear infinite;
 
-    bottom:50px;
+    bottom:2vw;
   }
   .wave2{
     animation: waveAnimation 12s linear infinite;
     animation-delay: 6s;
 
-    bottom:50px;
+    bottom:2vw;
   }
 }
 
@@ -62,13 +62,13 @@
   .wave1{
     animation: waveAnimation 17s linear infinite;
 
-    bottom:100px;
+    bottom:4vw;
   }
   .wave2{
     animation: waveAnimation 17s linear infinite;
     animation-delay: 8.5s;
 
-    bottom:100px;
+    bottom:4vw;
   }
 }
 
