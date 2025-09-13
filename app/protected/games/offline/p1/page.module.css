@@ -1,43 +1,75 @@
+
+
+
+.boat{
+  width:10%;
+  background-color:transparent;
+
+  position:absolute;
+  left:7.5%;
+  bottom:50px;
+
+  animation: boatAnimation 2s linear infinite;
+  animation-delay: 1.2s;
+
+}
+
 .waveContainer {
   position: relative;
   width: 100vw;
   height:100vh;
   overflow: hidden;
 }
-
 .wave1 {
   position: absolute;
-  bottom:0;
   left: 0;
   width: 100%; /* Double the width for smooth looping */
 }
 .wave2 {
   position: absolute;
-  bottom: 0;
   left: 0;
   width: 100%; /* Double the width for smooth looping */
 }
 .first {
   .wave1{
-    animation: waveAnimation 8s linear infinite;
+    animation: waveAnimation 7s linear infinite;
+
+    bottom:0px;
   }
   .wave2{
-    animation: waveAnimation 8s linear infinite;
-    animation-delay: 4s;
+    animation: waveAnimation 7s linear infinite;
+    animation-delay: 3.5s;
+
+    bottom:0px;
   }
   background-color:aqua;
-  bottom: 0px;
 }
 .second {
   .wave1{
-    animation: waveAnimation 10s linear infinite;
+    animation: waveAnimation 12s linear infinite;
+
+    bottom:50px;
   }
   .wave2{
-    animation: waveAnimation 10s linear infinite;
-    animation-delay: 5s;
+    animation: waveAnimation 12s linear infinite;
+    animation-delay: 6s;
+
+    bottom:50px;
   }
-  background-color:blue;
-  bottom:400px;
+}
+
+.third{
+  .wave1{
+    animation: waveAnimation 17s linear infinite;
+
+    bottom:100px;
+  }
+  .wave2{
+    animation: waveAnimation 17s linear infinite;
+    animation-delay: 8.5s;
+
+    bottom:100px;
+  }
 }
 
 @keyframes waveAnimation {
@@ -46,5 +78,35 @@
   }
   100% {
     transform: translateX(-100%);
+  }
+}
+
+@keyframes boatAnimation {
+  0% {
+    transform: translateY(-15%) rotate(0deg);
+  }
+  10%{
+    transform: translateY(-20%) rotate(-7.5deg);
+  }
+  25%{
+    transform: translateY(-45%) rotate(-20deg);
+  }
+  40%{
+    transform: translateY(-70%) rotate(-5deg);
+  }
+  50%{
+    transform: translateY(-75%) rotate(0deg);
+  }
+  60%{
+    transform: translateY(-70%) rotate(5deg);
+  }
+  75%{
+    transform: translateY(-45%) rotate(20deg);
+  }
+  90%{
+    transform: translateY(-20%) rotate(7.5deg);
+  }
+  100%{
+    transform: translateY(-15%) rotate(0deg);
   }
 }
