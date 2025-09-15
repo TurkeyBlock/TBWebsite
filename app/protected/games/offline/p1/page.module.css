@@ -9,16 +9,16 @@
   left:7.5%;
   bottom:2vw;
 
+  transform: translate(-50%, -50%);
   animation: boatAnimation 2s linear infinite;
   animation-delay: 1.2s;
-
 }
-
+/*
 .bigBoat{
   animation: bigBoatAnimation 3s linear infinite;
   animation-delay: 1.2s;
 }
-
+*/
 .waveContainer {
   position: relative;
   width: 100vw;

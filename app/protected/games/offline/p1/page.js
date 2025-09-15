@@ -7,51 +7,44 @@ import {useEffect, useState} from "react";
 import Sailboat from "@/public/images/Sailboat.svg"
 
 const WaveAnimation = () => {
-  let x = 7.5; // % distance from left
-  let y = 2; // vw distance from bottom
 
-  const [boatLocation, setBoatLocation] = useState({
-    position: 'absolute',
-    left: `${x}%`,
-    bottom: `${y}vw`
-  })
+  const [xPosition, setXPosition] = useState(0); // Tracks the x-axis position
+  const [increment, setIncrement] = useState(25); // Tracks the x-axis position
+  const amplitude = 1; // Amplitude of the sine wave
+  const frequency = Math.PI/1000; // Frequency of the sine wave
 
+  const step = 10; // Number of... percents? (of 100) to move
+  
   useEffect(() => {
     const keyDownHandler = (e) => {
-      console.log(e);
-      console.log(x+" "+y);
-      console.log(boatLocation.bottom);
-      const step = 1; // Number of... percents? (of 100) to move
+      
       switch (e.key) {
-        case 'ArrowUp':
-          y += step;
-          break;
-        case 'ArrowDown':
-          y -= step;
-          break;
         case 'ArrowLeft':
-          x -= step;
+          setXPosition((prev) => prev - step);
           break;
         case 'ArrowRight':
-          x += step;
+          setXPosition((prev) => prev + step);
           break;
         default:
           return; // Ignore other keys
       };
-      setBoatLocation({
-        position: 'absolute',
-        left: `${x}%`,
-        bottom: `${y}vw`
-      })
+
     };
     document.addEventListener("keydown", keyDownHandler);
+    
 
+    //Horizontal movement over time
+    const interval = setInterval(() => {
+      setIncrement(performance.now()); // Increment time
+    }, 32); // ~30 FPS
     // clean up
     return () => {
       document.removeEventListener("keydown", keyDownHandler);
+      clearInterval(interval); // Cleanup interval on unmount
     };
   }, []);
 
+  const movingWaveY = amplitude * Math.sin(frequency * increment ); // Y-axis position 
 
 
 
@@ -74,8 +67,15 @@ const WaveAnimation = () => {
         priority={false}
         alt="MOVING Image of a sailboat"
         
-        style = {boatLocation}
-        className={`${styles.bigBoat}`}
+        style={{
+          width:'80%',
+          position: "absolute",
+          left:`${xPosition*.1}vw`,
+          bottom:`${-13 + movingWaveY}vw`,
+          //Center the boat on its actual 'middle' point
+          //transform: "translate(-50%, -50%)",
+        }}
+        //className={`${styles.bigBoat}`}
       />
       <Image
         src={Sailboat}
