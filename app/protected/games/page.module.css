@@ -34,6 +34,8 @@
   flex: 1 1;
   flex-direction: column;
   justify-content:end;
+
+  font-size:clamp(1rem, 0.5rem + 3vmin, 20rem);
 }
 .link {
   font-weight: bold;
@@ -41,7 +43,7 @@
 
   margin: 1%;
   padding: 25px;
-  font-size:clamp(1rem, 0.5rem + 3vmin, 20rem);
+  /*font-size:clamp(1rem, 0.5rem + 3vmin, 20rem);*/
   cursor: pointer;
   border: 2px solid;
   border-radius: 5px;
@@ -126,4 +128,28 @@
 }
 .tokenB {
   background-color: #0C7BDC
+}
+
+.Checkers{
+  justify-content:center;
+  display: grid;
+  grid-template-columns: repeat(8, 4vmin);
+}
+.checkersBox{
+  width: 4vmin;
+  height: 4vmin;
+}
+.checkerX{
+  background-color: #FFC20A;
+
+  width: 2vmin;
+  height: 2vmin;
+  border-radius: 50%; /* Makes it a circle */
+}
+.checkO{
+  background-color: #0C7BDC;
+  
+  width: 2vmin;
+  height: 2vmin;
+  border-radius: 50%; /* Makes it a circle */
 }

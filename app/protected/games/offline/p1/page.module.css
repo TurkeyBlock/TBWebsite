@@ -22,7 +22,7 @@
 .waveContainer {
   position: relative;
   width: 100vw;
-  height:100vh;
+  height:calc(100vh - 50px);
   overflow: hidden;
 }
 .wave1 {

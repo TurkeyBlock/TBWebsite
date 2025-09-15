@@ -16,6 +16,10 @@ const Games = () => {
     ConnectFour[3][5]='X'; ConnectFour[4][4]='X'; ConnectFour[4][3]='X'; ConnectFour[3][3]='X'; ConnectFour[2][4]='X'; 
     ConnectFour[4][5]='O'; ConnectFour[3][4]='O'; ConnectFour[2][5]='O'; ConnectFour[5][5]='O'; ConnectFour[4][2]='O'; 
     
+    const Checkers = Array(8).fill(null).map(() => Array(8).fill(null));
+    Checkers[0] = ['o',null,'o',null,'o',null,'o',null]; Checkers[1] = [null,'o',null,'o',null,'o',null,'o'];
+    Checkers[6] = ['x',null,'x',null,'x',null,'x',null]; Checkers[7] = [null,'x',null,'x',null,'x',null,'x'];
+    
     return(
         <>
             <div className = {`${styles.title}`}>
@@ -82,7 +86,40 @@ const Games = () => {
                 </div>
                 <div className={`${styles.rowContainer}`}>
                     <Link href={{pathname: "./games/online", query:{game: "Checkers"}}} className={`${styles.link} ${styles.subContainer} color5`}>
-                        Play Checkers
+                        <div className = {styles.subContainer}>
+                            <div className = {styles.Checkers}>
+                                {Checkers.map((col, colIndex) => (
+                                    <div
+                                        key={colIndex}
+                                        style = {{
+                                            borderLeft:`${colIndex == 0 ? '2px solid':''}`,
+                                            borderRight:`${colIndex == 7 ? '2px solid':''}`,
+                                            zIndex:'0',
+                                        }}
+                                    >
+                                    {Checkers.map((slot, slotIndex) => (
+                                        <div
+                                            //style = {{backgroundColor:`${ConnectFour[colIndex][slotIndex] == null ? slotColor : ""}`}}
+                                            key={slotIndex}
+                                            className = {`${styles.checkersBox} 
+                                                ${slotIndex%2 == colIndex%2 ? 'color0' : 'color5'}
+                                                ${ Checkers[slotIndex][colIndex]?.toUpperCase() == 'X' ? styles.tokenA
+                                                : Checkers[slotIndex][colIndex]?.toUpperCase() == 'O' ? styles.tokenB
+                                                : "" }
+                                            `}
+                                            style = {{
+                                                borderTop:`${slotIndex == 0 ? '2px solid':''}`,
+                                                borderBottom:`${slotIndex == Checkers[0].length-1 ? '2px solid':''}`,
+                                            }}
+                                        >
+
+                                        </div>
+                                    ))}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                         Play Checkers
                     </Link>
                 </div>
             </div>
