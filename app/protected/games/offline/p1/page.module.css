@@ -1,5 +1,28 @@
 
-
+.waterThird{
+  width:100%;
+  height:7.9vw;
+  position:absolute;
+  left:0%;
+  bottom:0;
+  background: blue;
+}
+.waterSecond{
+  width:100%;
+  height:5.9vw;
+  position:absolute;
+  left:0%;
+  bottom:0;
+  background: #3399f8ff;
+}
+.waterFirst{
+  width:100%;
+  height:3.9vw;
+  position:absolute;
+  left:0%;
+  bottom:0;
+  background: aqua;
+}
 
 .boat{
   width:10%;
@@ -13,12 +36,7 @@
   animation: boatAnimation 2s linear infinite;
   animation-delay: 1.2s;
 }
-/*
-.bigBoat{
-  animation: bigBoatAnimation 3s linear infinite;
-  animation-delay: 1.2s;
-}
-*/
+
 .waveContainer {
   position: relative;
   width: 100vw;
@@ -28,12 +46,12 @@
 .wave1 {
   position: absolute;
   left: 0;
-  width: 100%; /* Double the width for smooth looping */
+  width: 100%; 
 }
 .wave2 {
   position: absolute;
   left: 0;
-  width: 100%; /* Double the width for smooth looping */
+  width: 100%; 
 }
 .first {
   .wave1{
@@ -42,9 +60,8 @@
     bottom:0px;
   }
   .wave2{
-    animation: waveAnimation 7s linear infinite;
-    animation-delay: 3.5s;
-
+    animation: waveBootAnimation 3.5s linear 1, waveAnimation 7s linear infinite;
+    animation-delay: 0s, 3.5s;
     bottom:0px;
   }
   background-color:aqua;
@@ -56,13 +73,11 @@
     bottom:2vw;
   }
   .wave2{
-    animation: waveAnimation 12s linear infinite;
-    animation-delay: 6s;
-
+    animation: waveBootAnimation 6s linear 1, waveAnimation 12s linear infinite;
+    animation-delay: 0s, 6s;
     bottom:2vw;
   }
 }
-
 .third{
   .wave1{
     animation: waveAnimation 17s linear infinite;
@@ -70,8 +85,8 @@
     bottom:4vw;
   }
   .wave2{
-    animation: waveAnimation 17s linear infinite;
-    animation-delay: 8.5s;
+    animation: waveBootAnimation 8.5s linear 1, waveAnimation 17s linear infinite;
+    animation-delay: 0s, 8.5s;
 
     bottom:4vw;
   }
@@ -86,15 +101,12 @@
   }
 }
 
-@keyframes bigBoatAnimation {
+@keyframes waveBootAnimation {
   0% {
-    transform: translateY(-3%);
-  }
-  50% {
-    transform: translateY(-0%);
+    transform: translateX(0%);
   }
   100% {
-    transform: translateY(-3%);
+    transform: translateX(-100%);
   }
 }
 
