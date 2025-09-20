@@ -29,9 +29,11 @@
 
 /*Holds a Links's contents*/
 .subContainer {
+  width:auto;
   text-align: center;
   display: flex;
   flex: 1 1;
+  align-items:center;
   flex-direction: column;
   justify-content:end;
 
@@ -123,12 +125,6 @@
     border:1px solid;
   }
 }
-.tokenA {
-  background-color: #FFC20A
-}
-.tokenB {
-  background-color: #0C7BDC
-}
 
 .Checkers{
   justify-content:center;
@@ -138,18 +134,30 @@
 .checkersBox{
   width: 4vmin;
   height: 4vmin;
-}
-.checkerX{
-  background-color: #FFC20A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  width: 2vmin;
-  height: 2vmin;
-  border-radius: 50%; /* Makes it a circle */
+  /*border-right:2px solid black;*/
 }
-.checkO{
-  background-color: #0C7BDC;
-  
-  width: 2vmin;
-  height: 2vmin;
+.checker{
+  width: 3.5vmin;
+  height: 3.5vmin;
   border-radius: 50%; /* Makes it a circle */
+
+  font-size: 2vmin;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 2px solid;
+  @media (prefers-color-scheme: dark) {
+    border: 1px solid;
+  }
+}
+.X{
+  background-color: #FFC20A;
+}
+.O{
+  background-color: #0C7BDC;
 }

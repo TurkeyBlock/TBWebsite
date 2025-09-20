@@ -335,7 +335,7 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
                                 /*: movingGame.nextToken == movingGame.board[rowIndex][colIndex]?.toUpperCase() ?  'green 3px solid'*/
                                 : ''}`
                             }}
-                            className = {`${(rowIndex%2 == colIndex%2 )?'color0':'color5'}
+                            className = {`${(rowIndex%2 == colIndex%2 )?'color0':'color4'}
                                 ${styles.cell}
                             `}
                             onClick={() => prepMove(rowIndex*8+colIndex)}
