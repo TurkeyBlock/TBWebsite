@@ -1,0 +1,19 @@
+.header{
+    color: var(--clr-surface-a50);
+}
+/*.subContent{
+    text-align:right;
+    vertical-align:bottom;
+    margin-top:auto;
+}*/
+.content{
+    color: var(--clr);
+}
+.hidden{
+    background-color: var(--clr-surface-a20);
+    padding-left:3px;
+    padding-right:5px;
+}
+.hidden:hover{
+    background-color: var(--clr-surface-a30);
+}
