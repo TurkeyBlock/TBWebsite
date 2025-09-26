@@ -44,7 +44,7 @@ export default function Page() {
           setHasSession(true);
           const user = data.session.user
           setSessionUser({
-            is_anonymous: (user.is_anonymous == undefined || user.is_anonymous == false ? false : true),
+            is_anonymous: ((user.is_anonymous == undefined || user.is_anonymous == false) ? false : true),
             user_metadata:{
               displayName: user.user_metadata.displayName,
               email: user.user_metadata.email == undefined ? "N/A" : user.user_metadata.email,
