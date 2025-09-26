@@ -20,11 +20,11 @@ export default function Page() {
 
     const [hasSession, setHasSession] = useState(false);
     const [sessionUser, setSessionUser] = useState({
-      is_anonymous:'Error',
+      is_anonymous: true,
       user_metadata:{
         displayName:'Error', 
         email:'Error',
-        email_verified:'Error',
+        email_verified: false,
       }
     });
 
@@ -49,7 +49,7 @@ export default function Page() {
               user_metadata:{
                 displayName: prev.user_metadata.displayName,
                 email:"N/A",
-                email_verified:"N/A",
+                email_verified:false,
             }}))
           }
         }
