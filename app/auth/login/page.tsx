@@ -30,8 +30,7 @@ export default function Page() {
 
     const [showEmail, setShowEmail] = useState(false);
     function toggleShowEmail(){
-      showEmail ? setShowEmail(false) : setShowEmail(true);
-      return;
+      setShowEmail((prev)=>!prev);
     }
 
     useEffect(()=>{
