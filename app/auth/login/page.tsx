@@ -37,6 +37,9 @@ export default function Page() {
       async function getSession(){
         const supabase = createClient();
         const {data, error} = await supabase.auth.getSession()
+        if(error){
+          console.log(error);
+        }
         if(data.session){
           setHasSession(true);
           setSessionUser(data.session.user) //Ignore Warning; SessionUser loads with error-defaults
