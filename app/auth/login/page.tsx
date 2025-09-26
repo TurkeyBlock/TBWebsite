@@ -42,16 +42,15 @@ export default function Page() {
         }
         if(data.session){
           setHasSession(true);
-          setSessionUser(data.session.user) //Ignore Warning; SessionUser loads with error-defaults
-          if(data.session.user.is_anonymous){
-            setSessionUser((prev) => ({
-              ...prev,
-              user_metadata:{
-                displayName: prev.user_metadata.displayName,
-                email:"N/A",
-                email_verified:false,
-            }}))
-          }
+          const user = data.session.user
+          setSessionUser({
+            is_anonymous: (user.is_anonymous == undefined || user.is_anonymous == false ? false : true),
+            user_metadata:{
+              displayName: user.user_metadata.displayName,
+              email: user.user_metadata.email == undefined ? "N/A" : user.user_metadata.email,
+              email_verified: user.user_metadata.email_verified == undefined ? "N/A" : user.user_metadata.email_verified,
+            }
+          })
         }
       }
       getSession();
