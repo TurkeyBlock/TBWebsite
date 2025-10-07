@@ -1,4 +1,28 @@
 
+.appContainer {
+  font-family: Arial, sans-serif;
+  display: flex;
+
+  flex-direction: column;
+  align-items: center;
+}
+
+.buttonContainer{
+  display:flex;
+  min-width:100%;
+  justify-content: space-between;
+}
+
+.winnerText{
+  font-size: 3vmin;
+}
+
+.gameMode{
+  display:flex;
+  font-size:8vmin;
+  align-items:flex-end;
+}
+
 .board {
   justify-content:center;
   display: flex;

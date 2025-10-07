@@ -312,14 +312,11 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
 
   return (
         <div className={styles.appContainer}>
-            <div style={{display:"flex", width:"100%", alignContent:"center", justifyContent:"center"}}>
-                <h1 className = {styles.gameMode}>{
-                    !inLobby
-                    ? 'Singleplayer':
-                    `Game ID: ${gameId}`
-                }</h1>
-            </div>
-            {movingGame.moveStack}
+            <h1 className = {styles.gameMode}>{
+                !inLobby
+                ? 'Singleplayer':
+                `Game ID: ${gameId}`
+            }</h1>
             <div className = {styles.board}>
                 {/*--------------------*/}
                 {movingGame.board.map((row, rowIndex) => (
@@ -356,34 +353,37 @@ const Checkers = forwardRef(({inLobby = false, gameId = null, onlineMakeMove, on
                     </div>
                 ))}
             </div>
-            <p className={styles.winnerChatt}>
+            <p className={styles.winnerText}>
                 {winner
                 ? `Token ${winner} wins!`:
                 `Current Token: ${game.nextToken}`}
             </p>
-            <button className={`${styles.resetButton}
-                ${sendingAction ? styles.loadingCursor
-                : ''}`
-                } 
-                onClick={resetGame}
-            >
-                Reset Game
-            </button>
-            <button 
-            onClick = {makeMove}
-            className={`${styles.resetButton}`}
-            style={{
-                backgroundColor: `${(movingGame.moveStack.length > 1) ? 'blue' : 'red'}`,
-                outline: `${movingGame.moveStack.length > 1 && highlightLocations.length == 0 ? 'gold 5px solid': ''}`
-            }}
-            >
-                Commit Move
-            </button>
-                <button className={`${styles.resetButton}`}
-                onClick={undoMove}
-            >
-                Undo Move
-            </button>
+            <div className = {styles.buttonContainer}>
+                <button 
+                    className={`${styles.resetButton}
+                    ${sendingAction ? styles.loadingCursor
+                    : ''}`
+                    } 
+                    onClick={resetGame}
+                >
+                    Reset Game
+                </button>
+                <button 
+                    onClick = {makeMove}
+                    className={`${styles.resetButton}`}
+                    style={{
+                        backgroundColor: `${(movingGame.moveStack.length > 1) ? 'blue' : 'red'}`,
+                        outline: `${movingGame.moveStack.length > 1 && highlightLocations.length == 0 ? 'gold 5px solid': ''}`
+                    }}
+                >
+                    Commit Move
+                </button>
+                    <button className={`${styles.resetButton}`}
+                    onClick={undoMove}
+                >
+                    Undo Move
+                </button>
+            </div>
         </div>
     );
 });
