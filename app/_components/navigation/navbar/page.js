@@ -10,7 +10,7 @@ const Navbar = () => {
       <div className={`header ${styles.body}`}>
         <Logo />
         <Link href="/" className={`header ${styles.link}`}>Homepage</Link>
-        <Link href="/protected/games" className={`header ${styles.link}`}>Games</Link>
+        <Link href={`/protected/games?cachebust`} className={`header ${styles.link}`}>Games</Link>
         <Link href="/auth/login" className={`header ${styles.link}`}>Login</Link>
         
         <Button />
