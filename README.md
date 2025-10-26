@@ -4,7 +4,7 @@ This repository contains the documentation and website code for [Turkeyblock.org
 ## Background Information
 Turkeyblock.org is a serverless React website hosted on [Vercel](https://vercel.com), using [Supabase](https://supabase.com/)'s serverless-database API. It uses the [Vercel x Supabase](https://vercel.com/templates/next.js/supabase) starter, which contains middleware to filter registered users and styling for Supabase components.  Costs are limited to that of the site's domain name.
 
-Turkeyblock.org is me poking my toes into web development; I began with the above starter and a client-side Tic-Tac-Toe tutorial, and I wrote the rest from the ground up.
+Turkeyblock.org is me poking my toes into web development; I began with the above starter and a client-side Tic-Tac-Toe tutorial, and I wrote the rest from the ground up. It's messy, it's odd, and I've learned a good bit.
 
 > [!NOTE]
 > The majority of pages are locked behind an account login; Anonymous logins are available and recommended.
