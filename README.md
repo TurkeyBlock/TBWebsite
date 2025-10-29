@@ -11,7 +11,7 @@ Turkeyblock.org is me poking my toes into web development; I began with the abov
 
 ## The Site Itself
 The site hosts the following asynchronous multiplayer-games:
-- Tic-TacToe
+- Tic-Tac-Toe
 - Connect-Four
 - Checkers
 
